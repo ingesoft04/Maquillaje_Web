@@ -1,0 +1,1845 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>El Arte del Maquillaje | Proyecto SENA</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream: #FAF6F1;
+      --blush: #E8C4B8;
+      --rose:  #C17A6F;
+      --deep:  #7A3B3B;
+      --plum:  #3D1C2E;
+      --gold:  #C9A96E;
+      --text:  #2A1A1A;
+      --muted: #7A6060;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Jost', sans-serif;
+      background: var(--cream);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    /* ── HEADER ── */
+    header {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      overflow: hidden;
+      background: var(--plum);
+    }
+
+    .header-bg {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 110%, #C17A6F55 0%, transparent 65%),
+        radial-gradient(ellipse 50% 50% at 80% 20%, #E8C4B840 0%, transparent 60%),
+        radial-gradient(ellipse 40% 40% at 10% 80%, #C9A96E30 0%, transparent 55%),
+        linear-gradient(160deg, #3D1C2E 0%, #5C2A3A 50%, #3D1C2E 100%);
+    }
+
+    .petal {
+      position: absolute;
+      border-radius: 50% 0 50% 0;
+      opacity: 0.08;
+      animation: float 8s ease-in-out infinite;
+    }
+    .petal:nth-child(1) { width:220px; height:220px; background:var(--blush); top:10%; left:5%; animation-delay:0s; }
+    .petal:nth-child(2) { width:150px; height:150px; background:var(--gold);  top:60%; left:82%; animation-delay:2s; border-radius: 0 50% 0 50%; }
+    .petal:nth-child(3) { width:300px; height:300px; background:var(--rose);  top:70%; left:2%;  animation-delay:4s; }
+    .petal:nth-child(4) { width:180px; height:180px; background:var(--blush); top:5%;  left:72%; animation-delay:1s; border-radius: 0 50% 0 50%; }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50%       { transform: translateY(-20px) rotate(5deg); }
+    }
+
+    header .content {
+      position: relative; z-index: 2;
+      padding: 2rem;
+      animation: fadeUp 1.2s ease both;
+    }
+
+    .sena-badge {
+      display: inline-block;
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      font-family: 'Jost', sans-serif;
+      font-weight: 300;
+      font-size: 0.7rem;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      padding: 6px 20px;
+      margin-bottom: 2rem;
+      animation: fadeUp 1s 0.2s both;
+    }
+
+    header h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(3.5rem, 9vw, 8rem);
+      font-weight: 300;
+      color: var(--cream);
+      line-height: 1;
+      letter-spacing: -1px;
+    }
+
+    header h1 em {
+      display: block;
+      font-style: italic;
+      color: var(--blush);
+      font-size: 0.65em;
+    }
+
+    header p.subtitle {
+      margin-top: 1.5rem;
+      color: #D4B0A8;
+      font-weight: 200;
+      font-size: 1rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      animation: fadeUp 1s 0.5s both;
+    }
+
+    .scroll-cue {
+      position: absolute; bottom: 2.5rem; left: 50%; transform: translateX(-50%);
+      color: var(--blush); font-size: 0.65rem; letter-spacing: 3px;
+      text-transform: uppercase; display: flex; flex-direction: column; align-items: center; gap: 8px;
+      animation: fadeUp 1s 1s both;
+    }
+    .scroll-cue::after {
+      content: '';
+      width: 1px; height: 50px;
+      background: linear-gradient(to bottom, var(--blush), transparent);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{ opacity:.4; } 50%{ opacity:1; } }
+
+    @keyframes fadeUp {
+      from { opacity:0; transform: translateY(30px); }
+      to   { opacity:1; transform: translateY(0); }
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(250,246,241,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid #E8C4B860;
+      display: flex; justify-content: center; gap: 0;
+    }
+
+    nav a {
+      font-family: 'Jost', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 400;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 1.1rem 1.5rem;
+      transition: color 0.3s, border-bottom 0.3s;
+      border-bottom: 2px solid transparent;
+    }
+    nav a:hover { color: var(--deep); border-bottom-color: var(--rose); }
+
+    /* ── SECTIONS ── */
+    section { padding: 6rem 2rem; max-width: 1100px; margin: 0 auto; }
+
+    .section-label {
+      font-size: 0.65rem;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--rose);
+      margin-bottom: 1rem;
+    }
+
+    h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      font-weight: 400;
+      line-height: 1.1;
+      color: var(--plum);
+      margin-bottom: 1.5rem;
+    }
+
+    h2 em { font-style: italic; color: var(--rose); }
+
+    .lead {
+      font-size: 1.05rem;
+      font-weight: 300;
+      color: var(--muted);
+      line-height: 1.85;
+      max-width: 680px;
+      margin-bottom: 2rem;
+    }
+
+    /* ── HISTORIA ── */
+    #historia { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center; }
+    .historia-visual {
+      position: relative;
+      height: 480px;
+    }
+    .historia-card {
+      position: absolute;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .card-a {
+      width: 65%; height: 70%;
+      top: 0; left: 0;
+      background: linear-gradient(135deg, var(--blush), var(--rose));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 5rem;
+    }
+    .card-b {
+      width: 55%; height: 58%;
+      bottom: 0; right: 0;
+      background: linear-gradient(135deg, var(--plum), var(--deep));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 4rem;
+    }
+    .card-accent {
+      position: absolute;
+      width: 80px; height: 80px;
+      top: 50%; left: 50%; transform: translate(-50%,-50%);
+      background: var(--gold);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem;
+      box-shadow: 0 10px 40px #C9A96E60;
+      z-index: 3;
+    }
+
+    /* ── TIPOS ── */
+    #tipos { background: var(--plum); max-width: 100%; padding: 6rem 2rem; }
+    #tipos .inner { max-width: 1100px; margin: 0 auto; }
+    #tipos h2 { color: var(--cream); }
+    #tipos .section-label { color: var(--blush); }
+    #tipos .lead { color: #C8ABA5; }
+
+    .tipos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5px;
+      margin-top: 3rem;
+      background: #5C2A3A;
+    }
+
+    .tipo-card {
+      background: #3D1C2E;
+      padding: 2.5rem;
+      transition: background 0.3s;
+      cursor: default;
+    }
+    .tipo-card:hover { background: #4E2438; }
+
+    .tipo-icon { font-size: 2.5rem; margin-bottom: 1.2rem; display: block; }
+
+    .tipo-card h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      font-weight: 400;
+      color: var(--blush);
+      margin-bottom: 0.75rem;
+    }
+
+    .tipo-card p {
+      font-size: 0.88rem;
+      color: #A08888;
+      line-height: 1.75;
+    }
+
+    /* ── PRODUCTOS ── */
+    .productos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+
+    .producto {
+      border: 1px solid #E8C4B870;
+      padding: 2rem;
+      position: relative;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .producto:hover { transform: translateY(-6px); box-shadow: 0 20px 50px #C17A6F20; }
+
+    .producto-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 3rem;
+      color: #E8C4B840;
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+
+    .producto h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.35rem;
+      color: var(--deep);
+      margin-bottom: 0.6rem;
+    }
+
+    .producto p { font-size: 0.85rem; color: var(--muted); line-height: 1.7; }
+
+    .producto .tag {
+      display: inline-block;
+      margin-top: 1rem;
+      font-size: 0.6rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--rose);
+      border: 1px solid var(--rose);
+      padding: 3px 10px;
+    }
+
+    /* ── TÉCNICAS ── */
+    #tecnicas { background: #FDF9F6; max-width: 100%; padding: 6rem 2rem; }
+    #tecnicas .inner { max-width: 1100px; margin: 0 auto; }
+
+    .tecnicas-list { margin-top: 3rem; }
+
+    .tecnica-item {
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      gap: 2rem;
+      padding: 2rem 0;
+      border-bottom: 1px solid #E8C4B850;
+      align-items: start;
+      transition: padding-left 0.3s;
+    }
+    .tecnica-item:hover { padding-left: 1rem; }
+
+    .tecnica-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.5rem;
+      font-weight: 300;
+      color: var(--blush);
+      line-height: 1;
+    }
+
+    .tecnica-info h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      color: var(--plum);
+      margin-bottom: 0.5rem;
+    }
+
+    .tecnica-info p { font-size: 0.88rem; color: var(--muted); line-height: 1.75; }
+
+    /* ── CUIDADO ── */
+    .cuidado-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+      align-items: start;
+      margin-top: 3rem;
+    }
+
+    .skin-box {
+      background: var(--plum);
+      padding: 2.5rem;
+      color: var(--cream);
+    }
+    .skin-box h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.6rem;
+      color: var(--blush);
+      margin-bottom: 1.2rem;
+    }
+    .skin-box ul { list-style: none; }
+    .skin-box li {
+      padding: 0.6rem 0;
+      border-bottom: 1px solid #5C2A3A;
+      font-size: 0.9rem;
+      color: #C8ABA5;
+      display: flex; gap: 0.75rem;
+    }
+    .skin-box li::before { content: '◆'; color: var(--gold); font-size: 0.5rem; margin-top: 0.35rem; }
+
+    .tips-col h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.6rem;
+      color: var(--deep);
+      margin-bottom: 1.2rem;
+    }
+    .tip {
+      display: flex; gap: 1rem; margin-bottom: 1.2rem;
+      padding: 1.2rem;
+      background: #FDF9F6;
+      border-left: 3px solid var(--rose);
+    }
+    .tip-icon { font-size: 1.4rem; flex-shrink: 0; }
+    .tip p { font-size: 0.85rem; color: var(--muted); line-height: 1.7; }
+    .tip strong { color: var(--deep); font-weight: 500; display: block; margin-bottom: 0.2rem; }
+
+    /* ── TENDENCIAS ── */
+    .tendencias-strip {
+      display: flex; gap: 1px;
+      overflow-x: auto;
+      margin-top: 3rem;
+      background: var(--blush);
+    }
+    .tendencia {
+      flex: 1; min-width: 200px;
+      padding: 2.5rem 1.5rem;
+      background: var(--cream);
+      text-align: center;
+      transition: background 0.3s;
+    }
+    .tendencia:hover { background: #F5EDE8; }
+    .tendencia-emoji { font-size: 2.5rem; margin-bottom: 1rem; display: block; }
+    .tendencia h4 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem; color: var(--plum);
+      margin-bottom: 0.5rem;
+    }
+    .tendencia p { font-size: 0.8rem; color: var(--muted); line-height: 1.6; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--plum);
+      color: #A08080;
+      text-align: center;
+      padding: 4rem 2rem;
+    }
+    footer .logo-footer {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      color: var(--blush);
+      font-style: italic;
+      margin-bottom: 1rem;
+    }
+    footer p { font-size: 0.8rem; line-height: 1.8; }
+    footer .divider { width: 60px; height: 1px; background: var(--rose); margin: 1.5rem auto; }
+    footer .gold { color: var(--gold); font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; }
+
+    /* ── CITAS / AUTH ── */
+    #citas-wrapper {
+      background: linear-gradient(160deg, #2A1020 0%, #3D1C2E 50%, #2A1020 100%);
+      padding: 6rem 2rem;
+    }
+    #citas-wrapper .inner { max-width: 1000px; margin: 0 auto; }
+    #citas-wrapper .section-label { color: var(--blush); }
+    #citas-wrapper h2 { color: var(--cream); }
+    #citas-wrapper .lead { color: #C8ABA5; }
+
+    /* Auth tabs */
+    .auth-tabs {
+      display: flex; gap: 0;
+      border: 1px solid #5C2A3A;
+      width: fit-content;
+      margin: 2.5rem auto 0;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .auth-tab {
+      padding: 0.75rem 2.5rem;
+      font-family: 'Jost', sans-serif;
+      font-size: 0.72rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      background: transparent;
+      color: #A08080;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s, color 0.3s;
+    }
+    .auth-tab.active { background: var(--rose); color: var(--cream); }
+
+    /* Auth panel */
+    .auth-panel {
+      max-width: 460px;
+      margin: 2rem auto 0;
+      background: #2A1020;
+      border: 1px solid #5C2A3A;
+      padding: 2.5rem;
+      display: none;
+    }
+    .auth-panel.visible { display: block; }
+
+    .auth-panel h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.8rem; font-weight: 400;
+      color: var(--blush); margin-bottom: 1.5rem;
+    }
+
+    .field { margin-bottom: 1.2rem; }
+    .field label {
+      display: block;
+      font-size: 0.65rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #A08080;
+      margin-bottom: 0.4rem;
+    }
+    .field input, .field select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: #3D1C2E;
+      border: 1px solid #5C2A3A;
+      color: var(--cream);
+      font-family: 'Jost', sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.3s;
+      appearance: none;
+    }
+    .field input:focus, .field select:focus { border-color: var(--rose); }
+    .field input::placeholder { color: #6A4A55; }
+
+    .btn-auth {
+      width: 100%;
+      padding: 0.9rem;
+      background: var(--rose);
+      color: var(--cream);
+      border: none;
+      font-family: 'Jost', sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      transition: background 0.3s;
+    }
+    .btn-auth:hover { background: var(--deep); }
+
+    .auth-msg {
+      margin-top: 1rem;
+      font-size: 0.82rem;
+      text-align: center;
+      padding: 0.6rem;
+      border-radius: 2px;
+      display: none;
+    }
+    .auth-msg.success { background: #2A4A2A; color: #8ACA8A; display: block; }
+    .auth-msg.error   { background: #4A1A1A; color: #CA8A8A; display: block; }
+
+    /* Dashboard */
+    #dashboard {
+      max-width: 800px;
+      margin: 2rem auto 0;
+      display: none;
+    }
+    #dashboard.visible { display: block; }
+
+    .dash-header {
+      display: flex; justify-content: space-between; align-items: center;
+      background: #2A1020;
+      border: 1px solid #5C2A3A;
+      padding: 1.5rem 2rem;
+      margin-bottom: 1.5px;
+    }
+    .dash-header h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem; color: var(--blush);
+    }
+    .btn-logout {
+      background: transparent;
+      border: 1px solid #5C2A3A;
+      color: #A08080;
+      padding: 0.4rem 1.2rem;
+      font-size: 0.65rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .btn-logout:hover { border-color: var(--rose); color: var(--rose); }
+
+    /* Agendar form */
+    .agendar-box {
+      background: #2A1020;
+      border: 1px solid #5C2A3A;
+      padding: 2rem;
+      margin-bottom: 1.5px;
+    }
+    .agendar-box h4 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.3rem; color: var(--gold);
+      margin-bottom: 1.2rem;
+    }
+    .agendar-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .agendar-grid .field { margin-bottom: 0; }
+
+    .btn-agendar {
+      margin-top: 1.2rem;
+      padding: 0.75rem 2rem;
+      background: var(--gold);
+      color: var(--plum);
+      border: none;
+      font-family: 'Jost', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.3s;
+    }
+    .btn-agendar:hover { background: #B8943A; }
+
+    /* Citas list */
+    .citas-box {
+      background: #2A1020;
+      border: 1px solid #5C2A3A;
+      padding: 2rem;
+    }
+    .citas-box h4 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.3rem; color: var(--blush);
+      margin-bottom: 1.2rem;
+    }
+    .cita-card {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem 1.2rem;
+      border: 1px solid #5C2A3A;
+      margin-bottom: 0.8rem;
+      background: #3D1C2E;
+      transition: border-color 0.3s;
+    }
+    .cita-card:hover { border-color: var(--rose); }
+    .cita-info { flex: 1; }
+    .cita-servicio {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem; color: var(--cream);
+    }
+    .cita-meta {
+      font-size: 0.75rem; color: #A08080; margin-top: 0.2rem;
+      letter-spacing: 1px;
+    }
+    .cita-estado {
+      font-size: 0.6rem; letter-spacing: 2px; text-transform: uppercase;
+      padding: 3px 10px; border-radius: 20px;
+      background: #2A4A2A; color: #8ACA8A;
+    }
+    .btn-cancelar {
+      background: transparent; border: 1px solid #5C2A3A;
+      color: #A08080; padding: 4px 12px; font-size: 0.6rem;
+      letter-spacing: 1px; text-transform: uppercase; cursor: pointer;
+      margin-left: 1rem; transition: all 0.3s;
+    }
+    .btn-cancelar:hover { border-color: #CA4A4A; color: #CA4A4A; }
+    .empty-citas {
+      text-align: center; color: #6A4A55;
+      padding: 2rem; font-style: italic;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      #historia { grid-template-columns: 1fr; }
+      .historia-visual { height: 300px; order: -1; }
+      .cuidado-split { grid-template-columns: 1fr; }
+      nav a { padding: 1rem 0.75rem; font-size: 0.65rem; }
+    }
+    /* ── TOAST NOTIFICATIONS ── */
+.toast {
+  position: fixed; top: 20px; right: 20px; z-index: 10000;
+  padding: 1rem 1.5rem; border-radius: 8px; font-family: 'Jost', sans-serif;
+  font-size: 0.85rem; font-weight: 500; letter-spacing: 1px;
+  transform: translateX(400px); opacity: 0;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+  backdrop-filter: blur(10px);
+}
+.toast.show { transform: translateX(0); opacity: 1; }
+.toast.success { background: #2A4A2A; color: #8ACA8A; border: 1px solid #4A7A4A; }
+.toast.error { background: #4A1A1A; color: #CA8A8A; border: 1px solid #7A3A3A; }
+.toast.info { background: #2A3A4A; color: #8AAACA; border: 1px solid #4A5A7A; }
+
+/* ── LOADING SPINNER ── */
+.loading {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 0.75rem; letter-spacing: 2px; color: var(--rose);
+}
+.spinner {
+  width: 16px; height: 16px; border: 2px solid #E8C4B840;
+  border-top: 2px solid var(--rose); border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── INPUT STATES ── */
+.field input, .field select {
+  transition: all 0.3s ease;
+}
+.field input:focus, .field select:focus {
+  border-color: var(--rose); box-shadow: 0 0 0 3px #C17A6F20;
+  transform: translateY(-1px);
+}
+.field input.error, .field select.error {
+  border-color: #CA8A8A; box-shadow: 0 0 0 3px #CA8A8A20;
+}
+.field .error-text {
+  font-size: 0.65rem; color: #CA8A8A; margin-top: 4px;
+  display: none; letter-spacing: 1px;
+}
+.field.error .error-text { display: block; }
+
+/* ── BUTTON STATES ── */
+.btn-auth:disabled, .btn-agendar:disabled {
+  opacity: 0.6; cursor: not-allowed; background: var(--muted) !important;
+}
+.btn-agendar.loading { padding-right: 2.5rem; position: relative; }
+.btn-agendar.loading::after {
+  content: ''; position: absolute; right: 1rem; top: 50%; transform: translateY(-50%);
+  width: 16px; height: 16px; border: 2px solid transparent;
+  border-top: 2px solid var(--plum); border-radius: 50%; animation: spin 1s linear infinite;
+}
+
+/* ── DASHBOARD IMPROVEMENTS ── */
+.stats-row {
+  display: flex; gap: 1rem; margin-bottom: 1.5rem;
+}
+.stat-card {
+  flex: 1; background: #3D1C2E; padding: 1rem; text-align: center;
+  border: 1px solid #5C2A3A; border-radius: 4px;
+}
+.stat-num { 
+  font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; 
+  color: var(--blush); font-weight: 400; display: block;
+}
+.stat-label { font-size: 0.7rem; color: #A08080; letter-spacing: 2px; }
+
+/* ── MOBILE TOAST ── */
+@media (max-width: 768px) {
+  .toast { right: 10px; left: 10px; top: 10px; transform: translateY(-100px); }
+  .toast.show { transform: translateY(0); }
+}
+/* ── CALENDARIO VISUAL ── */
+.calendar-container {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1.5rem 0;
+}
+.calendar {
+  background: #3D1C2E; border: 1px solid #5C2A3A; border-radius: 8px;
+  padding: 1.5rem; height: 340px; overflow-y: auto;
+}
+.calendar-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #5C2A3A;
+}
+.calendar-nav {
+  background: transparent; border: 1px solid #A08080; color: #A08080;
+  padding: 0.4rem 0.8rem; font-size: 0.7rem; cursor: pointer; transition: all 0.3s;
+}
+.calendar-nav:hover { background: var(--rose); color: var(--cream); }
+.calendar-title {
+  font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; color: var(--blush);
+}
+.calendar-grid {
+  display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; font-size: 0.75rem;
+}
+.day-header { 
+  font-weight: 500; color: var(--blush); padding: 0.5rem 0; 
+  text-transform: uppercase; letter-spacing: 1px; font-size: 0.65rem;
+}
+.calendar-day {
+  aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+  border-radius: 6px; cursor: pointer; transition: all 0.3s; position: relative;
+  font-weight: 400; border: 1px solid transparent;
+}
+.calendar-day:hover:not(.pasado):not(.ocupado) { 
+  transform: scale(1.08); background: #4A2438; z-index: 10; 
+}
+.calendar-day.pasado { opacity: 0.4; cursor: not-allowed; }
+.calendar-day.ocupado { 
+  background: #4A1A1A; color: #CA8A8A; cursor: not-allowed;
+}
+.calendar-day.ocupado::after {
+  content: '●'; position: absolute; top: 3px; right: 3px; color: #CA4A4A;
+  font-size: 0.6rem; font-weight: bold;
+}
+.calendar-day.disponible { background: #2A4A2A33; color: #8ACA8A; }
+.calendar-day.seleccionado { 
+  background: linear-gradient(135deg, var(--rose), var(--deep)) !important;
+  color: var(--cream) !important; font-weight: 600; box-shadow: 0 4px 16px #C17A6F40;
+}
+
+.horarios-container {
+  background: #3D1C2E; border: 1px solid #5C2A3A; border-radius: 8px; padding: 1.5rem;
+}
+.horarios-title {
+  font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; color: var(--blush);
+  margin-bottom: 1rem; text-align: center;
+}
+.horarios-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem;
+}
+.horario-btn {
+  padding: 0.75rem; background: #2A4A2A; color: #8ACA8A; border: 1px solid #4A7A4A;
+  border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 500;
+  transition: all 0.3s; text-align: center;
+}
+.horario-btn:hover:not(.ocupado) { 
+  background: #3A5A3A; transform: translateY(-2px); box-shadow: 0 4px 12px #4A7A4A40;
+}
+.horario-btn.ocupado { 
+  background: #4A1A1A; color: #CA8A8A; cursor: not-allowed; border-color: #7A3A3A;
+}
+.horario-btn.ocupado::after { content: '✕'; margin-left: 4px; }
+.horario-btn.seleccionado { 
+  background: var(--rose) !important; color: var(--cream) !important;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%,100%{ box-shadow: 0 0 0 0 #C17A6F40; } 50%{ box-shadow: 0 0 0 8px transparent; } }
+
+@media (max-width: 768px) {
+  .calendar-container { grid-template-columns: 1fr; }
+  .calendar { height: 300px; }
+  .horarios-grid { grid-template-columns: repeat(2, 1fr); }
+}
+/* ── BOTÓN PDF ── */
+.btn-pdf {
+  background: linear-gradient(135deg, var(--gold), #B8943A);
+  color: var(--plum); border: none; padding: 0.8rem 1.5rem;
+  font-family: 'Jost', sans-serif; font-size: 0.75rem; font-weight: 500;
+  letter-spacing: 3px; text-transform: uppercase; cursor: pointer;
+  border-radius: 25px; transition: all 0.3s; margin: 1rem 0;
+  box-shadow: 0 4px 20px #C9A96E40;
+}
+.btn-pdf:hover { transform: translateY(-2px); box-shadow: 0 8px 30px #C9A96E60; }
+.btn-pdf:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.pdf-preview {
+  background: #2A1020; border: 1px solid #5C2A3A; border-radius: 8px;
+  padding: 1.5rem; margin-top: 1rem; max-height: 300px; overflow-y: auto;
+}
+
+/* ── GALERÍA DE LOOKS ── */
+.galeria-card {
+  cursor: pointer;
+  border: 1px solid #E8C4B860;
+  overflow: hidden;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.galeria-card:hover { transform: translateY(-6px); box-shadow: 0 20px 50px #C17A6F25; }
+.galeria-preview {
+  height: 200px;
+  display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+}
+.galeria-overlay {
+  position: absolute; inset: 0;
+  background: rgba(61,28,46,0.75);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--gold); font-size: 0.72rem; letter-spacing: 3px;
+  text-transform: uppercase; opacity: 0;
+  transition: opacity 0.3s;
+}
+.galeria-card:hover .galeria-overlay { opacity: 1; }
+.galeria-info {
+  padding: 1.2rem;
+  background: white;
+  border-top: 1px solid #E8C4B860;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.galeria-info h4 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem; color: var(--plum); font-weight: 400;
+}
+.galeria-tag {
+  font-size: 0.6rem; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--rose); border: 1px solid var(--rose);
+  padding: 2px 8px;
+}
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-bg"></div>
+  <div class="petal"></div>
+  <div class="petal"></div>
+  <div class="petal"></div>
+  <div class="petal"></div>
+  <div class="content">
+    <div class="sena-badge">Proyecto SENA · Arte y Belleza</div>
+    <h1>El Arte del<em>Maquillaje</em></h1>
+    <p class="subtitle">Historia · Técnicas · Tendencias · Cuidado</p>
+  </div>
+  <div class="scroll-cue">Explorar</div>
+</header>
+
+<!-- NAV -->
+<nav>
+  <a href="#historia">Historia</a>
+  <a href="#tipos">Tipos</a>
+  <a href="#productos">Productos</a>
+  <a href="#tecnicas">Técnicas</a>
+  <a href="#cuidado">Cuidado</a>
+  <a href="#tendencias">Tendencias</a>
+  <a href="#galeria">🖼 Galería</a><a href="#citas" style="color:var(--rose); font-weight:500;">📅 Citas</a>
+</nav>
+
+<!-- HISTORIA -->
+<section id="historia">
+  <div class="historia-visual">
+    <div class="historia-card card-a">🏺</div>
+    <div class="historia-card card-b">💄</div>
+    <div class="card-accent">✨</div>
+  </div>
+  <div>
+    <p class="section-label">01 — Historia</p>
+    <h2>Una tradición<em>milenaria</em></h2>
+    <p class="lead">
+      El maquillaje existe desde hace más de 6,000 años. Las civilizaciones antiguas como Egipto, Mesopotamia y China ya utilizaban pigmentos naturales para realzar su belleza y expresar su identidad cultural y espiritual.
+    </p>
+    <p class="lead">
+      Los egipcios usaban kohl para delinear los ojos, el ocre rojo para las mejillas y el agua con cobre para dar color a los párpados. En la antigua Roma, las mujeres aplicaban yeso en polvo para blanquear la piel. A lo largo de la historia, el maquillaje ha sido símbolo de estatus, poder, arte y autoexpresión.
+    </p>
+    <p class="lead">
+      En el siglo XX, la industria cosmética revolucionó el mundo con fórmulas dermatológicamente probadas, colores más seguros y una democratización del acceso a la belleza. Hoy, el maquillaje es una poderosa herramienta de arte y comunicación personal.
+    </p>
+  </div>
+</section>
+
+<!-- TIPOS -->
+<div id="tipos">
+  <div class="inner">
+    <p class="section-label">02 — Tipos de Maquillaje</p>
+    <h2>Cada <em>estilo</em>, un universo</h2>
+    <p class="lead">Existen múltiples estilos de maquillaje, cada uno con técnicas, herramientas y finalidades distintas. Conocerlos es el primer paso para dominar el arte de la belleza.</p>
+    <div class="tipos-grid">
+      <div class="tipo-card">
+        <span class="tipo-icon">🌅</span>
+        <h3>Maquillaje Natural</h3>
+        <p>Busca realzar los rasgos sin modificarlos drásticamente. Usa tonos neutros y acabados ligeros que imitan la piel limpia y luminosa. Ideal para el día a día y el ambiente laboral.</p>
+      </div>
+      <div class="tipo-card">
+        <span class="tipo-icon">🌙</span>
+        <h3>Maquillaje de Noche</h3>
+        <p>Más intenso y dramático. Aprovecha las luces artificiales para crear profundidad con sombras oscuras, labios marcados y brillos estratégicos. Perfecto para eventos y salidas nocturnas.</p>
+      </div>
+      <div class="tipo-card">
+        <span class="tipo-icon">💒</span>
+        <h3>Maquillaje Nupcial</h3>
+        <p>Diseñado para durar todo el día, resistente al agua y las emociones. Busca el equilibrio perfecto entre elegancia, romance y la personalidad de quien lo lleva.</p>
+      </div>
+      <div class="tipo-card">
+        <span class="tipo-icon">🎭</span>
+        <h3>Maquillaje Artístico</h3>
+        <p>Trasciende los límites convencionales. Se usa en fotografía, pasarelas, teatro y cine. Puede incluir efectos especiales, body paint y transformaciones completas del rostro.</p>
+      </div>
+      <div class="tipo-card">
+        <span class="tipo-icon">🏥</span>
+        <h3>Maquillaje Correctivo</h3>
+        <p>Utiliza técnicas de luz y sombra (contouring) para corregir o equilibrar rasgos del rostro. Se aplica en fotografía, televisión y cinematografía profesional.</p>
+      </div>
+      <div class="tipo-card">
+        <span class="tipo-icon">🌿</span>
+        <h3>Maquillaje Orgánico</h3>
+        <p>Elaborado con ingredientes naturales y libres de químicos agresivos. Ideal para pieles sensibles y personas comprometidas con el cuidado del medio ambiente.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PRODUCTOS -->
+<section id="productos">
+  <p class="section-label">03 — Productos Esenciales</p>
+  <h2>Tu kit de<em>belleza</em></h2>
+  <p class="lead">Conocer cada producto, su función y su correcta aplicación es fundamental para obtener resultados profesionales y cuidar la salud de la piel.</p>
+  <div class="productos-grid">
+    <div class="producto">
+      <div class="producto-num">01</div>
+      <h3>Prebase (Primer)</h3>
+      <p>Se aplica antes de la base para preparar la piel, minimizar poros, controlar el brillo y prolongar la duración del maquillaje. Existen formulas para distintos tipos de piel.</p>
+      <span class="tag">Preparación</span>
+    </div>
+    <div class="producto">
+      <div class="producto-num">02</div>
+      <h3>Base de Maquillaje</h3>
+      <p>Unifica el tono de la piel. Disponible en formatos líquido, polvo, crema y mousse. Se elige según el tipo de piel y la cobertura deseada (ligera, media o total).</p>
+      <span class="tag">Tono & Cobertura</span>
+    </div>
+    <div class="producto">
+      <div class="producto-num">03</div>
+      <h3>Corrector</h3>
+      <p>Cubre imperfecciones específicas como ojeras, manchas o granitos. Su cobertura es mayor que la base y se usa de forma localizada para mejores resultados.</p>
+      <span class="tag">Cobertura</span>
+    </div>
+    <div class="producto">
+      <div class="producto-num">04</div>
+      <h3>Polvo Translúcido</h3>
+      <p>Fija el maquillaje y reduce el brillo. El polvo translúcido es universal y no altera el color de la base. El polvo compacto añade cobertura adicional.</p>
+      <span class="tag">Fijación</span>
+    </div>
+    <div class="producto">
+      <div class="producto-num">05</div>
+      <h3>Contorno & Iluminador</h3>
+      <p>El contorno (oscuro) da profundidad y define el rostro. El iluminador (claro o con shimmer) atrae la luz hacia los puntos que se quieren resaltar como pómulos y arco de Cupido.</p>
+      <span class="tag">Dimensión</span>
+    </div>
+    <div class="producto">
+      <div class="producto-num">06</div>
+      <h3>Colorete (Blush)</h3>
+      <p>Aporta color y vitalidad al rostro. Se aplica en las mejillas con movimientos circulares o en diagonal hacia las sienes, según la forma del rostro.</p>
+      <span class="tag">Color & Vida</span>
+    </div>
+    <div class="producto">
+      <div class="producto-num">07</div>
+      <h3>Sombras de Ojos</h3>
+      <p>Disponibles en acabados mate, shimmer, satín y glitter. Se combinan para crear profundidad, movimiento y personalidad en la mirada. La clave está en el difuminado.</p>
+      <span class="tag">Ojos</span>
+    </div>
+    <div class="producto">
+      <div class="producto-num">08</div>
+      <h3>Delineador</h3>
+      <p>Define y enmarca los ojos. Existe en lápiz, líquido y gel. El delineador líquido da líneas más precisas, mientras que el lápiz es más versátil y suave.</p>
+      <span class="tag">Definición</span>
+    </div>
+    <div class="producto">
+      <div class="producto-num">09</div>
+      <h3>Máscara de Pestañas</h3>
+      <p>Alarga, curva y da volumen a las pestañas, abriendo y realzando la mirada. Disponible en fórmulas resistentes al agua para mayor durabilidad.</p>
+      <span class="tag">Mirada</span>
+    </div>
+    <div class="producto">
+      <div class="producto-num">10</div>
+      <h3>Labial</h3>
+      <p>Completa el maquillaje aportando color y cuidado a los labios. Disponible en barra, gloss, líquido y tinte. Los acabados van del mate al ultra brillante.</p>
+      <span class="tag">Labios</span>
+    </div>
+    <div class="producto">
+      <div class="producto-num">11</div>
+      <h3>Fijador en Spray</h3>
+      <p>El paso final para sellar todo el maquillaje y aumentar su durabilidad. Algunos tienen fórmulas hidratantes o matificantes según la necesidad de cada piel.</p>
+      <span class="tag">Sellado</span>
+    </div>
+    <div class="producto">
+      <div class="producto-num">12</div>
+      <h3>Brochas & Esponjas</h3>
+      <p>Las herramientas correctas hacen la diferencia. Las brochas difuminan, las esponjas húmedas dan un acabado natural. Su limpieza regular es fundamental para la higiene de la piel.</p>
+      <span class="tag">Herramientas</span>
+    </div>
+  </div>
+</section>
+
+<!-- TÉCNICAS -->
+<div id="tecnicas">
+  <div class="inner">
+    <p class="section-label">04 — Técnicas Fundamentales</p>
+    <h2>El <em>proceso</em> paso a paso</h2>
+    <p class="lead">Dominar las técnicas básicas de aplicación es esencial para lograr un maquillaje impecable, ya sea natural o más elaborado.</p>
+    <div class="tecnicas-list">
+      <div class="tecnica-item">
+        <div class="tecnica-num">01</div>
+        <div class="tecnica-info">
+          <h3>Preparación de la Piel</h3>
+          <p>Antes de cualquier maquillaje, la piel debe estar limpia, hidratada y con protector solar. Una buena base de skincare garantiza un maquillaje más uniforme y de mayor duración. Se recomienda esperar 5 minutos para que los productos se absorban antes de aplicar la base.</p>
+        </div>
+      </div>
+      <div class="tecnica-item">
+        <div class="tecnica-num">02</div>
+        <div class="tecnica-info">
+          <h3>Técnica de Difuminado</h3>
+          <p>El secreto de un maquillaje profesional está en no dejar líneas visibles. Las sombras y el contorno deben difuminarse con movimientos circulares y suaves, usando brochas limpias. El difuminado convierte un look amateur en uno de nivel experto.</p>
+        </div>
+      </div>
+      <div class="tecnica-item">
+        <div class="tecnica-num">03</div>
+        <div class="tecnica-info">
+          <h3>Contouring & Highlighting</h3>
+          <p>El contouring usa sombras oscuras para dar profundidad y esculpir el rostro, mientras que el highlighting usa tonos claros para resaltar puntos de luz. La técnica se basa en cómo la luz natural incide sobre el rostro humano, creando ilusiones ópticas de volumen.</p>
+        </div>
+      </div>
+      <div class="tecnica-item">
+        <div class="tecnica-num">04</div>
+        <div class="tecnica-info">
+          <h3>Aplicación de la Base</h3>
+          <p>La base puede aplicarse con esponja húmeda (para acabado natural), brocha plana (para mayor cobertura) o con los dedos (para fundir el producto con el calor de la piel). Se aplica desde el centro del rostro hacia afuera, difuminando bien el contorno del cuello para evitar líneas de demarcación.</p>
+        </div>
+      </div>
+      <div class="tecnica-item">
+        <div class="tecnica-num">05</div>
+        <div class="tecnica-info">
+          <h3>El Cat Eye (Delineado Felino)</h3>
+          <p>Una de las técnicas más icónicas del maquillaje. Se crea extendiendo el delineador hacia arriba en el extremo externo del ojo, formando una "alita". Para mayor precisión, se recomienda usar cinta adhesiva como guía o comenzar desde el extremo hacia el lagrimal.</p>
+        </div>
+      </div>
+      <div class="tecnica-item">
+        <div class="tecnica-num">06</div>
+        <div class="tecnica-info">
+          <h3>Tecnica de las Tres Sombras</h3>
+          <p>Consiste en aplicar una sombra clara en el lagrimal y el arco de la ceja, una sombra media en el párpado móvil como color principal, y una sombra oscura en el pliegue para dar profundidad. Las tres sombras se difuminan entre sí para lograr una transición armónica y sin cortes.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CUIDADO -->
+<section id="cuidado">
+  <p class="section-label">05 — Cuidado de la Piel</p>
+  <h2>Belleza con<em>responsabilidad</em></h2>
+  <p class="lead">El maquillaje debe convivir con una rutina de cuidado de la piel. Conocer el tipo de piel y sus necesidades es tan importante como dominar las técnicas de aplicación.</p>
+  <div class="cuidado-split">
+    <div class="skin-box">
+      <h3>Tipos de Piel</h3>
+      <ul>
+        <li>Piel Seca — Necesita hidratación intensa. Prefiere bases en crema o sérum. Evitar polvos en exceso.</li>
+        <li>Piel Grasa — Produce exceso de sebo. Beneficia del primer matificante y bases oil-free. El polvo es aliado.</li>
+        <li>Piel Mixta — Grasa en la zona T y seca en mejillas. Requiere productos equilibrantes y técnicas adaptadas.</li>
+        <li>Piel Sensible — Reacciona ante ingredientes agresivos. Priorizar fórmulas sin fragancia, hipoalergénicas y dermatológicamente testadas.</li>
+        <li>Piel Normal — Equilibrada y de fácil manejo. Compatible con casi todos los tipos de base y acabado.</li>
+        <li>Piel Madura — Prefiere acabados satinados o luminosos que no marquen líneas de expresión. Hidratación intensa.</li>
+      </ul>
+    </div>
+    <div class="tips-col">
+      <h3>Consejos Esenciales</h3>
+      <div class="tip">
+        <div class="tip-icon">🌙</div>
+        <p><strong>Desmaquíllate siempre</strong>Dormir con maquillaje obstruye los poros, acelera el envejecimiento y puede causar irritaciones. Usa agua micelar o aceite limpiador para remover todo el producto.</p>
+      </div>
+      <div class="tip">
+        <div class="tip-icon">☀️</div>
+        <p><strong>Protector Solar es obligatorio</strong>Aplica SPF 30 o mayor cada día, incluso si usas base con protección. La exposición UV sin protección daña la piel y altera los pigmentos.</p>
+      </div>
+      <div class="tip">
+        <div class="tip-icon">🦠</div>
+        <p><strong>Limpia tus herramientas</strong>Las brochas y esponjas acumulan bacterias. Lávalas con jabón suave al menos una vez por semana para evitar brotes e infecciones en la piel.</p>
+      </div>
+      <div class="tip">
+        <div class="tip-icon">📅</div>
+        <p><strong>Revisa las fechas de vencimiento</strong>Los cosméticos caducan. Úsalos dentro del período indicado (PAO: Period After Opening) para evitar reacciones alérgicas y pérdida de efectividad.</p>
+      </div>
+      <div class="tip">
+        <div class="tip-icon">💧</div>
+        <p><strong>Hidratación desde adentro</strong>Beber agua, dormir bien y llevar una dieta equilibrada se refleja directamente en la piel. El mejor "primer" es un cuerpo saludable.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TENDENCIAS -->
+<section id="tendencias" style="max-width:100%; padding:6rem 2rem; background:var(--cream);">
+  <div style="max-width:1100px; margin:0 auto;">
+    <p class="section-label">06 — Tendencias 2024–2025</p>
+    <h2>Lo que marca<em>la moda</em></h2>
+    <p class="lead">El mundo de la belleza evoluciona constantemente. Estas son las tendencias que dominan las pasarelas, redes sociales y el día a día de las amantes del maquillaje.</p>
+  </div>
+  <div class="tendencias-strip" style="max-width:1100px; margin:3rem auto 0;">
+    <div class="tendencia">
+      <span class="tendencia-emoji">🍑</span>
+      <h4>Glazed Skin</h4>
+      <p>Piel ultra hidratada y brillante como un glaseado. Enfocada en la luminosidad natural y el cuidado de la piel sobre el maquillaje.</p>
+    </div>
+    <div class="tendencia">
+      <span class="tendencia-emoji">🌸</span>
+      <h4>Blush Draping</h4>
+      <p>El colorete sube hasta el párpado y las sienes, creando un rubor difuminado que da un look fresco, juvenil y saludable.</p>
+    </div>
+    <div class="tendencia">
+      <span class="tendencia-emoji">🦋</span>
+      <h4>Graphic Liner</h4>
+      <p>Delineados geométricos, artísticos y coloridos que convierten los ojos en una obra de arte. Inspirado en el arte pop y el eyeliner de los años 60.</p>
+    </div>
+    <div class="tendencia">
+      <span class="tendencia-emoji">🍒</span>
+      <h4>Cherry Girl</h4>
+      <p>Labios rojos intensos combinados con mejillas rosadas y una mirada natural. Un look atemporal con energía retro-moderna.</p>
+    </div>
+    <div class="tendencia">
+      <span class="tendencia-emoji">✨</span>
+      <h4>Clean Beauty</h4>
+      <p>Fórmulas naturales, veganas y sostenibles. La tendencia de usar cosméticos conscientes con el medio ambiente y la salud de la piel.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CITAS / AUTH -->
+<div id="citas"></div>
+<div id="citas-wrapper">
+  <div class="inner">
+    <p class="section-label">07 — Agenda tu Cita</p>
+    <h2>Tu belleza, a tu <em>horario</em></h2>
+    <p class="lead">Crea tu cuenta o inicia sesión para agendar tu cita de maquillaje con nuestras especialistas. Elige el servicio, la fecha y la hora que mejor se adapten a ti.</p>
+
+    <!-- AUTH TABS -->
+    <div class="auth-tabs" id="authTabs">
+      <button class="auth-tab active" onclick="showTab('registro')">Registro</button>
+      <button class="auth-tab" onclick="showTab('login')">Iniciar Sesión</button>
+    </div>
+
+    <!-- REGISTRO -->
+    <div class="auth-panel visible" id="panelRegistro">
+      <h3>Crear cuenta</h3>
+      <div class="field">
+        <label>Nombre completo</label>
+        <input type="text" id="reg-nombre" placeholder="Tu nombre y apellido"/>
+      </div>
+      <div class="field">
+        <label>Correo electrónico</label>
+        <input type="email" id="reg-email" placeholder="correo@ejemplo.com"/>
+      </div>
+      <div class="field">
+        <label>Teléfono</label>
+        <input type="tel" id="reg-tel" placeholder="300 000 0000"/>
+      </div>
+      <div class="field">
+        <label>Contraseña</label>
+        <input type="password" id="reg-pass" placeholder="Mínimo 6 caracteres"/>
+      </div>
+      <button class="btn-auth" onclick="registrar()">Crear Cuenta</button>
+      <div class="auth-msg" id="reg-msg"></div>
+    </div>
+
+    <!-- LOGIN -->
+    <div class="auth-panel" id="panelLogin">
+      <h3>Bienvenida de vuelta</h3>
+      <div class="field">
+        <label>Correo electrónico</label>
+        <input type="email" id="log-email" placeholder="correo@ejemplo.com"/>
+      </div>
+      <div class="field">
+        <label>Contraseña</label>
+        <input type="password" id="log-pass" placeholder="Tu contraseña"/>
+      </div>
+      <button class="btn-auth" onclick="login()">Ingresar</button>
+      <div class="auth-msg" id="log-msg"></div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="dashboard">
+
+      <!-- Cabecera bienvenida -->
+      <div class="dash-header">
+        <h3 id="dash-bienvenida">Hola, ✨</h3>
+        <button class="btn-logout" onclick="logout()">Cerrar Sesión</button>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row" id="statsRow" style="display:none;">
+        <div class="stat-card">
+          <span class="stat-num" id="statTotal">0</span>
+          <span class="stat-label">Citas Totales</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num" id="statProxima">—</span>
+          <span class="stat-label">Próxima Cita</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num" id="statFavorita">—</span>
+          <span class="stat-label">Servicio Frecuente</span>
+        </div>
+      </div>
+
+      <!-- Formulario agendar -->
+      <div class="agendar-box">
+        <h4>✦ Agendar nueva cita</h4>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
+          <div class="field">
+            <label>Servicio</label>
+            <select id="cita-servicio">
+              <option value="">Selecciona...</option>
+              <option>Maquillaje Natural</option>
+              <option>Maquillaje de Noche</option>
+              <option>Maquillaje Nupcial</option>
+              <option>Maquillaje Artístico</option>
+              <option>Contouring Profesional</option>
+              <option>Asesoría de Color</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Especialista</label>
+            <select id="cita-especialista">
+              <option value="">Selecciona...</option>
+              <option>Valentina Ríos</option>
+              <option>Camila Moreno</option>
+              <option>Juliana Ospina</option>
+              <option>Andrea Vargas</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
+          <div class="field">
+            <label>Fecha</label>
+            <input type="date" id="cita-fecha"/>
+          </div>
+          <div class="field">
+            <label>Hora</label>
+            <select id="cita-hora">
+              <option value="">Selecciona...</option>
+              <option>8:00 AM</option>
+              <option>9:00 AM</option>
+              <option>10:00 AM</option>
+              <option>11:00 AM</option>
+              <option>1:00 PM</option>
+              <option>2:00 PM</option>
+              <option>3:00 PM</option>
+              <option>4:00 PM</option>
+              <option>5:00 PM</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field" style="margin-bottom:1rem;">
+          <label>Notas (opcional)</label>
+          <input type="text" id="cita-notas" placeholder="Ej: piel sensible, evento especial..."/>
+        </div>
+
+        <button class="btn-agendar" onclick="agendarCita()">Confirmar Cita ✨</button>
+        <div class="auth-msg" id="cita-msg"></div>
+      </div>
+
+      <!-- Mis Citas -->
+      <div class="citas-box">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+          <h4>📋 Mis Citas</h4>
+          <button class="btn-pdf" id="btnExportarPDF" onclick="exportarPDF()" disabled>
+            📄 Exportar PDF
+          </button>
+        </div>
+        <div id="lista-citas"></div>
+      </div>
+
+    </div><!-- /#dashboard -->
+  </div><!-- /.inner -->
+</div><!-- /#citas-wrapper -->
+
+<!-- NUEVA SECCIÓN: GALERÍA DE LOOKS -->
+<div id="galeria" style="background:var(--cream); padding:6rem 2rem;">
+  <div style="max-width:1100px; margin:0 auto;">
+    <p class="section-label">08 — Galería de Looks</p>
+    <h2>Inspírate con <em>nuestros estilos</em></h2>
+    <p class="lead">Explora los looks más solicitados por nuestras clientas. Cada uno fue creado por nuestras especialistas con técnicas profesionales y productos de alta calidad.</p>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:1.5rem; margin-top:3rem;">
+
+      <div class="galeria-card" onclick="abrirLook('Smoky Eye Clásico','💋','Profundidad y drama con sombras oscuras difuminadas. Perfecto para eventos nocturnos y ocasiones especiales.','Maquillaje de Noche','#3D1C2E','#C17A6F')">
+        <div class="galeria-preview" style="background:linear-gradient(135deg,#3D1C2E,#7A3B3B);">
+          <span style="font-size:4rem;">💋</span>
+          <div class="galeria-overlay">Ver detalles</div>
+        </div>
+        <div class="galeria-info">
+          <h4>Smoky Eye Clásico</h4>
+          <span class="galeria-tag">Noche</span>
+        </div>
+      </div>
+
+      <div class="galeria-card" onclick="abrirLook('Glam Nupcial','👰','Elegancia atemporal con iluminación natural y labios rosados. Diseñado para durar todo el día.','Maquillaje Nupcial','#F5E6DC','#C9A96E')">
+        <div class="galeria-preview" style="background:linear-gradient(135deg,#E8C4B8,#C9A96E);">
+          <span style="font-size:4rem;">👰</span>
+          <div class="galeria-overlay">Ver detalles</div>
+        </div>
+        <div class="galeria-info">
+          <h4>Glam Nupcial</h4>
+          <span class="galeria-tag">Nupcial</span>
+        </div>
+      </div>
+
+      <div class="galeria-card" onclick="abrirLook('Glowing Skin','✨','Piel luminosa y saludable con efecto glass skin. La tendencia del momento en belleza coreana.','Maquillaje Natural','#FAF6F1','#E8C4B8')">
+        <div class="galeria-preview" style="background:linear-gradient(135deg,#FAF6F1,#E8C4B8);">
+          <span style="font-size:4rem;">✨</span>
+          <div class="galeria-overlay">Ver detalles</div>
+        </div>
+        <div class="galeria-info">
+          <h4>Glowing Skin</h4>
+          <span class="galeria-tag">Natural</span>
+        </div>
+      </div>
+
+      <div class="galeria-card" onclick="abrirLook('Cherry Girl','🍒','Labios rojos intensos con mejillas rosadas. Un look retro-moderno atemporal lleno de energía.','Maquillaje Natural','#4A0A1A','#C17A6F')">
+        <div class="galeria-preview" style="background:linear-gradient(135deg,#7A1A1A,#C17A6F);">
+          <span style="font-size:4rem;">🍒</span>
+          <div class="galeria-overlay">Ver detalles</div>
+        </div>
+        <div class="galeria-info">
+          <h4>Cherry Girl</h4>
+          <span class="galeria-tag">Tendencia</span>
+        </div>
+      </div>
+
+      <div class="galeria-card" onclick="abrirLook('Editorial Art','🦋','Maquillaje artístico con delineados gráficos y colores vibrantes. Inspirado en alta costura y pasarela.','Maquillaje Artístico','#1A1A3D','#6F7AC1')">
+        <div class="galeria-preview" style="background:linear-gradient(135deg,#1A1A3D,#3A3A7A);">
+          <span style="font-size:4rem;">🦋</span>
+          <div class="galeria-overlay">Ver detalles</div>
+        </div>
+        <div class="galeria-info">
+          <h4>Editorial Art</h4>
+          <span class="galeria-tag">Artístico</span>
+        </div>
+      </div>
+
+      <div class="galeria-card" onclick="abrirLook('Contour Pro','⚡','Esculpido facial con técnicas de luz y sombra. Define pómulos, nariz y mandíbula a la perfección.','Contouring Profesional','#2A1A0A','#C9A96E')">
+        <div class="galeria-preview" style="background:linear-gradient(135deg,#2A1A0A,#7A5A2A);">
+          <span style="font-size:4rem;">⚡</span>
+          <div class="galeria-overlay">Ver detalles</div>
+        </div>
+        <div class="galeria-info">
+          <h4>Contour Pro</h4>
+          <span class="galeria-tag">Profesional</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODAL GALERÍA -->
+<div id="lookModal" style="display:none; position:fixed; inset:0; background:rgba(30,10,20,0.92); z-index:9000; align-items:center; justify-content:center; padding:2rem;">
+  <div id="lookModalContent" style="background:var(--plum); border:1px solid #5C2A3A; max-width:480px; width:100%; padding:3rem; position:relative; animation:fadeUp 0.4s ease;">
+    <button onclick="cerrarLook()" style="position:absolute;top:1rem;right:1rem;background:transparent;border:none;color:#A08080;font-size:1.5rem;cursor:pointer;">✕</button>
+    <div id="lookEmoji" style="font-size:4rem; margin-bottom:1rem;"></div>
+    <p class="section-label" id="lookServicio"></p>
+    <h2 id="lookTitulo" style="font-size:2rem; margin-bottom:1rem;"></h2>
+    <p class="lead" id="lookDesc" style="margin-bottom:2rem;"></p>
+    <button class="btn-agendar" onclick="reservarDesdeGaleria()" style="width:100%;">Agendar este look ✨</button>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="logo-footer">Arte & Belleza</div>
+  <div class="divider"></div>
+  <p>Proyecto presentado al Servicio Nacional de Aprendizaje<br/>Programa de Cosmetología y Estética Integral</p>
+  <br/>
+  <p class="gold">SENA · Colombia · 2025</p>
+</footer>
+
+<script>
+// ══════════════════════════════════════════════
+//  MAQUILLAJE SENA v3 — JS LIMPIO Y SIN BUGS
+// ══════════════════════════════════════════════
+
+// ── SCROLL ANIMATIONS ──
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.style.opacity = '1';
+      e.target.style.transform = 'translateY(0)';
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('section, #tipos, #tecnicas, #citas-wrapper, #galeria').forEach(el => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(40px)';
+  el.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+  observer.observe(el);
+});
+
+// ── ESTADO GLOBAL ──
+let usuarios       = {};
+let todasLasCitas  = {};
+let usuarioActual  = null;
+
+// ── LOCALSTORAGE ──
+function cargarDatos() {
+  try {
+    usuarios      = JSON.parse(localStorage.getItem('maquillaje_usuarios') || '{}');
+    todasLasCitas = JSON.parse(localStorage.getItem('maquillaje_citas')    || '{}');
+  } catch(e) {
+    usuarios = {}; todasLasCitas = {};
+  }
+}
+
+function guardarDatos() {
+  try {
+    localStorage.setItem('maquillaje_usuarios', JSON.stringify(usuarios));
+    localStorage.setItem('maquillaje_citas',    JSON.stringify(todasLasCitas));
+  } catch(e) {}
+}
+
+cargarDatos();
+
+// ── TOAST (corregido: usa clases correctas del CSS) ──
+function mostrarToast(mensaje, tipo = 'success') {
+  // Eliminar toasts anteriores
+  document.querySelectorAll('.toast').forEach(t => t.remove());
+
+  const toast = document.createElement('div');
+  // El CSS usa .toast.success / .toast.error / .toast.info
+  toast.className = 'toast ' + tipo;
+  toast.textContent = mensaje;
+  document.body.appendChild(toast);
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => toast.classList.add('show'));
+  });
+
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 400);
+  }, 3500);
+}
+
+// ── TABS AUTH ──
+function showTab(tab) {
+  document.getElementById('panelRegistro').classList.toggle('visible', tab === 'registro');
+  document.getElementById('panelLogin').classList.toggle('visible',    tab === 'login');
+  document.querySelectorAll('.auth-tab').forEach((b, i) => {
+    b.classList.toggle('active',
+      (i === 0 && tab === 'registro') || (i === 1 && tab === 'login')
+    );
+  });
+}
+
+// ── REGISTRO ──
+function registrar() {
+  const nombre = document.getElementById('reg-nombre').value.trim();
+  const email  = document.getElementById('reg-email').value.trim().toLowerCase();
+  const tel    = document.getElementById('reg-tel').value.trim();
+  const pass   = document.getElementById('reg-pass').value;
+
+  // Validaciones
+  if (!nombre || !email || !tel || !pass) {
+    mostrarToast('❗ Completa todos los campos', 'error'); return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    mostrarToast('❗ Email inválido', 'error'); return;
+  }
+  if (!/^3\d{9}$/.test(tel.replace(/\D/g, ''))) {
+    mostrarToast('❗ Teléfono inválido (ej: 3001234567)', 'error'); return;
+  }
+  if (pass.length < 6) {
+    mostrarToast('❗ Contraseña mínimo 6 caracteres', 'error'); return;
+  }
+  if (usuarios[email]) {
+    mostrarToast('❗ Este email ya está registrado', 'error'); return;
+  }
+
+  // Crear cuenta
+  usuarios[email] = { nombre, email, tel, pass };
+  todasLasCitas[email] = [];
+  guardarDatos();
+
+  mostrarToast('✅ ¡Cuenta creada! Ingresando...', 'success');
+  setTimeout(() => entrarDashboard(email), 1200);
+}
+
+// ── LOGIN ──
+function login() {
+  const email = document.getElementById('log-email').value.trim().toLowerCase();
+  const pass  = document.getElementById('log-pass').value;
+
+  if (!email || !pass) {
+    mostrarToast('❗ Ingresa email y contraseña', 'error'); return;
+  }
+  if (!usuarios[email]) {
+    mostrarToast('❗ Email no registrado', 'error'); return;
+  }
+  if (usuarios[email].pass !== pass) {
+    mostrarToast('❗ Contraseña incorrecta', 'error'); return;
+  }
+
+  mostrarToast('✅ ¡Bienvenida, ' + usuarios[email].nombre.split(' ')[0] + '!', 'success');
+  entrarDashboard(email);
+}
+
+// ── ENTRAR AL DASHBOARD ──
+function entrarDashboard(email) {
+  usuarioActual = email;
+  const u = usuarios[email];
+
+  // Ocultar auth
+  document.getElementById('authTabs').style.display = 'none';
+  document.getElementById('panelRegistro').classList.remove('visible');
+  document.getElementById('panelLogin').classList.remove('visible');
+
+  // Mostrar dashboard
+  const dash = document.getElementById('dashboard');
+  dash.classList.add('visible');
+  dash.style.display = 'block';
+
+  // Bienvenida
+  document.getElementById('dash-bienvenida').textContent = 'Hola, ' + u.nombre.split(' ')[0] + ' ✨';
+
+  // Fecha mínima = hoy
+  const hoy = new Date().toISOString().split('T')[0];
+  document.getElementById('cita-fecha').min   = hoy;
+  document.getElementById('cita-fecha').value = hoy;
+
+  renderCitas();
+  guardarDatos();
+}
+
+// ── LOGOUT ──
+function logout() {
+  usuarioActual = null;
+  const dash = document.getElementById('dashboard');
+  dash.classList.remove('visible');
+  dash.style.display = 'none';
+
+  document.getElementById('authTabs').style.display = 'flex';
+  showTab('login');
+
+  // Limpiar campos
+  document.querySelectorAll('#panelRegistro input, #panelLogin input').forEach(el => el.value = '');
+  mostrarToast('Sesión cerrada', 'info');
+}
+
+// ── AGENDAR CITA ──
+function agendarCita() {
+  if (!usuarioActual) { mostrarToast('❗ Debes iniciar sesión', 'error'); return; }
+
+  const servicio    = document.getElementById('cita-servicio').value;
+  const especialista= document.getElementById('cita-especialista').value;
+  const fecha       = document.getElementById('cita-fecha').value;
+  const hora        = document.getElementById('cita-hora').value;
+  const notas       = document.getElementById('cita-notas').value.trim();
+
+  if (!servicio)     { mostrarToast('❗ Selecciona un servicio',     'error'); return; }
+  if (!especialista) { mostrarToast('❗ Selecciona una especialista', 'error'); return; }
+  if (!fecha)        { mostrarToast('❗ Selecciona una fecha',        'error'); return; }
+  if (!hora)         { mostrarToast('❗ Selecciona una hora',         'error'); return; }
+
+  const cita = {
+    id: Date.now(),
+    servicio,
+    especialista,
+    fecha,
+    hora,
+    notas: notas || 'Sin notas',
+    estado: 'Confirmada',
+    fechaCreacion: new Date().toISOString()
+  };
+
+  if (!todasLasCitas[usuarioActual]) todasLasCitas[usuarioActual] = [];
+  todasLasCitas[usuarioActual].unshift(cita);
+  guardarDatos();
+
+  // Mensaje de éxito en el form
+  const msg = document.getElementById('cita-msg');
+  msg.className = 'auth-msg success';
+  msg.innerHTML = '✅ <strong>¡Cita confirmada!</strong> ' + servicio + ' · ' + formatFecha(fecha) + ' · ' + hora;
+  msg.style.display = 'block';
+
+  mostrarToast('¡Cita agendada! ✨', 'success');
+
+  // Limpiar form después de 3s
+  setTimeout(() => {
+    document.getElementById('cita-servicio').value    = '';
+    document.getElementById('cita-especialista').value= '';
+    document.getElementById('cita-hora').value        = '';
+    document.getElementById('cita-notas').value       = '';
+    msg.style.display = 'none';
+    renderCitas();
+  }, 3000);
+}
+
+// ── CANCELAR CITA ──
+function cancelarCita(id) {
+  if (!usuarioActual) return;
+  todasLasCitas[usuarioActual] = todasLasCitas[usuarioActual].filter(c => c.id !== id);
+  guardarDatos();
+  renderCitas();
+  mostrarToast('Cita cancelada', 'info');
+}
+
+// ── RENDER CITAS ──
+function renderCitas() {
+  const lista  = document.getElementById('lista-citas');
+  const btnPDF = document.getElementById('btnExportarPDF');
+  const stats  = document.getElementById('statsRow');
+  if (!lista) return;
+
+  const citas = todasLasCitas[usuarioActual] || [];
+
+  // Stats
+  if (stats) {
+    stats.style.display = citas.length > 0 ? 'flex' : 'none';
+    document.getElementById('statTotal').textContent = citas.length;
+
+    const futuras = citas.filter(c => new Date(c.fecha) >= new Date()).sort((a,b) => new Date(a.fecha)-new Date(b.fecha));
+    document.getElementById('statProxima').textContent = futuras.length > 0
+      ? formatFecha(futuras[0].fecha)
+      : '—';
+
+    const frecuencia = {};
+    citas.forEach(c => { frecuencia[c.servicio] = (frecuencia[c.servicio]||0) + 1; });
+    const top = Object.entries(frecuencia).sort((a,b) => b[1]-a[1])[0];
+    document.getElementById('statFavorita').textContent = top ? top[0].split(' ').slice(0,2).join(' ') : '—';
+  }
+
+  // Botón PDF
+  if (btnPDF) {
+    btnPDF.disabled    = citas.length === 0;
+    btnPDF.textContent = citas.length > 0
+      ? '📄 Exportar ' + citas.length + ' Cita' + (citas.length > 1 ? 's' : '')
+      : '📄 Exportar PDF';
+  }
+
+  if (citas.length === 0) {
+    lista.innerHTML = '<p class="empty-citas">Aún no tienes citas agendadas 🌸</p>';
+    return;
+  }
+
+  lista.innerHTML = citas.map(cita => `
+    <div class="cita-card">
+      <div class="cita-info">
+        <div class="cita-servicio">${cita.servicio}</div>
+        <div class="cita-meta">
+          📅 ${formatFecha(cita.fecha)} &nbsp;·&nbsp; ⏰ ${cita.hora}
+          &nbsp;·&nbsp; 👩‍🎨 ${cita.especialista}
+          ${cita.notas && cita.notas !== 'Sin notas' ? '<br>📝 ' + cita.notas : ''}
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:0.5rem;align-items:flex-end;">
+        <span class="cita-estado">✓ ${cita.estado}</span>
+        <button class="btn-cancelar" onclick="cancelarCita(${cita.id})">❌ Cancelar</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── FORMATO FECHA ──
+function formatFecha(f) {
+  if (!f) return 'N/A';
+  const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const [y,m,d] = f.split('-');
+  return d + ' ' + meses[parseInt(m)-1] + ' ' + y.slice(-2);
+}
+
+// ── EXPORTAR PDF ──
+function exportarPDF() {
+  if (!window.jspdf) { mostrarToast('Cargando PDF...', 'info'); return; }
+  const { jsPDF } = window.jspdf;
+  const doc   = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const citas = todasLasCitas[usuarioActual] || [];
+  const u     = usuarios[usuarioActual];
+
+  // Header
+  doc.setFillColor(61, 28, 46);
+  doc.rect(0, 0, 210, 45, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(24);
+  doc.text('MIS CITAS', 105, 25, { align: 'center' });
+  doc.setFontSize(13);
+  doc.text('El Arte del Maquillaje', 105, 36, { align: 'center' });
+
+  // Datos cliente
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(11);
+  doc.setTextColor(232, 196, 184);
+  doc.text('Nombre: '   + (u.nombre || 'Cliente'), 20, 55);
+  doc.text('Email: '    + (u.email  || 'N/A'),     20, 63);
+  doc.text('Teléfono: ' + (u.tel    || 'N/A'),     20, 71);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(201, 169, 110);
+  doc.text('Total: ' + citas.length + ' cita' + (citas.length !== 1 ? 's' : ''), 20, 79);
+
+  let y = 95;
+  citas.forEach((cita, i) => {
+    if (i % 2 === 0) {
+      doc.setFillColor(72, 38, 58);
+      doc.rect(15, y - 5, 180, 28, 'F');
+    }
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.setTextColor(255, 255, 255);
+    doc.text((i+1) + '. ' + cita.servicio, 20, y);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(210, 210, 210);
+    doc.text(formatFecha(cita.fecha) + '  ·  ' + cita.hora, 20, y + 7);
+
+    doc.setTextColor(232, 196, 184);
+    doc.text(cita.especialista, 20, y + 14);
+
+    if (cita.notas && cita.notas !== 'Sin notas') {
+      doc.setFontSize(9);
+      doc.setTextColor(180, 180, 180);
+      doc.text(doc.splitTextToSize(cita.notas, 160), 20, y + 21);
+      y += 8;
+    }
+
+    y += 34;
+    if (y > 260) { doc.addPage(); y = 20; }
+  });
+
+  // Footer en todas las páginas
+  const total = doc.internal.getNumberOfPages();
+  for (let p = 1; p <= total; p++) {
+    doc.setPage(p);
+    doc.setFillColor(40, 25, 40);
+    doc.rect(0, 290, 210, 10, 'F');
+    doc.setFontSize(8);
+    doc.setTextColor(255, 255, 255);
+    doc.text('Proyecto SENA — Arte & Belleza 2025', 20, 296);
+    doc.text('Página ' + p + ' de ' + total, 190, 296, { align: 'right' });
+  }
+
+  const nombre = (u.nombre || 'Cliente').replace(/[^a-zA-Z0-9]/g, '_');
+  doc.save('Citas_' + nombre + '_' + new Date().toISOString().split('T')[0] + '.pdf');
+  mostrarToast('✅ PDF descargado con ' + citas.length + ' citas', 'success');
+}
+
+// ── GALERÍA DE LOOKS ──
+let lookServicioActual = '';
+
+function abrirLook(titulo, emoji, desc, servicio) {
+  document.getElementById('lookTitulo').textContent   = titulo;
+  document.getElementById('lookEmoji').textContent    = emoji;
+  document.getElementById('lookDesc').textContent     = desc;
+  document.getElementById('lookServicio').textContent = servicio;
+  lookServicioActual = servicio;
+
+  const modal = document.getElementById('lookModal');
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function cerrarLook() {
+  document.getElementById('lookModal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function reservarDesdeGaleria() {
+  cerrarLook();
+  if (!usuarioActual) {
+    mostrarToast('Crea una cuenta para agendar ✨', 'info');
+    document.getElementById('citas').scrollIntoView({ behavior: 'smooth' });
+    setTimeout(() => showTab('registro'), 600);
+    return;
+  }
+  // Pre-llenar servicio
+  const sel = document.getElementById('cita-servicio');
+  for (let i = 0; i < sel.options.length; i++) {
+    if (sel.options[i].text === lookServicioActual) {
+      sel.selectedIndex = i; break;
+    }
+  }
+  document.getElementById('citas').scrollIntoView({ behavior: 'smooth' });
+  mostrarToast('Servicio pre-seleccionado 🌸', 'success');
+}
+
+// Cerrar modal al hacer click afuera
+document.getElementById('lookModal').addEventListener('click', function(e) {
+  if (e.target === this) cerrarLook();
+});
+
+// ── INICIALIZACIÓN ──
+window.addEventListener('beforeunload', guardarDatos);
+
+// Ocultar dashboard al inicio
+document.addEventListener('DOMContentLoaded', function() {
+  const dash = document.getElementById('dashboard');
+  dash.style.display = 'none';
+  dash.classList.remove('visible');
+});
+</script>
+</body>
+</html>
