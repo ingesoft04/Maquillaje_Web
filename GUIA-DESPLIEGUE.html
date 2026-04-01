@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Guía de Despliegue — SENA Maquillaje</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0D0F14;--surface:#161A22;--card:#1E2330;--border:#2A3040;
+  --rose:#E8758A;--gold:#D4A853;--mint:#5DD4B0;--blue:#5B9CF6;--purple:#9B7FEA;
+  --text:#E8EAF0;--muted:#6B7590;--code-bg:#111418;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+
+/* ── HEADER ── */
+header{
+  background:linear-gradient(135deg,#1A0F20 0%,#0D1A2E 50%,#0F1A14 100%);
+  padding:5rem 2rem 4rem;text-align:center;position:relative;overflow:hidden;
+  border-bottom:1px solid var(--border);
+}
+header::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 50% at 50% 100%,#E8758A18 0%,transparent 70%);
+}
+.header-badge{
+  display:inline-flex;align-items:center;gap:.5rem;
+  border:1px solid #E8758A40;color:var(--rose);font-size:.7rem;
+  letter-spacing:3px;text-transform:uppercase;padding:6px 16px;
+  border-radius:2px;margin-bottom:1.5rem;font-family:'JetBrains Mono',monospace;
+}
+header h1{
+  font-family:'Syne',sans-serif;font-size:clamp(2rem,6vw,4rem);
+  font-weight:800;line-height:1.1;position:relative;
+}
+header h1 span{color:var(--rose)}
+header p{margin-top:1rem;color:var(--muted);font-size:1rem;font-weight:300}
+
+/* ── NAV ── */
+nav{
+  position:sticky;top:0;z-index:100;
+  background:rgba(13,15,20,0.92);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  display:flex;gap:0;overflow-x:auto;padding:0 1rem;
+}
+nav a{
+  font-size:.72rem;letter-spacing:2px;text-transform:uppercase;
+  color:var(--muted);text-decoration:none;padding:1rem 1.2rem;
+  white-space:nowrap;border-bottom:2px solid transparent;
+  transition:all .2s;font-family:'JetBrains Mono',monospace;
+}
+nav a:hover{color:var(--text);border-bottom-color:var(--rose)}
+
+/* ── LAYOUT ── */
+.container{max-width:960px;margin:0 auto;padding:4rem 2rem}
+.section-label{
+  font-family:'JetBrains Mono',monospace;font-size:.65rem;
+  letter-spacing:3px;text-transform:uppercase;color:var(--rose);
+  margin-bottom:.75rem;
+}
+h2{font-family:'Syne',sans-serif;font-size:clamp(1.6rem,4vw,2.4rem);
+   font-weight:700;margin-bottom:1.5rem;line-height:1.2}
+h3{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:600;
+   margin-bottom:1rem;color:var(--text)}
+p{color:#A0A8C0;margin-bottom:1rem;font-weight:300}
+
+/* ── STEPS ── */
+.steps{display:flex;flex-direction:column;gap:0}
+.step{
+  display:grid;grid-template-columns:60px 1fr;gap:1.5rem;
+  padding:2rem 0;border-bottom:1px solid var(--border);position:relative;
+}
+.step:last-child{border-bottom:none}
+.step-num{
+  width:48px;height:48px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:500;
+  flex-shrink:0;margin-top:.25rem;
+}
+.step-num.rose{background:#E8758A20;color:var(--rose);border:1px solid #E8758A40}
+.step-num.gold{background:#D4A85320;color:var(--gold);border:1px solid #D4A85340}
+.step-num.mint{background:#5DD4B020;color:var(--mint);border:1px solid #5DD4B040}
+.step-num.blue{background:#5B9CF620;color:var(--blue);border:1px solid #5B9CF640}
+.step-num.purple{background:#9B7FEA20;color:var(--purple);border:1px solid #9B7FEA40}
+
+/* ── CODE BLOCKS ── */
+.code-block{
+  background:var(--code-bg);border:1px solid var(--border);
+  border-radius:6px;overflow:hidden;margin:1rem 0;
+}
+.code-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.6rem 1rem;background:#1A1E28;border-bottom:1px solid var(--border);
+}
+.code-label{
+  font-family:'JetBrains Mono',monospace;font-size:.65rem;
+  color:var(--muted);letter-spacing:2px;text-transform:uppercase;
+}
+.copy-btn{
+  font-family:'JetBrains Mono',monospace;font-size:.65rem;
+  background:none;border:1px solid var(--border);color:var(--muted);
+  padding:4px 10px;border-radius:3px;cursor:pointer;letter-spacing:1px;
+  transition:all .2s;text-transform:uppercase;
+}
+.copy-btn:hover{border-color:var(--rose);color:var(--rose)}
+.copy-btn.copied{border-color:var(--mint);color:var(--mint)}
+pre{
+  padding:1.25rem;overflow-x:auto;font-family:'JetBrains Mono',monospace;
+  font-size:.82rem;line-height:1.8;color:#CDD6F4;
+}
+.c-cmd{color:var(--mint)}
+.c-comment{color:#4A5568;font-style:italic}
+.c-str{color:var(--gold)}
+.c-kw{color:var(--purple)}
+.c-val{color:var(--blue)}
+
+/* ── CARDS ── */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1px;
+       background:var(--border);border:1px solid var(--border);border-radius:6px;overflow:hidden;margin:1.5rem 0}
+.card{background:var(--card);padding:1.5rem;transition:background .2s}
+.card:hover{background:#252A38}
+.card-icon{font-size:1.5rem;margin-bottom:.75rem}
+.card h4{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:600;margin-bottom:.5rem}
+.card p{font-size:.85rem;color:var(--muted);margin:0}
+
+/* ── COMMANDS TABLE ── */
+.cmd-table{width:100%;border-collapse:collapse;margin:1rem 0}
+.cmd-table tr{border-bottom:1px solid var(--border)}
+.cmd-table tr:last-child{border-bottom:none}
+.cmd-table td{padding:.75rem 1rem;font-size:.85rem;vertical-align:top}
+.cmd-table td:first-child{
+  font-family:'JetBrains Mono',monospace;color:var(--mint);
+  white-space:nowrap;width:35%;
+}
+.cmd-table td:last-child{color:var(--muted)}
+.cmd-section{background:var(--surface);padding:.4rem 1rem}
+.cmd-section td{
+  font-family:'JetBrains Mono',monospace;font-size:.65rem;
+  letter-spacing:2px;text-transform:uppercase;color:var(--rose);padding:.5rem 0;
+}
+
+/* ── ARCH DIAGRAM ── */
+.arch{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:6px;padding:2rem;margin:1.5rem 0;text-align:center;
+}
+.arch-row{display:flex;align-items:center;justify-content:center;gap:.5rem;flex-wrap:wrap;margin:.5rem 0}
+.arch-box{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:4px;padding:.6rem 1.2rem;font-family:'JetBrains Mono',monospace;
+  font-size:.8rem;display:flex;align-items:center;gap:.5rem;
+}
+.arch-box.rose{border-color:#E8758A60;color:var(--rose)}
+.arch-box.blue{border-color:#5B9CF660;color:var(--blue)}
+.arch-box.mint{border-color:#5DD4B060;color:var(--mint)}
+.arch-box.gold{border-color:#D4A85360;color:var(--gold)}
+.arch-arrow{color:var(--muted);font-size:1.2rem}
+
+/* ── ALERT ── */
+.alert{
+  border-left:3px solid;padding:1rem 1.25rem;border-radius:0 4px 4px 0;
+  margin:1rem 0;font-size:.875rem;
+}
+.alert.warn{border-color:var(--gold);background:#D4A85310;color:#D4A853}
+.alert.info{border-color:var(--blue);background:#5B9CF610;color:#8BB4F8}
+.alert.success{border-color:var(--mint);background:#5DD4B010;color:#7EDFC5}
+
+/* ── FOOTER ── */
+footer{
+  border-top:1px solid var(--border);padding:3rem 2rem;text-align:center;
+  color:var(--muted);font-size:.8rem;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-badge">🌸 SENA · Guía de Despliegue</div>
+  <h1>Deploy & Gestión<br/><span>Arte & Belleza</span></h1>
+  <p>Nginx + Node.js + PostgreSQL + Redis — Stack completo de producción</p>
+</header>
+
+<nav>
+  <a href="#arquitectura">Arquitectura</a>
+  <a href="#requisitos">Requisitos</a>
+  <a href="#pasos">Despliegue</a>
+  <a href="#ssl">SSL</a>
+  <a href="#gestion">Gestión</a>
+  <a href="#comandos">Comandos</a>
+</nav>
+
+<!-- ARQUITECTURA -->
+<div class="container" id="arquitectura">
+  <div class="section-label">01 — Visión general</div>
+  <h2>Arquitectura del sistema</h2>
+  <p>El stack completo se orquesta con Docker Compose. Nginx actúa como punto de entrada público y distribuye el tráfico.</p>
+
+  <div class="arch">
+    <div class="arch-row">
+      <div class="arch-box rose">🌐 Internet</div>
+    </div>
+    <div class="arch-row"><div class="arch-arrow">↓ :80 / :443</div></div>
+    <div class="arch-row">
+      <div class="arch-box rose">🔒 Nginx<br/><small>SSL · Proxy · Rate limit</small></div>
+    </div>
+    <div class="arch-row">
+      <div class="arch-arrow">← :4000 →</div>
+    </div>
+    <div class="arch-row" style="gap:2rem">
+      <div class="arch-box blue">📁 Frontend<br/><small>HTML estático</small></div>
+      <div class="arch-box mint">⚙️ API Node.js<br/><small>Express · JWT</small></div>
+    </div>
+    <div class="arch-row"><div class="arch-arrow">↓</div></div>
+    <div class="arch-row" style="gap:2rem">
+      <div class="arch-box gold">🗄️ PostgreSQL 16<br/><small>Datos persistentes</small></div>
+      <div class="arch-box gold">⚡ Redis 7<br/><small>Caché · Sesiones</small></div>
+    </div>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-icon">🔒</div>
+      <h4>Nginx</h4>
+      <p>SSL/TLS automático con Let's Encrypt, reverse proxy, compresión gzip y rate limiting</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">⚙️</div>
+      <h4>Node.js API</h4>
+      <p>Express con JWT, validaciones, manejo de errores y caché inteligente con Redis</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🗄️</div>
+      <h4>PostgreSQL</h4>
+      <p>Solo accesible desde la red interna de Docker, nunca expuesto al exterior</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">⚡</div>
+      <h4>Redis</h4>
+      <p>Caché de catálogos (6h), sesiones (7d), disponibilidad (2min). Reduce carga en BD 90%</p>
+    </div>
+  </div>
+</div>
+
+<!-- REQUISITOS -->
+<div class="container" id="requisitos" style="padding-top:0">
+  <div class="section-label">02 — Antes de empezar</div>
+  <h2>Requisitos del servidor</h2>
+
+  <div class="alert info">
+    ℹ️ Necesitas un VPS o servidor con Ubuntu 22.04 / 24.04. Opciones económicas: DigitalOcean ($6/mes), Hetzner (€4/mes), Contabo, o cualquier proveedor con Linux.
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-icon">💻</div>
+      <h4>Hardware mínimo</h4>
+      <p>1 vCPU · 1 GB RAM · 20 GB SSD<br/>Ubuntu 22.04 LTS</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🌐</div>
+      <h4>Dominio</h4>
+      <p>Un dominio apuntando a la IP del servidor (registro A en tu proveedor DNS)</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🐳</div>
+      <h4>Software</h4>
+      <p>Docker Engine + Docker Compose Plugin (se instalan en el paso 1)</p>
+    </div>
+  </div>
+</div>
+
+<!-- PASOS DE DESPLIEGUE -->
+<div class="container" id="pasos" style="padding-top:0">
+  <div class="section-label">03 — Instalación</div>
+  <h2>Despliegue paso a paso</h2>
+
+  <div class="steps">
+
+    <!-- PASO 1 -->
+    <div class="step">
+      <div class="step-num rose">1</div>
+      <div>
+        <h3>Instalar Docker en el servidor</h3>
+        <p>Conéctate a tu servidor por SSH y ejecuta:</p>
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-label">bash — servidor Ubuntu</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><span class="c-comment"># Instalar Docker Engine + Compose Plugin</span>
+<span class="c-cmd">curl -fsSL https://get.docker.com | sh</span>
+
+<span class="c-comment"># Agregar tu usuario al grupo docker (evitar usar sudo)</span>
+<span class="c-cmd">sudo usermod -aG docker $USER</span>
+<span class="c-cmd">newgrp docker</span>
+
+<span class="c-comment"># Verificar instalación</span>
+<span class="c-cmd">docker --version</span>
+<span class="c-cmd">docker compose version</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- PASO 2 -->
+    <div class="step">
+      <div class="step-num gold">2</div>
+      <div>
+        <h3>Subir el proyecto al servidor</h3>
+        <p>Desde tu computador local, transfiere los archivos al servidor:</p>
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-label">bash — tu computador local</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><span class="c-comment"># Comprimir el proyecto</span>
+<span class="c-cmd">tar -czf sena-backend.tar.gz maquillaje-sena-backend/</span>
+
+<span class="c-comment"># Subir al servidor (reemplaza IP con la de tu VPS)</span>
+<span class="c-cmd">scp sena-backend.tar.gz usuario@TU_IP_SERVIDOR:/home/usuario/</span>
+
+<span class="c-comment"># Conectarte al servidor</span>
+<span class="c-cmd">ssh usuario@TU_IP_SERVIDOR</span>
+
+<span class="c-comment"># Descomprimir</span>
+<span class="c-cmd">tar -xzf sena-backend.tar.gz</span>
+<span class="c-cmd">cd maquillaje-sena-backend</span></pre>
+        </div>
+        <div class="alert info">
+          ℹ️ También puedes usar Git: <code style="font-family:JetBrains Mono,monospace;color:var(--mint)">git clone https://github.com/tu-usuario/sena-backend.git</code>
+        </div>
+      </div>
+    </div>
+
+    <!-- PASO 3 -->
+    <div class="step">
+      <div class="step-num mint">3</div>
+      <div>
+        <h3>Configurar variables de entorno</h3>
+        <p>Crea el archivo <code style="font-family:JetBrains Mono,monospace;color:var(--mint)">.env</code> con tus valores reales:</p>
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-label">bash — servidor</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><span class="c-cmd">cp .env.example .env</span>
+<span class="c-cmd">nano .env</span></pre>
+        </div>
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-label">.env — editar estos valores</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><span class="c-comment"># Base de datos — usa contraseñas fuertes</span>
+<span class="c-kw">DB_USER</span>=<span class="c-str">sena</span>
+<span class="c-kw">DB_PASS</span>=<span class="c-str">MiContraseñaSegura2025!</span>
+<span class="c-kw">DB_NAME</span>=<span class="c-str">maquillaje_sena</span>
+
+<span class="c-comment"># Redis</span>
+<span class="c-kw">REDIS_PASS</span>=<span class="c-str">OtraContraseñaSegura!</span>
+
+<span class="c-comment"># JWT — genera uno aleatorio:</span>
+<span class="c-comment"># openssl rand -base64 48</span>
+<span class="c-kw">JWT_SECRET</span>=<span class="c-str">pega_aqui_el_resultado_de_openssl</span>
+
+<span class="c-comment"># Tu dominio</span>
+<span class="c-kw">DOMAIN</span>=<span class="c-str">tudominio.com</span>
+<span class="c-kw">SSL_EMAIL</span>=<span class="c-str">tu@email.com</span>
+<span class="c-kw">FRONTEND_URL</span>=<span class="c-str">https://tudominio.com</span></pre>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-label">Generar JWT_SECRET seguro</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><span class="c-cmd">openssl rand -base64 48</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- PASO 4 -->
+    <div class="step">
+      <div class="step-num blue">4</div>
+      <div>
+        <h3>Editar el dominio en Nginx</h3>
+        <p>Reemplaza <code style="font-family:JetBrains Mono,monospace;color:var(--gold)">tudominio.com</code> con tu dominio real:</p>
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-label">bash</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><span class="c-cmd">sed -i 's/tudominio.com/midominio.com/g' nginx/nginx.conf</span>
+<span class="c-cmd">sed -i 's/tudominio.com/midominio.com/g' docker-compose.prod.yml</span></pre>
+        </div>
+
+        <p style="margin-top:1rem">También copia el frontend HTML:</p>
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-label">bash</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><span class="c-cmd">mkdir -p frontend</span>
+<span class="c-cmd">cp maquillaje-sena.html frontend/index.html</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- PASO 5 -->
+    <div class="step">
+      <div class="step-num purple">5</div>
+      <div>
+        <h3>Ejecutar el despliegue</h3>
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-label">bash — despliegue completo con SSL</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><span class="c-comment"># Dar permisos a los scripts</span>
+<span class="c-cmd">chmod +x deploy.sh manage.sh</span>
+
+<span class="c-comment"># Primer despliegue sin SSL (para el challenge de Let's Encrypt)</span>
+<span class="c-cmd">./deploy.sh</span>
+
+<span class="c-comment"># Obtener certificado SSL (después del primer deploy)</span>
+<span class="c-cmd">./deploy.sh --ssl</span></pre>
+        </div>
+
+        <div class="alert success">
+          ✔ Si todo funciona, verás tu sitio en https://tudominio.com con candado verde.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- SSL -->
+<div class="container" id="ssl" style="padding-top:0">
+  <div class="section-label">04 — Certificado SSL</div>
+  <h2>HTTPS gratuito con Let's Encrypt</h2>
+
+  <div class="alert warn">
+    ⚠️ Antes de obtener el certificado, el DNS de tu dominio debe apuntar a la IP de tu servidor. Verifica con: <code style="font-family:JetBrains Mono,monospace">nslookup tudominio.com</code>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-label">Obtener certificado por primera vez</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="c-cmd">./deploy.sh --ssl</span></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-label">Ver estado y renovar manualmente</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="c-cmd">./manage.sh ssl-status</span>    <span class="c-comment"># Ver expiración</span>
+<span class="c-cmd">./manage.sh ssl-renew</span>     <span class="c-comment"># Renovar manualmente</span></pre>
+  </div>
+
+  <div class="alert info">
+    ℹ️ El certificado se renueva automáticamente cada 12 horas mediante el contenedor Certbot. Let's Encrypt emite certificados válidos por 90 días.
+  </div>
+</div>
+
+<!-- GESTIÓN -->
+<div class="container" id="gestion" style="padding-top:0">
+  <div class="section-label">05 — Operaciones diarias</div>
+  <h2>Gestionar el servidor</h2>
+  <p>Usa <code style="font-family:JetBrains Mono,monospace;color:var(--mint)">./manage.sh</code> para todas las operaciones:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-label">Ver todos los comandos disponibles</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="c-cmd">./manage.sh help</span></pre>
+  </div>
+</div>
+
+<!-- TABLA DE COMANDOS -->
+<div class="container" id="comandos" style="padding-top:0">
+  <div class="section-label">06 — Referencia rápida</div>
+  <h2>Todos los comandos</h2>
+
+  <div class="code-block" style="margin:0">
+    <table class="cmd-table">
+      <tr class="cmd-section"><td colspan="2">ESTADO</td></tr>
+      <tr><td>./manage.sh status</td><td>Ver si todos los contenedores están corriendo</td></tr>
+      <tr><td>./manage.sh health</td><td>Health check completo (API + BD + Redis)</td></tr>
+      <tr><td>./manage.sh stats</td><td>CPU, RAM y disco de cada servicio</td></tr>
+
+      <tr class="cmd-section"><td colspan="2">SERVICIOS</td></tr>
+      <tr><td>./manage.sh start</td><td>Iniciar todo el stack</td></tr>
+      <tr><td>./manage.sh stop</td><td>Detener (sin borrar datos)</td></tr>
+      <tr><td>./manage.sh restart</td><td>Reiniciar todos los servicios</td></tr>
+      <tr><td>./manage.sh restart-api</td><td>Reiniciar solo la API sin tocar BD/Redis</td></tr>
+
+      <tr class="cmd-section"><td colspan="2">LOGS</td></tr>
+      <tr><td>./manage.sh logs</td><td>Últimas 100 líneas de todos los servicios</td></tr>
+      <tr><td>./manage.sh logs-api</td><td>Logs de la API Node.js</td></tr>
+      <tr><td>./manage.sh logs-nginx</td><td>Accesos y errores de Nginx</td></tr>
+      <tr><td>./manage.sh logs-live</td><td>Logs en tiempo real (Ctrl+C para salir)</td></tr>
+
+      <tr class="cmd-section"><td colspan="2">BASE DE DATOS</td></tr>
+      <tr><td>./manage.sh backup</td><td>Crear backup comprimido de PostgreSQL</td></tr>
+      <tr><td>./manage.sh restore archivo.sql.gz</td><td>Restaurar desde un backup</td></tr>
+      <tr><td>./manage.sh db-shell</td><td>Abrir consola psql interactiva</td></tr>
+      <tr><td>./manage.sh db-size</td><td>Ver tamaño de cada tabla</td></tr>
+
+      <tr class="cmd-section"><td colspan="2">REDIS</td></tr>
+      <tr><td>./manage.sh redis-shell</td><td>Consola redis-cli interactiva</td></tr>
+      <tr><td>./manage.sh redis-info</td><td>Estadísticas de memoria y claves</td></tr>
+      <tr><td>./manage.sh redis-flush</td><td>⚠️ Limpiar toda la caché</td></tr>
+
+      <tr class="cmd-section"><td colspan="2">SSL</td></tr>
+      <tr><td>./manage.sh ssl-status</td><td>Ver fecha de expiración del certificado</td></tr>
+      <tr><td>./manage.sh ssl-renew</td><td>Renovar certificado manualmente</td></tr>
+
+      <tr class="cmd-section"><td colspan="2">DEPLOY / ACTUALIZACIÓN</td></tr>
+      <tr><td>./deploy.sh</td><td>Despliegue completo inicial</td></tr>
+      <tr><td>./deploy.sh --ssl</td><td>Despliegue + obtener certificado SSL</td></tr>
+      <tr><td>./deploy.sh --update</td><td>Actualizar solo la API sin downtime</td></tr>
+      <tr><td>./deploy.sh --backup</td><td>Hacer backup antes de desplegar</td></tr>
+    </table>
+  </div>
+
+  <div style="margin-top:2rem">
+    <h3>Actualizar la API después de cambios</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-label">flujo de actualización</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><span class="c-comment"># 1. Hacer backup antes de cualquier cambio</span>
+<span class="c-cmd">./deploy.sh --backup</span>
+
+<span class="c-comment"># 2. Subir los nuevos archivos al servidor</span>
+<span class="c-cmd">scp -r src/ usuario@TU_IP:/home/usuario/maquillaje-sena-backend/</span>
+
+<span class="c-comment"># 3. Actualizar la API (sin bajar BD ni Redis)</span>
+<span class="c-cmd">./deploy.sh --update</span>
+
+<span class="c-comment"># 4. Verificar que todo funciona</span>
+<span class="c-cmd">./manage.sh health</span></pre>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>🌸 SENA Maquillaje · Arte & Belleza · Colombia 2025</p>
+  <p style="margin-top:.5rem">Stack: Nginx · Node.js · PostgreSQL · Redis · Docker</p>
+</footer>
+
+<script>
+function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre');
+  const text = pre.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copiado!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = 'Copiar';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+</script>
+</body>
+</html>
