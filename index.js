@@ -12,6 +12,8 @@ const authRoutes       = require('./routes/auth.routes');
 const citasRoutes      = require('./routes/citas.routes');
 const catalogoRoutes   = require('./routes/catalogo.routes');
 const comparacionesRoutes = require('./routes/comparaciones.routes');
+const adminRoutes = require('./routes/admin.routes');
+const { prepararBaseDeDatos } = require('./bootstrap');
 
 const app  = express();
 const PORT = process.env.PORT || 4000;
@@ -70,6 +72,7 @@ app.use('/api/auth',     authLimiter, authRoutes);
 app.use('/api/citas',    citasRoutes);
 app.use('/api',          catalogoRoutes);
 app.use('/api/comparaciones', comparacionesRoutes);
+app.use('/api/admin', adminRoutes);
 
 // ── 404 ───────────────────────────────────────────
 app.use((req, res) => {
@@ -88,7 +91,9 @@ app.use((err, req, res, _next) => {
 });
 
 // ── ARRANQUE ──────────────────────────────────────
-app.listen(PORT, () => {
+async function iniciar() {
+  await prepararBaseDeDatos();
+  return app.listen(PORT, () => {
   console.log(`
   ╔══════════════════════════════════════╗
   ║   🌸 SENA Maquillaje API — v1.0      ║
@@ -96,6 +101,14 @@ app.listen(PORT, () => {
   ║   Entorno: ${(process.env.NODE_ENV || 'development').padEnd(11)}           ║
   ╚══════════════════════════════════════╝
   `);
-});
+  });
+}
 
-module.exports = app;
+if (require.main === module) {
+  iniciar().catch((error) => {
+    console.error('[ARRANQUE]', error);
+    process.exit(1);
+  });
+}
+
+module.exports = { app, iniciar };

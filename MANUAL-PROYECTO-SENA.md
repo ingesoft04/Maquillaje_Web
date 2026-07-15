@@ -186,6 +186,15 @@ Cuando se crea o cancela una cita, la API elimina las claves relacionadas para e
 | PATCH | `/api/citas/:id/cancelar` | JWT |
 | GET | `/api/citas/:id/exportar` | JWT |
 
+### Administración
+
+| Método | Endpoint | Acceso |
+|---|---|---|
+| GET | `/api/admin/resumen` | Administrador |
+| GET | `/api/admin/usuarios` | Administrador |
+| GET | `/api/admin/citas` | Administrador |
+| PATCH | `/api/admin/citas/:id/estado` | Administrador |
+
 ### Comparaciones
 
 | Método | Endpoint | Acceso |
@@ -211,6 +220,16 @@ Copy-Item .env.example .env
 ```
 
 Cambiar `JWT_SECRET` en `.env` por una cadena larga y privada.
+
+También se deben cambiar las credenciales iniciales del administrador:
+
+```env
+ADMIN_NAME=Administrador SENA
+ADMIN_EMAIL=admin@sena.edu.co
+ADMIN_PASSWORD=UnaClavePrivadaYSegura
+```
+
+En el entorno local actual, mientras no se cree un `.env` personalizado, el acceso de demostración es `admin@sena.edu.co` con la contraseña `CambieEstaClave2026!`. Estas credenciales no deben utilizarse en producción.
 
 ### Construir y arrancar
 
@@ -294,10 +313,12 @@ Para una producción real también se deben usar secretos fuertes, HTTPS, copias
 - Dockerfiles y composición local de cuatro servicios.
 - Health check de infraestructura.
 - Frontend conectado a la API para registro, login, sesión, catálogos y citas.
+- Panel administrativo con métricas, usuarios, citas y gestión de estados.
+- Exportación PDF institucional con resumen y paginación.
+- Pruebas automatizadas de integración.
 
 ### Pendiente
 
-- Agregar pruebas automatizadas.
 - Implementar carga real de imágenes.
 - Revisar roles administrativos.
 - Preparar configuración de dominio y HTTPS para producción.
@@ -363,3 +384,73 @@ La prueba completa confirmó:
 - Consulta de la cita desde PostgreSQL/Redis.
 - Cancelación exitosa.
 - Catálogos visibles en el navegador sin errores de consola.
+
+## 20. Módulo administrativo
+
+### Propósito
+
+El panel permite supervisar el sistema sin acceder directamente a PostgreSQL. Solamente aparece para usuarios cuyo campo `rol` sea `admin`.
+
+### Seguridad por capas
+
+Ocultar el panel en el HTML no sería una protección suficiente. Por eso la API aplica dos middlewares:
+
+1. `autenticar` valida el JWT.
+2. `soloAdmin` verifica que el token contenga el rol administrativo.
+
+Un cliente autenticado que intente consultar `/api/admin/resumen` recibe HTTP `403 Forbidden`.
+
+### Funciones disponibles
+
+- Consultar número de usuarios, citas y especialistas.
+- Consultar citas próximas.
+- Listar usuarios registrados.
+- Listar todas las citas con cliente y especialista.
+- Cambiar estados entre confirmada, completada, reprogramada y cancelada.
+- Invalidar la caché relacionada después de un cambio.
+
+El archivo `bootstrap.js` agrega la columna `rol` a instalaciones existentes y crea o actualiza la cuenta administrativa definida en las variables de entorno.
+
+## 21. Exportación PDF mejorada
+
+El PDF se genera en el navegador con jsPDF e incluye:
+
+- Encabezado institucional de Arte & Belleza SENA.
+- Fecha y hora de generación.
+- Nombre, correo y teléfono de la cliente.
+- Resumen de citas totales, confirmadas y completadas.
+- Tarjetas separadas para cada cita.
+- Servicio, fecha, hora, especialista, estado y notas.
+- Ajuste automático de notas extensas.
+- Saltos de página calculados según el contenido.
+- Encabezado en páginas adicionales.
+- Pie institucional y numeración `Página X de Y`.
+- Nombre de archivo normalizado y fechado.
+
+## 22. Pruebas automatizadas
+
+La suite está en `tests/integration.test.js` y se ejecuta contra los contenedores activos:
+
+```powershell
+pnpm test:integration
+```
+
+Si `pnpm` no está disponible localmente, también puede ejecutarse dentro del contenedor:
+
+```powershell
+docker compose exec -e TEST_BASE_URL=http://localhost:4000 api node --test --test-concurrency=1 tests/integration.test.js
+```
+
+Las nueve verificaciones actuales cubren:
+
+1. Estado de PostgreSQL y Redis.
+2. Catálogos públicos.
+3. Registro y generación de JWT.
+4. Rechazo administrativo para clientes.
+5. Consulta de disponibilidad y creación de cita.
+6. Listado de citas del cliente.
+7. Login y métricas administrativas.
+8. Actualización administrativa del estado.
+9. Respuesta JSON para rutas inexistentes.
+
+Resultado validado: **9 pruebas aprobadas, 0 fallidas**.

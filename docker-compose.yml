@@ -67,6 +67,9 @@ services:
       REDIS_PASS: ${REDIS_PASS:-redis1234}
       JWT_SECRET: ${JWT_SECRET:-cambia_este_secreto_en_produccion}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:8088}
+      ADMIN_NAME: ${ADMIN_NAME:-Administrador SENA}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@sena.edu.co}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-CambieEstaClave2026!}
     ports:
       - "4000:4000"
     healthcheck:

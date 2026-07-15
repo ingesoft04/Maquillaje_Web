@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
   telefono    VARCHAR(20),
   password_hash TEXT        NOT NULL,
   tono_piel   VARCHAR(60),          -- resultado guardado de la calculadora
+  rol         VARCHAR(20) NOT NULL DEFAULT 'cliente' CHECK (rol IN ('cliente', 'admin')),
   creado_en   TIMESTAMPTZ   DEFAULT NOW(),
   actualizado_en TIMESTAMPTZ DEFAULT NOW()
 );

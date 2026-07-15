@@ -597,6 +597,28 @@
     }
     .btn-logout:hover { border-color: var(--rose); color: var(--rose); }
 
+    .admin-panel {
+      display: none; margin-top: 1.5rem; padding: 2rem;
+      background: #180C14; border: 1px solid var(--gold);
+    }
+    .admin-panel.visible { display: block; }
+    .admin-title-row { display:flex; justify-content:space-between; gap:1rem; align-items:center; margin-bottom:1.5rem; }
+    .admin-title-row h4 { font-family:'Cormorant Garamond',serif; color:var(--gold); font-size:1.5rem; }
+    .admin-badge { color:var(--plum); background:var(--gold); padding:.3rem .7rem; font-size:.6rem; letter-spacing:2px; text-transform:uppercase; }
+    .admin-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:.75rem; margin-bottom:1.5rem; }
+    .admin-stat { padding:1rem; border:1px solid #5C2A3A; background:#2A1020; text-align:center; }
+    .admin-stat strong { display:block; color:var(--blush); font:400 1.7rem 'Cormorant Garamond',serif; }
+    .admin-stat span { color:#A08080; font-size:.6rem; letter-spacing:1px; text-transform:uppercase; }
+    .admin-tabs { display:flex; gap:.5rem; margin-bottom:1rem; }
+    .admin-tab { border:1px solid #5C2A3A; background:transparent; color:#C8ABA5; padding:.55rem 1rem; cursor:pointer; }
+    .admin-tab.active { background:var(--rose); color:white; border-color:var(--rose); }
+    .admin-table-wrap { overflow:auto; max-height:430px; }
+    .admin-table { width:100%; border-collapse:collapse; min-width:680px; font-size:.72rem; }
+    .admin-table th { color:var(--gold); text-align:left; letter-spacing:1px; text-transform:uppercase; font-size:.58rem; }
+    .admin-table th, .admin-table td { padding:.75rem; border-bottom:1px solid #4A2438; }
+    .admin-table td { color:#D8C2C0; }
+    .admin-select { background:#2A1020; color:var(--cream); border:1px solid #6A4055; padding:.35rem; }
+
     /* Agendar form */
     .agendar-box {
       background: #2A1020;
@@ -692,6 +714,8 @@
       nav { justify-content: flex-start; overflow-x: auto; scrollbar-width: none; }
       nav::-webkit-scrollbar { display: none; }
       nav a { flex: 0 0 auto; padding: 1rem 0.8rem; font-size: 0.62rem; }
+      .admin-stats { grid-template-columns:1fr 1fr; }
+      .admin-panel { padding:1rem; }
     }
 
     @media (max-width: 480px) {
@@ -1371,6 +1395,25 @@
         <div id="lista-citas"></div>
       </div>
 
+      <!-- Administración: solo visible para el rol admin -->
+      <div class="admin-panel" id="adminPanel">
+        <div class="admin-title-row">
+          <h4>Panel administrativo</h4>
+          <span class="admin-badge">Acceso restringido</span>
+        </div>
+        <div class="admin-stats">
+          <div class="admin-stat"><strong id="adminUsuarios">0</strong><span>Usuarios</span></div>
+          <div class="admin-stat"><strong id="adminCitas">0</strong><span>Citas totales</span></div>
+          <div class="admin-stat"><strong id="adminProximas">0</strong><span>Próximas</span></div>
+          <div class="admin-stat"><strong id="adminEspecialistas">0</strong><span>Especialistas</span></div>
+        </div>
+        <div class="admin-tabs">
+          <button class="admin-tab active" onclick="mostrarAdminVista('citas', this)">Citas</button>
+          <button class="admin-tab" onclick="mostrarAdminVista('usuarios', this)">Usuarios</button>
+        </div>
+        <div class="admin-table-wrap" id="adminContenido"></div>
+      </div>
+
     </div><!-- /#dashboard -->
   </div><!-- /.inner -->
 </div><!-- /#citas-wrapper -->
@@ -1522,6 +1565,14 @@ const API = '/api';
 let token = localStorage.getItem('sena_token') || '';
 let usuarioActual = null;
 let todasLasCitas = [];
+let adminCitas = [];
+let adminUsuarios = [];
+
+function escaparHTML(valor) {
+  return String(valor ?? '').replace(/[&<>'"]/g, caracter => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+  })[caracter]);
+}
 
 async function apiFetch(ruta, opciones = {}) {
   const headers = { ...(opciones.headers || {}) };
@@ -1673,6 +1724,9 @@ async function entrarDashboard(usuario) {
   document.getElementById('cita-fecha').value = hoy;
 
   await renderCitas();
+  const adminPanel = document.getElementById('adminPanel');
+  adminPanel.classList.toggle('visible', usuarioActual.rol === 'admin');
+  if (usuarioActual.rol === 'admin') await cargarAdmin();
 }
 
 // ── LOGOUT ──
@@ -1682,6 +1736,7 @@ async function logout() {
   const dash = document.getElementById('dashboard');
   dash.classList.remove('visible');
   dash.style.display = 'none';
+  document.getElementById('adminPanel').classList.remove('visible');
 
   document.getElementById('authTabs').style.display = 'flex';
   showTab('login');
@@ -1791,11 +1846,11 @@ async function renderCitas() {
   lista.innerHTML = citas.map(cita => `
     <div class="cita-card">
       <div class="cita-info">
-        <div class="cita-servicio">${cita.servicio}</div>
+        <div class="cita-servicio">${escaparHTML(cita.servicio)}</div>
         <div class="cita-meta">
           📅 ${formatFecha(cita.fecha)} &nbsp;·&nbsp; ⏰ ${cita.hora}
-          &nbsp;·&nbsp; 👩‍🎨 ${cita.especialista}
-          ${cita.notas && cita.notas !== 'Sin notas' ? '<br>📝 ' + cita.notas : ''}
+          &nbsp;·&nbsp; 👩‍🎨 ${escaparHTML(cita.especialista)}
+          ${cita.notas && cita.notas !== 'Sin notas' ? '<br>📝 ' + escaparHTML(cita.notas) : ''}
         </div>
       </div>
       <div style="display:flex;flex-direction:column;gap:0.5rem;align-items:flex-end;">
@@ -1804,6 +1859,77 @@ async function renderCitas() {
       </div>
     </div>
   `).join('');
+}
+
+// ── PANEL ADMINISTRATIVO ──
+async function cargarAdmin() {
+  try {
+    const [resumen, citasData, usuariosData] = await Promise.all([
+      apiFetch('/admin/resumen'), apiFetch('/admin/citas'), apiFetch('/admin/usuarios')
+    ]);
+    adminCitas = citasData.citas || [];
+    adminUsuarios = usuariosData.usuarios || [];
+    document.getElementById('adminUsuarios').textContent = resumen.usuarios;
+    document.getElementById('adminCitas').textContent = resumen.citas_total;
+    document.getElementById('adminProximas').textContent = resumen.citas_proximas;
+    document.getElementById('adminEspecialistas').textContent = resumen.especialistas;
+    renderAdminCitas();
+  } catch (error) {
+    document.getElementById('adminContenido').innerHTML = `<p class="empty-citas">${escaparHTML(error.message)}</p>`;
+  }
+}
+
+function mostrarAdminVista(vista, boton) {
+  document.querySelectorAll('.admin-tab').forEach(item => item.classList.remove('active'));
+  boton.classList.add('active');
+  if (vista === 'usuarios') renderAdminUsuarios();
+  else renderAdminCitas();
+}
+
+function renderAdminCitas() {
+  const contenido = document.getElementById('adminContenido');
+  if (!adminCitas.length) {
+    contenido.innerHTML = '<p class="empty-citas">No hay citas registradas.</p>';
+    return;
+  }
+  contenido.innerHTML = `<table class="admin-table">
+    <thead><tr><th>Fecha</th><th>Cliente</th><th>Servicio</th><th>Especialista</th><th>Estado</th></tr></thead>
+    <tbody>${adminCitas.map(cita => `<tr>
+      <td>${formatFecha(cita.fecha)}<br>${escaparHTML(String(cita.hora).slice(0,5))}</td>
+      <td>${escaparHTML(cita.cliente)}<br><small>${escaparHTML(cita.cliente_email)}</small></td>
+      <td>${escaparHTML(cita.servicio || 'Sin servicio')}</td>
+      <td>${escaparHTML(cita.especialista)}</td>
+      <td><select class="admin-select" onchange="cambiarEstadoAdmin('${cita.id}', this.value)">
+        ${['confirmada','completada','reprogramada','cancelada'].map(estado =>
+          `<option value="${estado}" ${cita.estado === estado ? 'selected' : ''}>${estado}</option>`).join('')}
+      </select></td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+function renderAdminUsuarios() {
+  document.getElementById('adminContenido').innerHTML = `<table class="admin-table">
+    <thead><tr><th>Nombre</th><th>Correo</th><th>Teléfono</th><th>Rol</th><th>Registro</th></tr></thead>
+    <tbody>${adminUsuarios.map(usuario => `<tr>
+      <td>${escaparHTML(usuario.nombre)}</td><td>${escaparHTML(usuario.email)}</td>
+      <td>${escaparHTML(usuario.telefono || '—')}</td><td>${escaparHTML(usuario.rol)}</td>
+      <td>${new Date(usuario.creado_en).toLocaleDateString('es-CO')}</td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+async function cambiarEstadoAdmin(id, estado) {
+  try {
+    await apiFetch(`/admin/citas/${id}/estado`, {
+      method: 'PATCH', body: JSON.stringify({ estado })
+    });
+    mostrarToast('Estado actualizado', 'success');
+    await cargarAdmin();
+    await renderCitas();
+  } catch (error) {
+    mostrarToast('❗ ' + error.message, 'error');
+    await cargarAdmin();
+  }
 }
 
 // ── FORMATO FECHA ──
@@ -1817,77 +1943,116 @@ function formatFecha(f) {
 // ── EXPORTAR PDF ──
 function exportarPDF() {
   if (!window.jspdf) { mostrarToast('Cargando PDF...', 'info'); return; }
+  if (!todasLasCitas.length) { mostrarToast('No hay citas para exportar', 'info'); return; }
   const { jsPDF } = window.jspdf;
-  const doc   = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const citas = todasLasCitas;
-  const u     = usuarioActual || {};
+  const u = usuarioActual || {};
+  const generado = new Date().toLocaleString('es-CO', { dateStyle: 'long', timeStyle: 'short' });
+  const confirmadas = citas.filter(c => c.estado === 'confirmada').length;
+  const completadas = citas.filter(c => c.estado === 'completada').length;
 
-  // Header
-  doc.setFillColor(61, 28, 46);
-  doc.rect(0, 0, 210, 45, 'F');
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(24);
-  doc.text('MIS CITAS', 105, 25, { align: 'center' });
-  doc.setFontSize(13);
-  doc.text('El Arte del Maquillaje', 105, 36, { align: 'center' });
-
-  // Datos cliente
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(11);
-  doc.setTextColor(232, 196, 184);
-  doc.text('Nombre: '   + (u.nombre || 'Cliente'), 20, 55);
-  doc.text('Email: '    + (u.email  || 'N/A'),     20, 63);
-  doc.text('Teléfono: ' + (u.telefono || 'N/A'),   20, 71);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(201, 169, 110);
-  doc.text('Total: ' + citas.length + ' cita' + (citas.length !== 1 ? 's' : ''), 20, 79);
-
-  let y = 95;
-  citas.forEach((cita, i) => {
-    if (i % 2 === 0) {
-      doc.setFillColor(72, 38, 58);
-      doc.rect(15, y - 5, 180, 28, 'F');
-    }
+  function dibujarEncabezado(primeraPagina = false) {
+    doc.setFillColor(61, 28, 46);
+    doc.rect(0, 0, 210, primeraPagina ? 48 : 28, 'F');
+    doc.setDrawColor(201, 169, 110);
+    doc.setLineWidth(.6);
+    doc.line(16, primeraPagina ? 42 : 22, 194, primeraPagina ? 42 : 22);
+    doc.setTextColor(250, 246, 241);
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(12);
-    doc.setTextColor(255, 255, 255);
-    doc.text((i+1) + '. ' + cita.servicio, 20, y);
-
+    doc.setFontSize(primeraPagina ? 22 : 14);
+    doc.text('ARTE & BELLEZA', 16, primeraPagina ? 20 : 14);
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10);
-    doc.setTextColor(210, 210, 210);
-    doc.text(formatFecha(cita.fecha) + '  ·  ' + cita.hora, 20, y + 7);
-
+    doc.setFontSize(9);
     doc.setTextColor(232, 196, 184);
-    doc.text(cita.especialista, 20, y + 14);
-
-    if (cita.notas && cita.notas !== 'Sin notas') {
-      doc.setFontSize(9);
-      doc.setTextColor(180, 180, 180);
-      doc.text(doc.splitTextToSize(cita.notas, 160), 20, y + 21);
-      y += 8;
+    doc.text('Comprobante de citas · Proyecto SENA', 16, primeraPagina ? 29 : 19);
+    if (primeraPagina) {
+      doc.setFontSize(8);
+      doc.text('Generado: ' + generado, 194, 20, { align: 'right' });
+      doc.text('Documento informativo', 194, 27, { align: 'right' });
     }
+  }
 
-    y += 34;
-    if (y > 260) { doc.addPage(); y = 20; }
+  dibujarEncabezado(true);
+  doc.setTextColor(61, 28, 46);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(15);
+  doc.text('Resumen de la cliente', 16, 61);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9.5);
+  doc.setTextColor(70, 55, 60);
+  doc.text('Nombre', 16, 71); doc.text(u.nombre || 'Cliente', 45, 71);
+  doc.text('Correo', 16, 78); doc.text(u.email || 'No registrado', 45, 78);
+  doc.text('Teléfono', 16, 85); doc.text(u.telefono || 'No registrado', 45, 85);
+
+  const resumen = [
+    { x: 115, valor: citas.length, etiqueta: 'TOTAL' },
+    { x: 145, valor: confirmadas, etiqueta: 'CONFIRMADAS' },
+    { x: 175, valor: completadas, etiqueta: 'COMPLETADAS' }
+  ];
+  resumen.forEach(item => {
+    doc.setFillColor(250, 246, 241);
+    doc.roundedRect(item.x, 62, 27, 24, 2, 2, 'F');
+    doc.setTextColor(122, 59, 59);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(15);
+    doc.text(String(item.valor), item.x + 13.5, 73, { align: 'center' });
+    doc.setFontSize(5.5);
+    doc.text(item.etiqueta, item.x + 13.5, 80, { align: 'center' });
   });
 
-  // Footer en todas las páginas
+  doc.setFontSize(14);
+  doc.setTextColor(61, 28, 46);
+  doc.text('Detalle de citas', 16, 101);
+  let y = 109;
+
+  citas.forEach((cita, indice) => {
+    const notas = cita.notas && cita.notas !== 'Sin notas'
+      ? doc.splitTextToSize('Notas: ' + cita.notas, 155) : [];
+    const alto = 29 + Math.max(0, notas.length - 1) * 4;
+    if (y + alto > 277) {
+      doc.addPage();
+      dibujarEncabezado(false);
+      y = 36;
+    }
+
+    doc.setFillColor(indice % 2 === 0 ? 250 : 247, indice % 2 === 0 ? 246 : 239, indice % 2 === 0 ? 241 : 243);
+    doc.setDrawColor(232, 196, 184);
+    doc.roundedRect(16, y, 178, alto, 2, 2, 'FD');
+    doc.setFillColor(193, 122, 111);
+    doc.circle(25, y + 10, 5, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(8);
+    doc.text(String(indice + 1), 25, y + 12, { align: 'center' });
+
+    doc.setTextColor(61, 28, 46);
+    doc.setFontSize(11);
+    doc.text(cita.servicio || 'Servicio de maquillaje', 35, y + 9);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5);
+    doc.setTextColor(90, 70, 75);
+    doc.text(`${formatFecha(cita.fecha)} · ${String(cita.hora).slice(0,5)} · ${cita.especialista}`, 35, y + 16);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(7);
+    doc.setTextColor(cita.estado === 'cancelada' ? 160 : 60, cita.estado === 'cancelada' ? 60 : 120, 70);
+    doc.text(String(cita.estado || 'confirmada').toUpperCase(), 188, y + 9, { align: 'right' });
+    if (notas.length) {
+      doc.setFont('helvetica', 'italic'); doc.setFontSize(7.5); doc.setTextColor(110, 90, 95);
+      doc.text(notas, 35, y + 23);
+    }
+    y += alto + 5;
+  });
+
   const total = doc.internal.getNumberOfPages();
   for (let p = 1; p <= total; p++) {
     doc.setPage(p);
-    doc.setFillColor(40, 25, 40);
-    doc.rect(0, 290, 210, 10, 'F');
-    doc.setFontSize(8);
-    doc.setTextColor(255, 255, 255);
-    doc.text('Proyecto SENA — Arte & Belleza 2025', 20, 296);
-    doc.text('Página ' + p + ' de ' + total, 190, 296, { align: 'right' });
+    doc.setDrawColor(232, 196, 184); doc.setLineWidth(.3); doc.line(16, 286, 194, 286);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(115, 90, 95);
+    doc.text('Arte & Belleza SENA · Cosmetología y Estética Integral', 16, 292);
+    doc.text(`Página ${p} de ${total}`, 194, 292, { align: 'right' });
   }
 
-  const nombre = (u.nombre || 'Cliente').replace(/[^a-zA-Z0-9]/g, '_');
-  doc.save('Citas_' + nombre + '_' + new Date().toISOString().split('T')[0] + '.pdf');
-  mostrarToast('✅ PDF descargado con ' + citas.length + ' citas', 'success');
+  const nombre = (u.nombre || 'Cliente').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]/g, '_');
+  doc.save(`Citas_Arte_Belleza_${nombre}_${new Date().toISOString().split('T')[0]}.pdf`);
+  mostrarToast(`✅ PDF profesional generado con ${citas.length} cita${citas.length === 1 ? '' : 's'}`, 'success');
 }
 
 // ── GALERÍA DE LOOKS ──

@@ -36,4 +36,11 @@ async function autenticacionOpcional(req, _res, next) {
   return next();
 }
 
-module.exports = { autenticar, autenticacionOpcional };
+function soloAdmin(req, res, next) {
+  if (req.usuario?.rol !== 'admin') {
+    return res.status(403).json({ error: 'Se requieren permisos de administrador.' });
+  }
+  return next();
+}
+
+module.exports = { autenticar, autenticacionOpcional, soloAdmin };

@@ -25,7 +25,7 @@ async function registro(req, res) {
   const { rows } = await query(
     `INSERT INTO usuarios (nombre, email, telefono, password_hash)
      VALUES ($1, $2, $3, $4)
-     RETURNING id, nombre, email, telefono, creado_en`,
+     RETURNING id, nombre, email, telefono, rol, creado_en`,
     [nombre.trim(), email.toLowerCase(), telefono || null, hash]
   );
 
@@ -38,7 +38,7 @@ async function registro(req, res) {
   return res.status(201).json({
     mensaje: '¡Cuenta creada exitosamente!',
     token,
-    usuario: { id: usuario.id, nombre: usuario.nombre, email: usuario.email }
+    usuario: { id: usuario.id, nombre: usuario.nombre, email: usuario.email, rol: usuario.rol }
   });
 }
 
@@ -51,7 +51,7 @@ async function login(req, res) {
   }
 
   const { rows } = await query(
-    'SELECT id, nombre, email, password_hash, tono_piel FROM usuarios WHERE email = $1',
+    'SELECT id, nombre, email, password_hash, tono_piel, rol FROM usuarios WHERE email = $1',
     [email.toLowerCase()]
   );
 
@@ -76,7 +76,8 @@ async function login(req, res) {
       id:        usuario.id,
       nombre:    usuario.nombre,
       email:     usuario.email,
-      tono_piel: usuario.tono_piel
+      tono_piel: usuario.tono_piel,
+      rol:       usuario.rol
     }
   });
 }
@@ -92,7 +93,7 @@ async function logout(req, res) {
 // ── PERFIL ───────────────────────────────────────
 async function perfil(req, res) {
   const { rows } = await query(
-    'SELECT id, nombre, email, telefono, tono_piel, creado_en FROM usuarios WHERE id = $1',
+    'SELECT id, nombre, email, telefono, tono_piel, rol, creado_en FROM usuarios WHERE id = $1',
     [req.usuario.id]
   );
   if (!rows.length) return res.status(404).json({ error: 'Usuario no encontrado.' });
@@ -102,7 +103,7 @@ async function perfil(req, res) {
 // ── HELPER ───────────────────────────────────────
 function generarToken(usuario) {
   return jwt.sign(
-    { id: usuario.id, email: usuario.email, nombre: usuario.nombre },
+    { id: usuario.id, email: usuario.email, nombre: usuario.nombre, rol: usuario.rol },
     process.env.JWT_SECRET,
     { expiresIn: '7d' }
   );
