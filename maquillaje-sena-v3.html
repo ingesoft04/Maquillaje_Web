@@ -1318,23 +1318,13 @@
           <div class="field">
             <label>Servicio</label>
             <select id="cita-servicio">
-              <option value="">Selecciona...</option>
-              <option>Maquillaje Natural</option>
-              <option>Maquillaje de Noche</option>
-              <option>Maquillaje Nupcial</option>
-              <option>Maquillaje Artístico</option>
-              <option>Contouring Profesional</option>
-              <option>Asesoría de Color</option>
+              <option value="">Cargando servicios...</option>
             </select>
           </div>
           <div class="field">
             <label>Especialista</label>
             <select id="cita-especialista">
-              <option value="">Selecciona...</option>
-              <option>Valentina Ríos</option>
-              <option>Camila Moreno</option>
-              <option>Juliana Ospina</option>
-              <option>Andrea Vargas</option>
+              <option value="">Cargando especialistas...</option>
             </select>
           </div>
         </div>
@@ -1348,15 +1338,15 @@
             <label>Hora</label>
             <select id="cita-hora">
               <option value="">Selecciona...</option>
-              <option>8:00 AM</option>
-              <option>9:00 AM</option>
-              <option>10:00 AM</option>
-              <option>11:00 AM</option>
-              <option>1:00 PM</option>
-              <option>2:00 PM</option>
-              <option>3:00 PM</option>
-              <option>4:00 PM</option>
-              <option>5:00 PM</option>
+              <option value="08:00">8:00 AM</option>
+              <option value="09:00">9:00 AM</option>
+              <option value="10:00">10:00 AM</option>
+              <option value="11:00">11:00 AM</option>
+              <option value="13:00">1:00 PM</option>
+              <option value="14:00">2:00 PM</option>
+              <option value="15:00">3:00 PM</option>
+              <option value="16:00">4:00 PM</option>
+              <option value="17:00">5:00 PM</option>
             </select>
           </div>
         </div>
@@ -1527,29 +1517,50 @@ const navObserver = new IntersectionObserver((entries) => {
 
 navSections.forEach(section => navObserver.observe(section));
 
-// ── ESTADO GLOBAL ──
-let usuarios       = {};
-let todasLasCitas  = {};
-let usuarioActual  = null;
+// ── API Y ESTADO GLOBAL ──
+const API = '/api';
+let token = localStorage.getItem('sena_token') || '';
+let usuarioActual = null;
+let todasLasCitas = [];
 
-// ── LOCALSTORAGE ──
-function cargarDatos() {
+async function apiFetch(ruta, opciones = {}) {
+  const headers = { ...(opciones.headers || {}) };
+  if (opciones.body) headers['Content-Type'] = 'application/json';
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  const respuesta = await fetch(`${API}${ruta}`, { ...opciones, headers });
+  const data = await respuesta.json().catch(() => ({}));
+  if (!respuesta.ok) {
+    if (respuesta.status === 401 && token) limpiarSesion();
+    throw new Error(data.error || 'No fue posible completar la solicitud.');
+  }
+  return data;
+}
+
+function limpiarSesion() {
+  token = '';
+  usuarioActual = null;
+  todasLasCitas = [];
+  localStorage.removeItem('sena_token');
+}
+
+async function cargarCatalogos() {
+  const servicios = document.getElementById('cita-servicio');
+  const especialistas = document.getElementById('cita-especialista');
   try {
-    usuarios      = JSON.parse(localStorage.getItem('maquillaje_usuarios') || '{}');
-    todasLasCitas = JSON.parse(localStorage.getItem('maquillaje_citas')    || '{}');
-  } catch(e) {
-    usuarios = {}; todasLasCitas = {};
+    const [tiposData, especialistasData] = await Promise.all([
+      apiFetch('/tipos'), apiFetch('/especialistas')
+    ]);
+    servicios.innerHTML = '<option value="">Selecciona...</option>' +
+      tiposData.tipos.map(item => `<option value="${item.id}">${item.nombre}</option>`).join('');
+    especialistas.innerHTML = '<option value="">Selecciona...</option>' +
+      especialistasData.especialistas.map(item => `<option value="${item.id}">${item.nombre}</option>`).join('');
+  } catch (error) {
+    servicios.innerHTML = '<option value="">API no disponible</option>';
+    especialistas.innerHTML = '<option value="">API no disponible</option>';
+    mostrarToast('No fue posible cargar el catálogo: ' + error.message, 'error');
   }
 }
-
-function guardarDatos() {
-  try {
-    localStorage.setItem('maquillaje_usuarios', JSON.stringify(usuarios));
-    localStorage.setItem('maquillaje_citas',    JSON.stringify(todasLasCitas));
-  } catch(e) {}
-}
-
-cargarDatos();
 
 // ── TOAST (corregido: usa clases correctas del CSS) ──
 function mostrarToast(mensaje, tipo = 'success') {
@@ -1584,7 +1595,7 @@ function showTab(tab) {
 }
 
 // ── REGISTRO ──
-function registrar() {
+async function registrar() {
   const nombre = document.getElementById('reg-nombre').value.trim();
   const email  = document.getElementById('reg-email').value.trim().toLowerCase();
   const tel    = document.getElementById('reg-tel').value.trim();
@@ -1603,42 +1614,45 @@ function registrar() {
   if (pass.length < 6) {
     mostrarToast('❗ Contraseña mínimo 6 caracteres', 'error'); return;
   }
-  if (usuarios[email]) {
-    mostrarToast('❗ Este email ya está registrado', 'error'); return;
+  try {
+    const data = await apiFetch('/auth/registro', {
+      method: 'POST',
+      body: JSON.stringify({ nombre, email, telefono: tel, password: pass })
+    });
+    token = data.token;
+    localStorage.setItem('sena_token', token);
+    mostrarToast('✅ ¡Cuenta creada!', 'success');
+    await entrarDashboard(data.usuario);
+  } catch (error) {
+    mostrarToast('❗ ' + error.message, 'error');
   }
-
-  // Crear cuenta
-  usuarios[email] = { nombre, email, tel, pass };
-  todasLasCitas[email] = [];
-  guardarDatos();
-
-  mostrarToast('✅ ¡Cuenta creada! Ingresando...', 'success');
-  setTimeout(() => entrarDashboard(email), 1200);
 }
 
 // ── LOGIN ──
-function login() {
+async function login() {
   const email = document.getElementById('log-email').value.trim().toLowerCase();
   const pass  = document.getElementById('log-pass').value;
 
   if (!email || !pass) {
     mostrarToast('❗ Ingresa email y contraseña', 'error'); return;
   }
-  if (!usuarios[email]) {
-    mostrarToast('❗ Email no registrado', 'error'); return;
+  try {
+    const data = await apiFetch('/auth/login', {
+      method: 'POST', body: JSON.stringify({ email, password: pass })
+    });
+    token = data.token;
+    localStorage.setItem('sena_token', token);
+    mostrarToast('✅ ¡Bienvenida, ' + data.usuario.nombre.split(' ')[0] + '!', 'success');
+    await entrarDashboard(data.usuario);
+  } catch (error) {
+    mostrarToast('❗ ' + error.message, 'error');
   }
-  if (usuarios[email].pass !== pass) {
-    mostrarToast('❗ Contraseña incorrecta', 'error'); return;
-  }
-
-  mostrarToast('✅ ¡Bienvenida, ' + usuarios[email].nombre.split(' ')[0] + '!', 'success');
-  entrarDashboard(email);
 }
 
 // ── ENTRAR AL DASHBOARD ──
-function entrarDashboard(email) {
-  usuarioActual = email;
-  const u = usuarios[email];
+async function entrarDashboard(usuario) {
+  try { usuarioActual = await apiFetch('/auth/perfil'); }
+  catch (_) { usuarioActual = usuario; }
 
   // Ocultar auth
   document.getElementById('authTabs').style.display = 'none';
@@ -1651,20 +1665,20 @@ function entrarDashboard(email) {
   dash.style.display = 'block';
 
   // Bienvenida
-  document.getElementById('dash-bienvenida').textContent = 'Hola, ' + u.nombre.split(' ')[0] + ' ✨';
+  document.getElementById('dash-bienvenida').textContent = 'Hola, ' + usuarioActual.nombre.split(' ')[0] + ' ✨';
 
   // Fecha mínima = hoy
   const hoy = new Date().toISOString().split('T')[0];
   document.getElementById('cita-fecha').min   = hoy;
   document.getElementById('cita-fecha').value = hoy;
 
-  renderCitas();
-  guardarDatos();
+  await renderCitas();
 }
 
 // ── LOGOUT ──
-function logout() {
-  usuarioActual = null;
+async function logout() {
+  try { await apiFetch('/auth/logout', { method: 'POST' }); } catch (_) {}
+  limpiarSesion();
   const dash = document.getElementById('dashboard');
   dash.classList.remove('visible');
   dash.style.display = 'none';
@@ -1678,11 +1692,13 @@ function logout() {
 }
 
 // ── AGENDAR CITA ──
-function agendarCita() {
+async function agendarCita() {
   if (!usuarioActual) { mostrarToast('❗ Debes iniciar sesión', 'error'); return; }
 
-  const servicio    = document.getElementById('cita-servicio').value;
-  const especialista= document.getElementById('cita-especialista').value;
+  const servicioEl = document.getElementById('cita-servicio');
+  const especialistaEl = document.getElementById('cita-especialista');
+  const servicio = servicioEl.value;
+  const especialista = especialistaEl.value;
   const fecha       = document.getElementById('cita-fecha').value;
   const hora        = document.getElementById('cita-hora').value;
   const notas       = document.getElementById('cita-notas').value.trim();
@@ -1692,57 +1708,56 @@ function agendarCita() {
   if (!fecha)        { mostrarToast('❗ Selecciona una fecha',        'error'); return; }
   if (!hora)         { mostrarToast('❗ Selecciona una hora',         'error'); return; }
 
-  const cita = {
-    id: Date.now(),
-    servicio,
-    especialista,
-    fecha,
-    hora,
-    notas: notas || 'Sin notas',
-    estado: 'Confirmada',
-    fechaCreacion: new Date().toISOString()
-  };
-
-  if (!todasLasCitas[usuarioActual]) todasLasCitas[usuarioActual] = [];
-  todasLasCitas[usuarioActual].unshift(cita);
-  guardarDatos();
-
-  // Mensaje de éxito en el form
-  const msg = document.getElementById('cita-msg');
-  msg.className = 'auth-msg success';
-  msg.innerHTML = '✅ <strong>¡Cita confirmada!</strong> ' + servicio + ' · ' + formatFecha(fecha) + ' · ' + hora;
-  msg.style.display = 'block';
-
-  mostrarToast('¡Cita agendada! ✨', 'success');
-
-  // Limpiar form después de 3s
-  setTimeout(() => {
-    document.getElementById('cita-servicio').value    = '';
-    document.getElementById('cita-especialista').value= '';
-    document.getElementById('cita-hora').value        = '';
-    document.getElementById('cita-notas').value       = '';
-    msg.style.display = 'none';
-    renderCitas();
-  }, 3000);
+  try {
+    await apiFetch('/citas', {
+      method: 'POST',
+      body: JSON.stringify({ especialista_id: Number(especialista), tipo_id: Number(servicio), fecha, hora, notas })
+    });
+    const msg = document.getElementById('cita-msg');
+    msg.className = 'auth-msg success';
+    msg.innerHTML = '✅ <strong>¡Cita confirmada!</strong> ' + servicioEl.options[servicioEl.selectedIndex].text + ' · ' + formatFecha(fecha) + ' · ' + hora;
+    msg.style.display = 'block';
+    mostrarToast('¡Cita agendada! ✨', 'success');
+    await renderCitas();
+    setTimeout(() => {
+      servicioEl.value = '';
+      especialistaEl.value = '';
+      document.getElementById('cita-hora').value = '';
+      document.getElementById('cita-notas').value = '';
+      msg.style.display = 'none';
+    }, 3000);
+  } catch (error) {
+    mostrarToast('❗ ' + error.message, 'error');
+  }
 }
 
 // ── CANCELAR CITA ──
-function cancelarCita(id) {
+async function cancelarCita(id) {
   if (!usuarioActual) return;
-  todasLasCitas[usuarioActual] = todasLasCitas[usuarioActual].filter(c => c.id !== id);
-  guardarDatos();
-  renderCitas();
-  mostrarToast('Cita cancelada', 'info');
+  try {
+    await apiFetch(`/citas/${id}/cancelar`, { method: 'PATCH' });
+    await renderCitas();
+    mostrarToast('Cita cancelada', 'info');
+  } catch (error) {
+    mostrarToast('❗ ' + error.message, 'error');
+  }
 }
 
 // ── RENDER CITAS ──
-function renderCitas() {
+async function renderCitas() {
   const lista  = document.getElementById('lista-citas');
   const btnPDF = document.getElementById('btnExportarPDF');
   const stats  = document.getElementById('statsRow');
   if (!lista) return;
 
-  const citas = todasLasCitas[usuarioActual] || [];
+  try {
+    const data = await apiFetch('/citas');
+    todasLasCitas = data.citas || [];
+  } catch (error) {
+    lista.innerHTML = `<p class="empty-citas">${error.message}</p>`;
+    return;
+  }
+  const citas = todasLasCitas;
 
   // Stats
   if (stats) {
@@ -1785,7 +1800,7 @@ function renderCitas() {
       </div>
       <div style="display:flex;flex-direction:column;gap:0.5rem;align-items:flex-end;">
         <span class="cita-estado">✓ ${cita.estado}</span>
-        <button class="btn-cancelar" onclick="cancelarCita(${cita.id})">❌ Cancelar</button>
+        <button class="btn-cancelar" onclick="cancelarCita('${cita.id}')">❌ Cancelar</button>
       </div>
     </div>
   `).join('');
@@ -1804,8 +1819,8 @@ function exportarPDF() {
   if (!window.jspdf) { mostrarToast('Cargando PDF...', 'info'); return; }
   const { jsPDF } = window.jspdf;
   const doc   = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-  const citas = todasLasCitas[usuarioActual] || [];
-  const u     = usuarios[usuarioActual];
+  const citas = todasLasCitas;
+  const u     = usuarioActual || {};
 
   // Header
   doc.setFillColor(61, 28, 46);
@@ -1823,7 +1838,7 @@ function exportarPDF() {
   doc.setTextColor(232, 196, 184);
   doc.text('Nombre: '   + (u.nombre || 'Cliente'), 20, 55);
   doc.text('Email: '    + (u.email  || 'N/A'),     20, 63);
-  doc.text('Teléfono: ' + (u.tel    || 'N/A'),     20, 71);
+  doc.text('Teléfono: ' + (u.telefono || 'N/A'),   20, 71);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(201, 169, 110);
   doc.text('Total: ' + citas.length + ' cita' + (citas.length !== 1 ? 's' : ''), 20, 79);
@@ -1920,13 +1935,21 @@ document.getElementById('lookModal').addEventListener('click', function(e) {
 });
 
 // ── INICIALIZACIÓN ──
-window.addEventListener('beforeunload', guardarDatos);
-
-// Ocultar dashboard al inicio
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
   const dash = document.getElementById('dashboard');
   dash.style.display = 'none';
   dash.classList.remove('visible');
+  await cargarCatalogos();
+
+  if (token) {
+    try {
+      const perfil = await apiFetch('/auth/perfil');
+      await entrarDashboard(perfil);
+    } catch (_) {
+      limpiarSesion();
+      showTab('login');
+    }
+  }
 });
 </script>
 </body>

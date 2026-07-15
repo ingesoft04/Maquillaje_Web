@@ -11,7 +11,7 @@
     "check": "node --check index.js"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",

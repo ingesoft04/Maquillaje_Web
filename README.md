@@ -4,7 +4,7 @@
 
 Backend completo para el proyecto **Arte & Belleza SENA**, construido con:
 
-- **Node.js 20 + Express** — API REST
+- **Node.js 22 + Express** — API REST
 - **PostgreSQL 16** — base de datos principal
 - **Redis 7** — caché de alta velocidad y manejo de sesiones
 - **Docker Compose** — orquestación de servicios

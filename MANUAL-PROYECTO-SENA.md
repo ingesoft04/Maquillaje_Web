@@ -62,7 +62,7 @@ MySQL también podría resolver el proyecto, pero PostgreSQL ofrece más flexibi
 
 ```text
 Navegador
-   │ HTTP — localhost:8080
+   │ HTTP — localhost:8088
    ▼
 Nginx / Frontend
    │ /api/*
@@ -80,8 +80,8 @@ El archivo `docker-compose.yml` define:
 
 | Servicio | Tecnología | Puerto local | Responsabilidad |
 |---|---|---:|---|
-| `frontend` | Nginx | 8080 | Servir la interfaz y redirigir `/api` |
-| `api` | Node.js 20 + Express | 4000 | Reglas del negocio y API REST |
+| `frontend` | Nginx | 8088 | Servir la interfaz y redirigir `/api` |
+| `api` | Node.js 22 + Express | 4000 | Reglas del negocio y API REST |
 | `postgres` | PostgreSQL 16 | 5432 | Persistencia principal |
 | `redis` | Redis 7 | 6379 | Caché y sesiones |
 
@@ -200,7 +200,7 @@ Cuando se crea o cancela una cita, la API elimina las claves relacionadas para e
 ### Requisitos
 
 - Docker Desktop instalado y abierto.
-- Puertos 8080, 4000, 5432 y 6379 disponibles.
+- Puertos 8088, 4000, 5432 y 6379 disponibles.
 
 ### Preparar variables
 
@@ -227,8 +227,8 @@ docker compose logs -f api
 
 Abrir:
 
-- Aplicación: `http://localhost:8080`
-- Estado de la API: `http://localhost:8080/health`
+- Aplicación: `http://localhost:8088`
+- Estado de la API: `http://localhost:8088/health`
 - API directa: `http://localhost:4000/health`
 
 La respuesta saludable debe indicar PostgreSQL y Redis en línea.
@@ -293,10 +293,10 @@ Para una producción real también se deben usar secretos fuertes, HTTPS, copias
 - API de autenticación, catálogos, citas y comparaciones.
 - Dockerfiles y composición local de cuatro servicios.
 - Health check de infraestructura.
+- Frontend conectado a la API para registro, login, sesión, catálogos y citas.
 
 ### Pendiente
 
-- Sustituir el almacenamiento local del frontend por llamadas reales a la API.
 - Agregar pruebas automatizadas.
 - Implementar carga real de imágenes.
 - Revisar roles administrativos.
@@ -329,3 +329,37 @@ Cada cambio importante debe registrar:
 - Qué queda pendiente.
 
 Este manual debe actualizarse a medida que se conecte el frontend con la API y se agreguen pruebas o funciones administrativas.
+
+## 19. Registro de integración frontend–backend
+
+### Problema resuelto
+
+La primera versión guardaba usuarios y citas en `localStorage`. Ese mecanismo solo funciona en un navegador específico y no permite compartir datos entre equipos.
+
+### Solución implementada
+
+- El navegador conserva únicamente el JWT en `localStorage`.
+- Registro y login se envían a la API.
+- Servicios y especialistas se cargan desde PostgreSQL.
+- Las citas se crean, consultan y cancelan mediante endpoints protegidos.
+- Al recargar la página, el frontend valida el token consultando `/api/auth/perfil`.
+- Nginx redirige las rutas `/api` al contenedor del backend.
+
+### Archivos principales modificados
+
+- `maquillaje-sena-v3.html`: cliente HTTP y manejo de sesión.
+- `docker-compose.yml`: orquestación y puerto web 8088.
+- `nginx.local.conf`: proxy inverso hacia la API.
+- `Dockerfile`: actualización a Node.js 22 por compatibilidad con pnpm 11.
+
+### Prueba realizada
+
+La prueba completa confirmó:
+
+- Health check en estado `ok`.
+- Ocho tipos de maquillaje recuperados.
+- Registro de usuario exitoso.
+- Creación de cita exitosa.
+- Consulta de la cita desde PostgreSQL/Redis.
+- Cancelación exitosa.
+- Catálogos visibles en el navegador sin errores de consola.
