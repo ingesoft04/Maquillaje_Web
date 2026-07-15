@@ -1,5 +1,5 @@
-const { query } = require('../config/db');
-const { getCache, setCache, TTL } = require('../config/redis');
+const { query } = require('./db');
+const { getCache, setCache, TTL } = require('./redis');
 
 // ── TIPOS DE MAQUILLAJE (con filtro por categoría) ──
 async function tipos(req, res) {

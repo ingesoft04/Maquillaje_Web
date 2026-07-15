@@ -5,12 +5,13 @@ const cors       = require('cors');
 const helmet     = require('helmet');
 const morgan     = require('morgan');
 const rateLimit  = require('express-rate-limit');
-const { pool }   = require('./config/db');
-const { redis }  = require('./config/redis');
+const { pool }   = require('./db');
+const { redis }  = require('./redis');
 
 const authRoutes       = require('./routes/auth.routes');
 const citasRoutes      = require('./routes/citas.routes');
 const catalogoRoutes   = require('./routes/catalogo.routes');
+const comparacionesRoutes = require('./routes/comparaciones.routes');
 
 const app  = express();
 const PORT = process.env.PORT || 4000;
@@ -68,6 +69,7 @@ app.get('/health', async (req, res) => {
 app.use('/api/auth',     authLimiter, authRoutes);
 app.use('/api/citas',    citasRoutes);
 app.use('/api',          catalogoRoutes);
+app.use('/api/comparaciones', comparacionesRoutes);
 
 // ── 404 ───────────────────────────────────────────
 app.use((req, res) => {

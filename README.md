@@ -1,5 +1,7 @@
 # 🌸 SENA Maquillaje — Backend API
 
+> Documentación académica: consulta el [Manual técnico del proyecto](MANUAL-PROYECTO-SENA.md) para entender la arquitectura, Docker, base de datos, seguridad, endpoints y el guion de sustentación.
+
 Backend completo para el proyecto **Arte & Belleza SENA**, construido con:
 
 - **Node.js 20 + Express** — API REST

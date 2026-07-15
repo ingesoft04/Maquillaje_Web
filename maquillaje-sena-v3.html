@@ -29,6 +29,13 @@
       overflow-x: hidden;
     }
 
+    .skip-link {
+      position: fixed; top: 1rem; left: 1rem; z-index: 10001;
+      padding: .75rem 1rem; background: var(--cream); color: var(--plum);
+      text-decoration: none; transform: translateY(-180%); transition: transform .2s;
+    }
+    .skip-link:focus { transform: translateY(0); }
+
     /* ── HEADER ── */
     header {
       position: relative;
@@ -72,6 +79,34 @@
       padding: 2rem;
       animation: fadeUp 1.2s ease both;
     }
+
+    .hero-kicker {
+      max-width: 650px; margin: 1.5rem auto 0; color: #EAD7D1;
+      font-family: 'Cormorant Garamond', serif; font-size: clamp(1.1rem, 2vw, 1.45rem);
+      font-weight: 300; line-height: 1.55;
+    }
+
+    .hero-actions {
+      display: flex; justify-content: center; flex-wrap: wrap; gap: .8rem;
+      margin-top: 2rem;
+    }
+    .hero-btn {
+      display: inline-flex; align-items: center; justify-content: center; min-width: 170px;
+      padding: .9rem 1.35rem; border: 1px solid var(--gold); color: var(--plum);
+      background: var(--gold); text-decoration: none; text-transform: uppercase;
+      font-size: .68rem; font-weight: 500; letter-spacing: 2px;
+      transition: transform .25s, background .25s, color .25s, box-shadow .25s;
+    }
+    .hero-btn.secondary { background: transparent; color: var(--cream); border-color: #E8C4B880; }
+    .hero-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 30px #160A1240; }
+    .hero-btn.secondary:hover { background: #FAF6F112; border-color: var(--cream); }
+
+    .hero-proof {
+      display: flex; justify-content: center; gap: 0; margin: 2.4rem auto 0;
+      color: #CFAAA4;
+    }
+    .hero-proof span { padding: 0 1rem; font-size: .64rem; letter-spacing: 1.5px; text-transform: uppercase; }
+    .hero-proof span + span { border-left: 1px solid #C9A96E55; }
 
     .sena-badge {
       display: inline-block;
@@ -139,6 +174,7 @@
       backdrop-filter: blur(12px);
       border-bottom: 1px solid #E8C4B860;
       display: flex; justify-content: center; gap: 0;
+      box-shadow: 0 8px 30px rgba(61,28,46,.04);
     }
 
     nav a {
@@ -154,6 +190,7 @@
       border-bottom: 2px solid transparent;
     }
     nav a:hover { color: var(--deep); border-bottom-color: var(--rose); }
+    nav a.active { color: var(--deep); border-bottom-color: var(--rose); }
 
     /* ── SECTIONS ── */
     section { padding: 6rem 2rem; max-width: 1100px; margin: 0 auto; }
@@ -647,7 +684,26 @@
       #historia { grid-template-columns: 1fr; }
       .historia-visual { height: 300px; order: -1; }
       .cuidado-split { grid-template-columns: 1fr; }
-      nav a { padding: 1rem 0.75rem; font-size: 0.65rem; }
+      header { min-height: 92svh; }
+      header .content { padding: 1.5rem; }
+      .hero-proof { flex-wrap: wrap; row-gap: .7rem; }
+      .hero-proof span { padding: 0 .65rem; }
+      .scroll-cue { display: none; }
+      nav { justify-content: flex-start; overflow-x: auto; scrollbar-width: none; }
+      nav::-webkit-scrollbar { display: none; }
+      nav a { flex: 0 0 auto; padding: 1rem 0.8rem; font-size: 0.62rem; }
+    }
+
+    @media (max-width: 480px) {
+      .sena-badge { letter-spacing: 2.5px; margin-bottom: 1.4rem; }
+      .hero-kicker { font-size: 1.05rem; }
+      .hero-btn { width: 100%; }
+      .hero-proof span { font-size: .57rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
     }
     /* ── TOAST NOTIFICATIONS ── */
 .toast {
@@ -863,6 +919,8 @@
 </head>
 <body>
 
+<a class="skip-link" href="#historia">Saltar al contenido</a>
+
 <!-- HEADER -->
 <header>
   <div class="header-bg"></div>
@@ -874,12 +932,22 @@
     <div class="sena-badge">Proyecto SENA · Arte y Belleza</div>
     <h1>El Arte del<em>Maquillaje</em></h1>
     <p class="subtitle">Historia · Técnicas · Tendencias · Cuidado</p>
+    <p class="hero-kicker">Descubre técnicas profesionales, encuentra inspiración y agenda una experiencia pensada para realzar tu estilo.</p>
+    <div class="hero-actions">
+      <a class="hero-btn" href="#galeria">Explorar looks</a>
+      <a class="hero-btn secondary" href="#citas">Agendar una cita</a>
+    </div>
+    <div class="hero-proof" aria-label="Características del servicio">
+      <span>Técnicas profesionales</span>
+      <span>Atención personalizada</span>
+      <span>Belleza consciente</span>
+    </div>
   </div>
   <div class="scroll-cue">Explorar</div>
 </header>
 
 <!-- NAV -->
-<nav>
+<nav aria-label="Navegación principal">
   <a href="#historia">Historia</a>
   <a href="#tipos">Tipos</a>
   <a href="#productos">Productos</a>
@@ -1438,6 +1506,26 @@ document.querySelectorAll('section, #tipos, #tecnicas, #citas-wrapper, #galeria'
   el.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
   observer.observe(el);
 });
+
+// ── NAVEGACIÓN ACTIVA ──
+const navLinks = [...document.querySelectorAll('nav a[href^="#"]')];
+const navSections = navLinks
+  .map(link => document.querySelector(link.getAttribute('href')))
+  .filter(Boolean);
+
+const navObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
+    navLinks.forEach(link => {
+      const active = link.getAttribute('href') === '#' + entry.target.id;
+      link.classList.toggle('active', active);
+      if (active) link.setAttribute('aria-current', 'location');
+      else link.removeAttribute('aria-current');
+    });
+  });
+}, { rootMargin: '-30% 0px -60% 0px', threshold: 0 });
+
+navSections.forEach(section => navObserver.observe(section));
 
 // ── ESTADO GLOBAL ──
 let usuarios       = {};

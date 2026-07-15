@@ -1,5 +1,5 @@
-const { query, withTransaction } = require('../config/db');
-const { getCache, setCache, delCache, delPattern, TTL } = require('../config/redis');
+const { query } = require('./db');
+const { getCache, setCache, delCache, TTL } = require('./redis');
 
 // ── LISTAR CITAS DEL USUARIO ─────────────────────
 async function mis_citas(req, res) {

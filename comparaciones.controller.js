@@ -1,5 +1,5 @@
-const { query } = require('../config/db');
-const { getCache, setCache, delCache, TTL } = require('../config/redis');
+const { query } = require('./db');
+const { getCache, setCache, delCache, TTL } = require('./redis');
 
 // ── CREAR COMPARACIÓN ANTES/DESPUÉS ─────────────
 async function crear(req, res) {

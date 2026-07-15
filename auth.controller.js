@@ -1,7 +1,7 @@
 const bcrypt  = require('bcryptjs');
 const jwt     = require('jsonwebtoken');
-const { query } = require('../config/db');
-const { setCache, delCache, TTL } = require('../config/redis');
+const { query } = require('./db');
+const { setCache, delCache, TTL } = require('./redis');
 
 // ── REGISTRO ────────────────────────────────────
 async function registro(req, res) {
