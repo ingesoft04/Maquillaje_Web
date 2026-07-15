@@ -25,6 +25,8 @@
     "ioredis": "^5.8.1",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.1",
-    "pg": "^8.16.3"
+    "nodemailer": "^9.0.3",
+    "pg": "^8.16.3",
+    "prom-client": "^15.1.3"
   }
 }

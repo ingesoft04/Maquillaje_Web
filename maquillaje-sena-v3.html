@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>El Arte del Maquillaje | Proyecto SENA</title>
+  <meta name="theme-color" content="#3D1C2E"/>
+  <link rel="manifest" href="/manifest.webmanifest"/>
+  <link rel="icon" href="/icon.svg" type="image/svg+xml"/>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
@@ -28,6 +31,29 @@
       color: var(--text);
       overflow-x: hidden;
     }
+
+    .citas-topbar { display: none; }
+    body:not(.citas-view) #citas-wrapper { display: none; }
+    body.citas-view > header,
+    body.citas-view > nav,
+    body.citas-view > section,
+    body.citas-view > #tipos,
+    body.citas-view > #tecnicas,
+    body.citas-view > #galeria,
+    body.citas-view > .skip-link { display: none !important; }
+    body.citas-view { background: var(--plum); }
+    body.citas-view .citas-topbar {
+      display: flex; position: sticky; top: 0; z-index: 200;
+      align-items: center; justify-content: space-between; gap: 1rem;
+      padding: 1rem max(1.25rem, calc((100vw - 1100px) / 2));
+      background: rgba(42,16,32,.96); border-bottom: 1px solid #5C2A3A;
+      backdrop-filter: blur(12px);
+    }
+    .citas-brand { color: var(--cream); text-decoration: none; font: 400 1.35rem 'Cormorant Garamond',serif; }
+    .citas-brand em { color: var(--blush); font-style: italic; }
+    .citas-back { color: var(--gold); text-decoration: none; font-size: .67rem; letter-spacing: 2px; text-transform: uppercase; }
+    body.citas-view #citas-wrapper { min-height: calc(100vh - 72px); padding-top: 4.5rem; }
+    body.citas-view footer { border-top: 1px solid #5C2A3A; }
 
     .skip-link {
       position: fixed; top: 1rem; left: 1rem; z-index: 10001;
@@ -618,6 +644,17 @@
     .admin-table th, .admin-table td { padding:.75rem; border-bottom:1px solid #4A2438; }
     .admin-table td { color:#D8C2C0; }
     .admin-select { background:#2A1020; color:var(--cream); border:1px solid #6A4055; padding:.35rem; }
+    .admin-form-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:.6rem; margin-bottom:1rem; }
+    .admin-form-grid input { min-width:0; background:#2A1020; color:var(--cream); border:1px solid #5C2A3A; padding:.65rem; }
+    .admin-form-grid button { background:var(--gold); color:var(--plum); border:0; padding:.65rem; cursor:pointer; font-weight:600; }
+    .admin-section-title { color:var(--blush); font:400 1.15rem 'Cormorant Garamond',serif; margin:1rem 0 .7rem; }
+    .profile-panel { margin-top:1.5rem; padding:2rem; background:#2A1020; border:1px solid #5C2A3A; }
+    .profile-panel h4 { color:var(--blush); font:400 1.35rem 'Cormorant Garamond',serif; margin-bottom:1rem; }
+    .profile-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:.8rem; }
+    .profile-grid input,.profile-grid select,.profile-grid textarea { width:100%; background:#3D1C2E; color:var(--cream); border:1px solid #5C2A3A; padding:.7rem; font-family:inherit; }
+    .profile-grid textarea { min-height:75px; resize:vertical; }
+    .profile-consent { color:#C8ABA5; font-size:.72rem; display:flex; gap:.5rem; align-items:center; }
+    .pro-summary { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:.7rem; margin:1rem 0; }
 
     /* Agendar form */
     .agendar-box {
@@ -716,6 +753,8 @@
       nav a { flex: 0 0 auto; padding: 1rem 0.8rem; font-size: 0.62rem; }
       .admin-stats { grid-template-columns:1fr 1fr; }
       .admin-panel { padding:1rem; }
+      .admin-form-grid { grid-template-columns:1fr 1fr; }
+      .profile-grid { grid-template-columns:1fr; }
     }
 
     @media (max-width: 480px) {
@@ -942,8 +981,19 @@
   </style>
 </head>
 <body>
+<script>
+  if (window.location.pathname.replace(/\/$/, '') === '/citas') {
+    document.body.classList.add('citas-view');
+    document.title = 'Agenda y administración | Arte & Belleza SENA';
+  }
+</script>
 
 <a class="skip-link" href="#historia">Saltar al contenido</a>
+
+<div class="citas-topbar">
+  <a class="citas-brand" href="/">Arte & <em>Belleza</em></a>
+  <a class="citas-back" href="/">← Volver a la página principal</a>
+</div>
 
 <!-- HEADER -->
 <header>
@@ -959,7 +1009,7 @@
     <p class="hero-kicker">Descubre técnicas profesionales, encuentra inspiración y agenda una experiencia pensada para realzar tu estilo.</p>
     <div class="hero-actions">
       <a class="hero-btn" href="#galeria">Explorar looks</a>
-      <a class="hero-btn secondary" href="#citas">Agendar una cita</a>
+      <a class="hero-btn secondary" href="/citas">Agendar una cita</a>
     </div>
     <div class="hero-proof" aria-label="Características del servicio">
       <span>Técnicas profesionales</span>
@@ -978,7 +1028,7 @@
   <a href="#tecnicas">Técnicas</a>
   <a href="#cuidado">Cuidado</a>
   <a href="#tendencias">Tendencias</a>
-  <a href="#galeria">🖼 Galería</a><a href="#citas" style="color:var(--rose); font-weight:500;">📅 Citas</a>
+  <a href="#galeria">🖼 Galería</a><a href="/citas" style="color:var(--rose); font-weight:500;">📅 Citas</a>
 </nav>
 
 <!-- HISTORIA -->
@@ -1395,6 +1445,26 @@
         <div id="lista-citas"></div>
       </div>
 
+      <div class="profile-panel" id="perfilCosmeticoPanel">
+        <h4>✦ Mi ficha cosmética</h4>
+        <div class="profile-grid">
+          <select id="perfilTipoPiel"><option value="">Tipo de piel</option><option>seca</option><option>grasa</option><option>mixta</option><option>sensible</option><option>normal</option><option>madura</option></select>
+          <select id="perfilSubtono"><option value="">Subtono</option><option>frio</option><option>calido</option><option>neutro</option></select>
+          <input id="perfilSensibilidad" placeholder="Sensibilidad declarada">
+          <input id="perfilAlergias" placeholder="Alergias conocidas">
+          <textarea id="perfilCondiciones" placeholder="Condiciones o tratamientos relevantes"></textarea>
+          <textarea id="perfilEvitar" placeholder="Productos o ingredientes que se deben evitar"></textarea>
+          <textarea id="perfilPreferencias" placeholder="Preferencias de maquillaje"></textarea>
+          <div>
+            <label class="profile-consent"><input type="checkbox" id="perfilConsentimientoDatos"> Autorizo el tratamiento de esta información.</label><br>
+            <label class="profile-consent"><input type="checkbox" id="perfilConsentimientoImagen"> Autorizo imágenes según consentimiento específico.</label>
+          </div>
+        </div>
+        <button class="btn-agendar" onclick="guardarPerfilCosmetico()">Guardar ficha</button>
+        <h4 style="margin-top:1.5rem;">Pagos registrados</h4>
+        <div id="misPagos"><p class="empty-citas">Sin pagos registrados.</p></div>
+      </div>
+
       <!-- Administración: solo visible para el rol admin -->
       <div class="admin-panel" id="adminPanel">
         <div class="admin-title-row">
@@ -1410,6 +1480,12 @@
         <div class="admin-tabs">
           <button class="admin-tab active" onclick="mostrarAdminVista('citas', this)">Citas</button>
           <button class="admin-tab" onclick="mostrarAdminVista('usuarios', this)">Usuarios</button>
+          <button class="admin-tab" onclick="mostrarAdminVista('catalogo', this)">Catálogo</button>
+          <button class="admin-tab" onclick="mostrarAdminVista('auditoria', this)">Auditoría</button>
+          <button class="admin-tab" onclick="mostrarAdminVista('analitica', this)">Analítica</button>
+          <button class="admin-tab" onclick="mostrarAdminVista('pagos', this)">Caja</button>
+          <button class="admin-tab" onclick="mostrarAdminVista('inventario', this)">Inventario</button>
+          <button class="admin-tab" onclick="mostrarAdminVista('agenda', this)">Agenda</button>
         </div>
         <div class="admin-table-wrap" id="adminContenido"></div>
       </div>
@@ -1565,8 +1641,17 @@ const API = '/api';
 let token = localStorage.getItem('sena_token') || '';
 let usuarioActual = null;
 let todasLasCitas = [];
+let citaEditandoId = null;
 let adminCitas = [];
 let adminUsuarios = [];
+let adminEspecialistas = [];
+let adminServicios = [];
+let adminAuditoria = [];
+let adminAnalitica = null;
+let adminPagos = [];
+let adminInventario = [];
+let adminHorarios = [];
+let adminBloqueos = [];
 
 function escaparHTML(valor) {
   return String(valor ?? '').replace(/[&<>'"]/g, caracter => ({
@@ -1724,9 +1809,48 @@ async function entrarDashboard(usuario) {
   document.getElementById('cita-fecha').value = hoy;
 
   await renderCitas();
+  await cargarPerfilCosmetico();
+  await cargarMisPagos();
   const adminPanel = document.getElementById('adminPanel');
   adminPanel.classList.toggle('visible', usuarioActual.rol === 'admin');
   if (usuarioActual.rol === 'admin') await cargarAdmin();
+}
+
+async function cargarPerfilCosmetico() {
+  try {
+    const {perfil}=await apiFetch('/perfil-cosmetico'); if(!perfil)return;
+    document.getElementById('perfilTipoPiel').value=perfil.tipo_piel||'';
+    document.getElementById('perfilSubtono').value=perfil.subtono||'';
+    document.getElementById('perfilSensibilidad').value=perfil.sensibilidad||'';
+    document.getElementById('perfilAlergias').value=perfil.alergias||'';
+    document.getElementById('perfilCondiciones').value=perfil.condiciones||'';
+    document.getElementById('perfilEvitar').value=perfil.productos_evitar||'';
+    document.getElementById('perfilPreferencias').value=perfil.preferencias||'';
+    document.getElementById('perfilConsentimientoDatos').checked=perfil.consentimiento_datos;
+    document.getElementById('perfilConsentimientoImagen').checked=perfil.consentimiento_imagen;
+  } catch(error){mostrarToast('No se pudo cargar la ficha: '+error.message,'error');}
+}
+
+async function guardarPerfilCosmetico() {
+  try {
+    await apiFetch('/perfil-cosmetico',{method:'PUT',body:JSON.stringify({
+      tipo_piel:document.getElementById('perfilTipoPiel').value,
+      subtono:document.getElementById('perfilSubtono').value,
+      sensibilidad:document.getElementById('perfilSensibilidad').value,
+      alergias:document.getElementById('perfilAlergias').value,
+      condiciones:document.getElementById('perfilCondiciones').value,
+      productos_evitar:document.getElementById('perfilEvitar').value,
+      preferencias:document.getElementById('perfilPreferencias').value,
+      consentimiento_datos:document.getElementById('perfilConsentimientoDatos').checked,
+      consentimiento_imagen:document.getElementById('perfilConsentimientoImagen').checked
+    })}); mostrarToast('Ficha cosmética guardada','success');
+  } catch(error){mostrarToast('❗ '+error.message,'error');}
+}
+
+async function cargarMisPagos(){
+  try{const data=await apiFetch('/pagos/mis');const cont=document.getElementById('misPagos');
+    cont.innerHTML=data.pagos.length?`<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Fecha</th><th>Servicio</th><th>Monto</th><th>Método</th><th>Estado</th></tr></thead><tbody>${data.pagos.map(p=>`<tr><td>${new Date(p.creado_en).toLocaleDateString('es-CO')}</td><td>${escaparHTML(p.servicio||'Servicio')}</td><td>$${Number(p.monto).toLocaleString('es-CO')}</td><td>${escaparHTML(p.metodo)}</td><td>${escaparHTML(p.estado)}</td></tr>`).join('')}</tbody></table></div>`:'<p class="empty-citas">Sin pagos registrados.</p>';
+  }catch(error){document.getElementById('misPagos').innerHTML=`<p class="empty-citas">${escaparHTML(error.message)}</p>`;}
 }
 
 // ── LOGOUT ──
@@ -1764,15 +1888,18 @@ async function agendarCita() {
   if (!hora)         { mostrarToast('❗ Selecciona una hora',         'error'); return; }
 
   try {
-    await apiFetch('/citas', {
-      method: 'POST',
+    const ruta = citaEditandoId ? `/citas/${citaEditandoId}/reprogramar` : '/citas';
+    await apiFetch(ruta, {
+      method: citaEditandoId ? 'PATCH' : 'POST',
       body: JSON.stringify({ especialista_id: Number(especialista), tipo_id: Number(servicio), fecha, hora, notas })
     });
     const msg = document.getElementById('cita-msg');
     msg.className = 'auth-msg success';
-    msg.innerHTML = '✅ <strong>¡Cita confirmada!</strong> ' + servicioEl.options[servicioEl.selectedIndex].text + ' · ' + formatFecha(fecha) + ' · ' + hora;
+    msg.innerHTML = `✅ <strong>¡Cita ${citaEditandoId ? 'reprogramada' : 'confirmada'}!</strong> ` + servicioEl.options[servicioEl.selectedIndex].text + ' · ' + formatFecha(fecha) + ' · ' + hora;
     msg.style.display = 'block';
-    mostrarToast('¡Cita agendada! ✨', 'success');
+    mostrarToast(citaEditandoId ? '¡Cita reprogramada! ✨' : '¡Cita agendada! ✨', 'success');
+    citaEditandoId = null;
+    document.querySelector('.btn-agendar').textContent = 'Confirmar Cita ✨';
     await renderCitas();
     setTimeout(() => {
       servicioEl.value = '';
@@ -1784,6 +1911,49 @@ async function agendarCita() {
   } catch (error) {
     mostrarToast('❗ ' + error.message, 'error');
   }
+}
+
+async function actualizarDisponibilidad() {
+  const especialista = document.getElementById('cita-especialista').value;
+  const servicio = document.getElementById('cita-servicio').value;
+  const fecha = document.getElementById('cita-fecha').value;
+  const horas = document.getElementById('cita-hora');
+  const valorActual = horas.value;
+  if (!especialista || !servicio || !fecha || !token) {
+    horas.innerHTML = '<option value="">Selecciona servicio, especialista y fecha...</option>';
+    return;
+  }
+  try {
+    const data = await apiFetch(`/citas/disponibilidad?especialista_id=${especialista}&fecha=${fecha}&tipo_id=${servicio}`);
+    const citaActual = todasLasCitas.find(item => item.id === citaEditandoId);
+    const horaPropia = citaActual && Number(citaActual.especialista_id) === Number(especialista) &&
+      String(citaActual.fecha).slice(0,10) === fecha ? String(citaActual.hora).slice(0,5) : null;
+    const opciones = [...new Set([...data.disponibles, ...data.ocupados, ...(horaPropia ? [horaPropia] : [])])].sort();
+    horas.innerHTML = '<option value="">Selecciona...</option>' + opciones.map(horaItem => {
+      const ocupada = data.ocupados.includes(horaItem) && horaItem !== horaPropia;
+      const [h,m] = horaItem.split(':').map(Number);
+      const etiqueta = new Date(2000,0,1,h,m).toLocaleTimeString('es-CO',{hour:'numeric',minute:'2-digit'});
+      return `<option value="${horaItem}" ${ocupada ? 'disabled' : ''}>${etiqueta}${ocupada ? ' · Ocupado' : ''}</option>`;
+    }).join('');
+    horas.value = opciones.includes(valorActual) && !data.ocupados.includes(valorActual) ? valorActual : (horaPropia || '');
+  } catch (error) {
+    mostrarToast('No se pudo consultar disponibilidad: ' + error.message, 'error');
+  }
+}
+
+async function editarCita(id) {
+  const cita = todasLasCitas.find(item => item.id === id);
+  if (!cita) return;
+  citaEditandoId = id;
+  document.getElementById('cita-servicio').value = cita.tipo_id || '';
+  document.getElementById('cita-especialista').value = cita.especialista_id;
+  document.getElementById('cita-fecha').value = String(cita.fecha).slice(0, 10);
+  document.getElementById('cita-notas').value = cita.notas === 'Sin notas' ? '' : (cita.notas || '');
+  await actualizarDisponibilidad();
+  document.getElementById('cita-hora').value = String(cita.hora).slice(0, 5);
+  document.querySelector('.btn-agendar').textContent = 'Guardar reprogramación ✨';
+  document.querySelector('.agendar-box').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  mostrarToast('Modifica la fecha, hora o especialista', 'info');
 }
 
 // ── CANCELAR CITA ──
@@ -1855,7 +2025,8 @@ async function renderCitas() {
       </div>
       <div style="display:flex;flex-direction:column;gap:0.5rem;align-items:flex-end;">
         <span class="cita-estado">✓ ${cita.estado}</span>
-        <button class="btn-cancelar" onclick="cancelarCita('${cita.id}')">❌ Cancelar</button>
+        ${cita.estado !== 'cancelada' && cita.estado !== 'completada' ? `<button class="btn-cancelar" onclick="editarCita('${cita.id}')">📅 Reprogramar</button>` : ''}
+        ${cita.estado !== 'cancelada' && cita.estado !== 'completada' ? `<button class="btn-cancelar" onclick="cancelarCita('${cita.id}')">❌ Cancelar</button>` : ''}
       </div>
     </div>
   `).join('');
@@ -1864,11 +2035,20 @@ async function renderCitas() {
 // ── PANEL ADMINISTRATIVO ──
 async function cargarAdmin() {
   try {
-    const [resumen, citasData, usuariosData] = await Promise.all([
-      apiFetch('/admin/resumen'), apiFetch('/admin/citas'), apiFetch('/admin/usuarios')
+    const [resumen, citasData, usuariosData, especialistasData, serviciosData, auditoriaData,
+      analiticaData,pagosData,inventarioData,horariosData,bloqueosData] = await Promise.all([
+      apiFetch('/admin/resumen'), apiFetch('/admin/citas'), apiFetch('/admin/usuarios'),
+      apiFetch('/admin/especialistas'), apiFetch('/admin/servicios'), apiFetch('/admin/auditoria'),
+      apiFetch('/admin/analitica'),apiFetch('/admin/pagos'),apiFetch('/admin/inventario'),
+      apiFetch('/admin/horarios'),apiFetch('/admin/bloqueos')
     ]);
     adminCitas = citasData.citas || [];
     adminUsuarios = usuariosData.usuarios || [];
+    adminEspecialistas = especialistasData.especialistas || [];
+    adminServicios = serviciosData.servicios || [];
+    adminAuditoria = auditoriaData.auditoria || [];
+    adminAnalitica=analiticaData; adminPagos=pagosData.pagos||[]; adminInventario=inventarioData.productos||[];
+    adminHorarios=horariosData.horarios||[]; adminBloqueos=bloqueosData.bloqueos||[];
     document.getElementById('adminUsuarios').textContent = resumen.usuarios;
     document.getElementById('adminCitas').textContent = resumen.citas_total;
     document.getElementById('adminProximas').textContent = resumen.citas_proximas;
@@ -1883,6 +2063,12 @@ function mostrarAdminVista(vista, boton) {
   document.querySelectorAll('.admin-tab').forEach(item => item.classList.remove('active'));
   boton.classList.add('active');
   if (vista === 'usuarios') renderAdminUsuarios();
+  else if (vista === 'catalogo') renderAdminCatalogo();
+  else if (vista === 'auditoria') renderAdminAuditoria();
+  else if (vista === 'analitica') renderAdminAnalitica();
+  else if (vista === 'pagos') renderAdminPagos();
+  else if (vista === 'inventario') renderAdminInventario();
+  else if (vista === 'agenda') renderAdminAgenda();
   else renderAdminCitas();
 }
 
@@ -1918,6 +2104,116 @@ function renderAdminUsuarios() {
   </table>`;
 }
 
+function renderAdminCatalogo() {
+  document.getElementById('adminContenido').innerHTML = `
+    <h5 class="admin-section-title">Nueva especialista</h5>
+    <div class="admin-form-grid">
+      <input id="adminEspNombre" placeholder="Nombre completo">
+      <input id="adminEspBio" placeholder="Especialidad o biografía">
+      <input id="adminEspFoto" placeholder="URL de fotografía (opcional)">
+      <button onclick="crearEspecialistaAdmin()">Agregar especialista</button>
+    </div>
+    <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Especialista</th><th>Descripción</th><th>Estado</th><th>Acción</th></tr></thead>
+      <tbody>${adminEspecialistas.map(item => `<tr><td>${escaparHTML(item.nombre)}</td><td>${escaparHTML(item.bio || '—')}</td>
+      <td>${item.activo ? 'Activa' : 'Inactiva'}</td><td><button class="admin-tab" onclick="toggleEspecialistaAdmin(${item.id})">${item.activo ? 'Desactivar' : 'Activar'}</button></td></tr>`).join('')}</tbody></table></div>
+    <h5 class="admin-section-title">Nuevo servicio</h5>
+    <div class="admin-form-grid">
+      <input id="adminSrvNombre" placeholder="Nombre del servicio">
+      <input id="adminSrvSlug" placeholder="slug-del-servicio">
+      <input id="adminSrvPrecio" type="number" min="0" placeholder="Precio COP">
+      <input id="adminSrvDuracion" type="number" min="15" value="60" placeholder="Minutos">
+      <input id="adminSrvCategoria" placeholder="Categoría" value="social">
+      <input id="adminSrvIcon" placeholder="Ícono" value="💄">
+      <input id="adminSrvDesc" placeholder="Descripción">
+      <button onclick="crearServicioAdmin()">Agregar servicio</button>
+    </div>
+    <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Servicio</th><th>Precio</th><th>Duración</th><th>Estado</th><th>Acción</th></tr></thead>
+      <tbody>${adminServicios.map(item => `<tr><td>${escaparHTML(item.nombre)}</td><td>$${Number(item.precio || 0).toLocaleString('es-CO')}</td>
+      <td>${item.duracion_minutos} min</td><td>${item.activo ? 'Activo' : 'Inactivo'}</td><td><button class="admin-tab" onclick="toggleServicioAdmin(${item.id})">${item.activo ? 'Desactivar' : 'Activar'}</button></td></tr>`).join('')}</tbody></table></div>`;
+}
+
+function renderAdminAuditoria() {
+  document.getElementById('adminContenido').innerHTML = `<table class="admin-table"><thead><tr><th>Fecha</th><th>Usuario</th><th>Acción</th><th>Entidad</th><th>ID</th></tr></thead>
+    <tbody>${adminAuditoria.map(item => `<tr><td>${new Date(item.creado_en).toLocaleString('es-CO')}</td><td>${escaparHTML(item.usuario || 'Sistema')}</td>
+    <td>${escaparHTML(item.accion)}</td><td>${escaparHTML(item.entidad)}</td><td>${escaparHTML(item.entidad_id)}</td></tr>`).join('')}</tbody></table>`;
+}
+
+function renderAdminAnalitica(){
+  const a=adminAnalitica||{general:{},inventario:{},servicios:[],mensual:[]};
+  document.getElementById('adminContenido').innerHTML=`<div class="pro-summary">
+    <div class="admin-stat"><strong>${a.general.citas||0}</strong><span>Citas</span></div>
+    <div class="admin-stat"><strong>$${Number(a.general.valor_agendado||0).toLocaleString('es-CO')}</strong><span>Valor agendado</span></div>
+    <div class="admin-stat"><strong>${a.general.canceladas||0}</strong><span>Canceladas</span></div>
+    <div class="admin-stat"><strong>${a.inventario.stock_bajo||0}</strong><span>Stock bajo</span></div>
+    <div class="admin-stat"><strong>${a.inventario.por_vencer||0}</strong><span>Por vencer</span></div></div>
+    <h5 class="admin-section-title">Servicios más solicitados</h5><table class="admin-table"><thead><tr><th>Servicio</th><th>Citas</th><th>Valor</th></tr></thead><tbody>${a.servicios.map(x=>`<tr><td>${escaparHTML(x.nombre||'Sin servicio')}</td><td>${x.total}</td><td>$${Number(x.ingresos||0).toLocaleString('es-CO')}</td></tr>`).join('')}</tbody></table>
+    <h5 class="admin-section-title">Evolución mensual</h5><table class="admin-table"><thead><tr><th>Mes</th><th>Citas</th><th>Valor</th></tr></thead><tbody>${a.mensual.map(x=>`<tr><td>${x.mes}</td><td>${x.total}</td><td>$${Number(x.valor||0).toLocaleString('es-CO')}</td></tr>`).join('')}</tbody></table>`;
+}
+
+function renderAdminPagos(){
+  document.getElementById('adminContenido').innerHTML=`<h5 class="admin-section-title">Registrar pago o abono</h5><div class="admin-form-grid">
+    <select class="admin-select" id="pagoCita"><option value="">Selecciona cita</option>${adminCitas.filter(c=>c.estado!=='cancelada').map(c=>`<option value="${c.id}">${escaparHTML(c.cliente)} · ${escaparHTML(c.servicio||'Servicio')} · ${formatFecha(c.fecha)}</option>`).join('')}</select>
+    <input id="pagoMonto" type="number" min="1" placeholder="Monto COP"><select class="admin-select" id="pagoMetodo"><option>efectivo</option><option>transferencia</option><option>tarjeta</option><option>otro</option></select><button onclick="registrarPagoAdmin()">Registrar pago</button></div>
+    <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Fecha</th><th>Cliente</th><th>Servicio</th><th>Monto</th><th>Método</th></tr></thead><tbody>${adminPagos.map(p=>`<tr><td>${new Date(p.creado_en).toLocaleDateString('es-CO')}</td><td>${escaparHTML(p.cliente)}</td><td>${escaparHTML(p.servicio||'Servicio')}</td><td>$${Number(p.monto).toLocaleString('es-CO')}</td><td>${escaparHTML(p.metodo)}</td></tr>`).join('')}</tbody></table></div>`;
+}
+
+async function registrarPagoAdmin(){try{await apiFetch('/admin/pagos',{method:'POST',body:JSON.stringify({cita_id:document.getElementById('pagoCita').value,monto:document.getElementById('pagoMonto').value,metodo:document.getElementById('pagoMetodo').value})});mostrarToast('Pago registrado','success');await cargarAdmin();renderAdminPagos();await cargarMisPagos();}catch(e){mostrarToast('❗ '+e.message,'error');}}
+
+function renderAdminInventario(){
+  document.getElementById('adminContenido').innerHTML=`<h5 class="admin-section-title">Nuevo producto</h5><div class="admin-form-grid"><input id="invNombre" placeholder="Producto"><input id="invMarca" placeholder="Marca"><input id="invCategoria" placeholder="Categoría"><input id="invCantidad" type="number" min="0" placeholder="Cantidad"><input id="invUnidad" value="unidad" placeholder="Unidad"><input id="invMinimo" type="number" min="0" placeholder="Stock mínimo"><input id="invVence" type="date"><button onclick="crearProductoAdmin()">Agregar producto</button></div>
+    <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Producto</th><th>Marca</th><th>Stock</th><th>Vence</th><th>Alertas</th><th>Movimientos</th></tr></thead><tbody>${adminInventario.map(p=>`<tr><td>${escaparHTML(p.nombre)}</td><td>${escaparHTML(p.marca||'—')}</td><td>${p.cantidad} ${escaparHTML(p.unidad)}</td><td>${p.vence_en?formatFecha(p.vence_en):'—'}</td><td>${p.stock_bajo?'⚠ Stock bajo ':''}${p.por_vencer?'⚠ Vence pronto':''}</td><td><button class="admin-tab" onclick="moverInventario('${p.id}','entrada')">+ Entrada</button> <button class="admin-tab" onclick="moverInventario('${p.id}','salida')">− Salida</button></td></tr>`).join('')}</tbody></table></div>`;
+}
+
+async function crearProductoAdmin(){try{await apiFetch('/admin/inventario',{method:'POST',body:JSON.stringify({nombre:document.getElementById('invNombre').value,marca:document.getElementById('invMarca').value,categoria:document.getElementById('invCategoria').value,cantidad:document.getElementById('invCantidad').value,unidad:document.getElementById('invUnidad').value,stock_minimo:document.getElementById('invMinimo').value,vence_en:document.getElementById('invVence').value||null})});mostrarToast('Producto agregado','success');await cargarAdmin();renderAdminInventario();}catch(e){mostrarToast('❗ '+e.message,'error');}}
+async function moverInventario(id,tipo){const cantidad=window.prompt(`Cantidad de ${tipo}:`);if(!cantidad)return;try{await apiFetch(`/admin/inventario/${id}/movimientos`,{method:'POST',body:JSON.stringify({tipo,cantidad:Number(cantidad),motivo:'Movimiento desde panel'})});mostrarToast('Inventario actualizado','success');await cargarAdmin();renderAdminInventario();}catch(e){mostrarToast('❗ '+e.message,'error');}}
+
+function renderAdminAgenda(){const dias=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];document.getElementById('adminContenido').innerHTML=`<h5 class="admin-section-title">Agregar jornada</h5><div class="admin-form-grid"><select class="admin-select" id="horEsp">${adminEspecialistas.filter(e=>e.activo).map(e=>`<option value="${e.id}">${escaparHTML(e.nombre)}</option>`).join('')}</select><select class="admin-select" id="horDia">${dias.map((d,i)=>`<option value="${i}">${d}</option>`).join('')}</select><input id="horInicio" type="time" value="08:00"><input id="horFin" type="time" value="18:00"><button onclick="crearHorarioAdmin()">Agregar jornada</button></div>
+  <table class="admin-table"><thead><tr><th>Especialista</th><th>Día</th><th>Inicio</th><th>Fin</th><th></th></tr></thead><tbody>${adminHorarios.map(h=>`<tr><td>${escaparHTML(h.especialista)}</td><td>${dias[h.dia_semana]}</td><td>${String(h.hora_inicio).slice(0,5)}</td><td>${String(h.hora_fin).slice(0,5)}</td><td><button class="admin-tab" onclick="eliminarHorarioAdmin(${h.id})">Eliminar</button></td></tr>`).join('')}</tbody></table>
+  <h5 class="admin-section-title">Vacaciones y bloqueos</h5><div class="admin-form-grid"><select class="admin-select" id="bloqEsp">${adminEspecialistas.filter(e=>e.activo).map(e=>`<option value="${e.id}">${escaparHTML(e.nombre)}</option>`).join('')}</select><input id="bloqInicio" type="datetime-local"><input id="bloqFin" type="datetime-local"><input id="bloqMotivo" placeholder="Motivo"><button onclick="crearBloqueoAdmin()">Crear bloqueo</button></div>
+  <table class="admin-table"><thead><tr><th>Especialista</th><th>Inicio</th><th>Fin</th><th>Motivo</th><th></th></tr></thead><tbody>${adminBloqueos.map(b=>`<tr><td>${escaparHTML(b.especialista)}</td><td>${new Date(b.inicio).toLocaleString('es-CO')}</td><td>${new Date(b.fin).toLocaleString('es-CO')}</td><td>${escaparHTML(b.motivo||'—')}</td><td><button class="admin-tab" onclick="eliminarBloqueoAdmin('${b.id}')">Eliminar</button></td></tr>`).join('')}</tbody></table>`;}
+
+async function crearHorarioAdmin(){try{await apiFetch('/admin/horarios',{method:'POST',body:JSON.stringify({especialista_id:Number(document.getElementById('horEsp').value),dia_semana:Number(document.getElementById('horDia').value),hora_inicio:document.getElementById('horInicio').value,hora_fin:document.getElementById('horFin').value})});mostrarToast('Jornada agregada','success');await cargarAdmin();renderAdminAgenda();}catch(e){mostrarToast('❗ '+e.message,'error');}}
+async function eliminarHorarioAdmin(id){try{await apiFetch(`/admin/horarios/${id}`,{method:'DELETE'});await cargarAdmin();renderAdminAgenda();}catch(e){mostrarToast('❗ '+e.message,'error');}}
+async function crearBloqueoAdmin(){try{await apiFetch('/admin/bloqueos',{method:'POST',body:JSON.stringify({especialista_id:Number(document.getElementById('bloqEsp').value),inicio:document.getElementById('bloqInicio').value,fin:document.getElementById('bloqFin').value,motivo:document.getElementById('bloqMotivo').value})});mostrarToast('Bloqueo creado','success');await cargarAdmin();renderAdminAgenda();}catch(e){mostrarToast('❗ '+e.message,'error');}}
+async function eliminarBloqueoAdmin(id){try{await apiFetch(`/admin/bloqueos/${id}`,{method:'DELETE'});await cargarAdmin();renderAdminAgenda();}catch(e){mostrarToast('❗ '+e.message,'error');}}
+
+async function crearEspecialistaAdmin() {
+  try {
+    await apiFetch('/admin/especialistas', { method:'POST', body:JSON.stringify({
+      nombre:document.getElementById('adminEspNombre').value,
+      bio:document.getElementById('adminEspBio').value,
+      foto_url:document.getElementById('adminEspFoto').value
+    })});
+    mostrarToast('Especialista agregada', 'success'); await cargarAdmin(); renderAdminCatalogo(); await cargarCatalogos();
+  } catch(error) { mostrarToast('❗ '+error.message,'error'); }
+}
+
+async function toggleEspecialistaAdmin(id) {
+  const item=adminEspecialistas.find(x=>x.id===id); if(!item) return;
+  try { await apiFetch(`/admin/especialistas/${id}`,{method:'PATCH',body:JSON.stringify({...item,activo:!item.activo})});
+    mostrarToast('Especialista actualizada','success'); await cargarAdmin(); renderAdminCatalogo(); await cargarCatalogos();
+  } catch(error){mostrarToast('❗ '+error.message,'error');}
+}
+
+async function crearServicioAdmin() {
+  try {
+    await apiFetch('/admin/servicios',{method:'POST',body:JSON.stringify({
+      nombre:document.getElementById('adminSrvNombre').value,slug:document.getElementById('adminSrvSlug').value,
+      precio:document.getElementById('adminSrvPrecio').value,duracion_minutos:Number(document.getElementById('adminSrvDuracion').value),
+      categoria:document.getElementById('adminSrvCategoria').value,icon:document.getElementById('adminSrvIcon').value,
+      descripcion:document.getElementById('adminSrvDesc').value
+    })});
+    mostrarToast('Servicio agregado','success'); await cargarAdmin(); renderAdminCatalogo(); await cargarCatalogos();
+  } catch(error){mostrarToast('❗ '+error.message,'error');}
+}
+
+async function toggleServicioAdmin(id) {
+  const item=adminServicios.find(x=>x.id===id); if(!item) return;
+  try { await apiFetch(`/admin/servicios/${id}`,{method:'PATCH',body:JSON.stringify({...item,activo:!item.activo})});
+    mostrarToast('Servicio actualizado','success'); await cargarAdmin(); renderAdminCatalogo(); await cargarCatalogos();
+  } catch(error){mostrarToast('❗ '+error.message,'error');}
+}
+
 async function cambiarEstadoAdmin(id, estado) {
   try {
     await apiFetch(`/admin/citas/${id}/estado`, {
@@ -1936,7 +2232,7 @@ async function cambiarEstadoAdmin(id, estado) {
 function formatFecha(f) {
   if (!f) return 'N/A';
   const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-  const [y,m,d] = f.split('-');
+  const [y,m,d] = String(f).slice(0, 10).split('-');
   return d + ' ' + meses[parseInt(m)-1] + ' ' + y.slice(-2);
 }
 
@@ -2077,21 +2373,8 @@ function cerrarLook() {
 
 function reservarDesdeGaleria() {
   cerrarLook();
-  if (!usuarioActual) {
-    mostrarToast('Crea una cuenta para agendar ✨', 'info');
-    document.getElementById('citas').scrollIntoView({ behavior: 'smooth' });
-    setTimeout(() => showTab('registro'), 600);
-    return;
-  }
-  // Pre-llenar servicio
-  const sel = document.getElementById('cita-servicio');
-  for (let i = 0; i < sel.options.length; i++) {
-    if (sel.options[i].text === lookServicioActual) {
-      sel.selectedIndex = i; break;
-    }
-  }
-  document.getElementById('citas').scrollIntoView({ behavior: 'smooth' });
-  mostrarToast('Servicio pre-seleccionado 🌸', 'success');
+  sessionStorage.setItem('sena_servicio_pendiente', lookServicioActual);
+  window.location.href = '/citas';
 }
 
 // Cerrar modal al hacer click afuera
@@ -2105,6 +2388,21 @@ document.addEventListener('DOMContentLoaded', async function() {
   dash.style.display = 'none';
   dash.classList.remove('visible');
   await cargarCatalogos();
+  document.getElementById('cita-especialista').addEventListener('change', actualizarDisponibilidad);
+  document.getElementById('cita-servicio').addEventListener('change', actualizarDisponibilidad);
+  document.getElementById('cita-fecha').addEventListener('change', actualizarDisponibilidad);
+
+  const servicioPendiente = sessionStorage.getItem('sena_servicio_pendiente');
+  if (servicioPendiente) {
+    const selector = document.getElementById('cita-servicio');
+    for (let i = 0; i < selector.options.length; i++) {
+      if (selector.options[i].text === servicioPendiente) {
+        selector.selectedIndex = i;
+        break;
+      }
+    }
+    sessionStorage.removeItem('sena_servicio_pendiente');
+  }
 
   if (token) {
     try {
@@ -2116,6 +2414,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
   }
 });
+
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
+}
 </script>
 </body>
 </html>

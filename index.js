@@ -13,7 +13,11 @@ const citasRoutes      = require('./routes/citas.routes');
 const catalogoRoutes   = require('./routes/catalogo.routes');
 const comparacionesRoutes = require('./routes/comparaciones.routes');
 const adminRoutes = require('./routes/admin.routes');
+const proRoutes = require('./routes/pro.routes');
 const { prepararBaseDeDatos } = require('./bootstrap');
+const { iniciarNotificaciones } = require('./notifications');
+const { middlewareMetricas, endpointMetricas } = require('./metrics');
+const openapi = require('./openapi');
 
 const app  = express();
 const PORT = process.env.PORT || 4000;
@@ -43,6 +47,7 @@ const authLimiter = rateLimit({
 // ── PARSERS ───────────────────────────────────────
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+app.use(middlewareMetricas);
 
 // ── LOGGING ───────────────────────────────────────
 if (process.env.NODE_ENV !== 'test') {
@@ -66,6 +71,22 @@ app.get('/health', async (req, res) => {
     timestamp: new Date().toISOString()
   });
 });
+app.get('/metrics', endpointMetricas);
+app.get('/api/openapi.json', (_req,res)=>res.json(openapi));
+app.get('/api/docs', (_req, res) => res.type('html').send(`<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>Arte & Belleza API</title><style>
+body{font:16px system-ui;max-width:920px;margin:40px auto;padding:0 20px;color:#27222a}h1{color:#8d3c68}
+pre{background:#f7f2f5;padding:18px;border-radius:12px;overflow:auto}a{color:#8d3c68}
+</style></head><body><h1>Arte & Belleza · API OpenAPI</h1>
+<p>Contrato navegable de la API. <a href="/api/openapi.json">Descargar OpenAPI JSON</a></p>
+<div id="contenido">Cargando…</div><script>
+fetch('/api/openapi.json').then(r=>r.json()).then(api=>{
+ const rutas=Object.entries(api.paths||{}).flatMap(([ruta,metodos])=>Object.entries(metodos).map(([metodo,d])=>
+   '<h3>'+metodo.toUpperCase()+' '+ruta+'</h3><p>'+(d.summary||'')+'</p>'));
+ document.querySelector('#contenido').innerHTML='<p><strong>Versión:</strong> '+api.info.version+'</p>'+rutas.join('');
+}).catch(()=>document.querySelector('#contenido').textContent='No fue posible cargar el contrato.');
+</script></body></html>`));
 
 // ── RUTAS ─────────────────────────────────────────
 app.use('/api/auth',     authLimiter, authRoutes);
@@ -73,6 +94,7 @@ app.use('/api/citas',    citasRoutes);
 app.use('/api',          catalogoRoutes);
 app.use('/api/comparaciones', comparacionesRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api', proRoutes);
 
 // ── 404 ───────────────────────────────────────────
 app.use((req, res) => {
@@ -93,6 +115,7 @@ app.use((err, req, res, _next) => {
 // ── ARRANQUE ──────────────────────────────────────
 async function iniciar() {
   await prepararBaseDeDatos();
+  iniciarNotificaciones();
   return app.listen(PORT, () => {
   console.log(`
   ╔══════════════════════════════════════╗

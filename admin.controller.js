@@ -1,5 +1,13 @@
 const { query } = require('./db');
-const { delCache } = require('./redis');
+const { delCache, delPattern } = require('./redis');
+
+async function auditar(req, accion, entidad, entidadId, datos = {}) {
+  await query(
+    `INSERT INTO auditoria (usuario_id, accion, entidad, entidad_id, datos, ip)
+     VALUES ($1,$2,$3,$4,$5,$6)`,
+    [req.usuario.id, accion, entidad, String(entidadId || ''), JSON.stringify(datos), req.ip]
+  );
+}
 
 async function resumen(_req, res) {
   const { rows } = await query(`
@@ -59,7 +67,108 @@ async function cambiarEstado(req, res) {
   const cita = rows[0];
   await delCache(`citas:usuario:${cita.usuario_id}`);
   await delCache(`disponibilidad:${cita.especialista_id}:${cita.fecha}`);
+  await auditar(req, 'cambiar_estado', 'cita', cita.id, { estado });
   return res.json({ mensaje: 'Estado actualizado.', cita });
 }
 
-module.exports = { resumen, usuarios, citas, cambiarEstado };
+async function listarEspecialistasAdmin(_req, res) {
+  const { rows } = await query('SELECT id, nombre, bio, foto_url, activo FROM especialistas ORDER BY id');
+  return res.json({ especialistas: rows });
+}
+
+async function crearEspecialista(req, res) {
+  const { nombre, bio, foto_url } = req.body;
+  if (!nombre || nombre.trim().length < 3) return res.status(400).json({ error: 'Nombre de especialista inválido.' });
+  const { rows } = await query(
+    `INSERT INTO especialistas(nombre,bio,foto_url) VALUES($1,$2,$3) RETURNING *`,
+    [nombre.trim(), bio || null, foto_url || null]
+  );
+  await delCache('catalogo:especialistas');
+  await auditar(req, 'crear', 'especialista', rows[0].id, rows[0]);
+  return res.status(201).json({ especialista: rows[0] });
+}
+
+async function editarEspecialista(req, res) {
+  const { nombre, bio, foto_url, activo } = req.body;
+  if (!nombre || nombre.trim().length < 3) return res.status(400).json({ error: 'Nombre de especialista inválido.' });
+  const { rows } = await query(
+    `UPDATE especialistas SET nombre=$1,bio=$2,foto_url=$3,activo=$4 WHERE id=$5 RETURNING *`,
+    [nombre.trim(), bio || null, foto_url || null, activo !== false, req.params.id]
+  );
+  if (!rows.length) return res.status(404).json({ error: 'Especialista no encontrada.' });
+  await delCache('catalogo:especialistas');
+  await auditar(req, 'editar', 'especialista', rows[0].id, rows[0]);
+  return res.json({ especialista: rows[0] });
+}
+
+async function listarServiciosAdmin(_req, res) {
+  const { rows } = await query(`SELECT id,nombre,slug,descripcion,icon,categoria,precio,duracion_minutos,activo
+                                FROM tipos_maquillaje ORDER BY id`);
+  return res.json({ servicios: rows });
+}
+
+function validarServicio(body) {
+  const precio = Number(body.precio);
+  const duracion = Number(body.duracion_minutos);
+  if (!body.nombre || body.nombre.trim().length < 3) return 'Nombre de servicio inválido.';
+  if (!body.slug || !/^[a-z0-9-]+$/.test(body.slug)) return 'Slug inválido; usa minúsculas, números y guiones.';
+  if (!Number.isFinite(precio) || precio < 0) return 'Precio inválido.';
+  if (!Number.isInteger(duracion) || duracion < 15 || duracion > 480) return 'Duración inválida (15 a 480 minutos).';
+  return null;
+}
+
+async function crearServicio(req, res) {
+  const error = validarServicio(req.body);
+  if (error) return res.status(400).json({ error });
+  const b = req.body;
+  try {
+    const { rows } = await query(
+      `INSERT INTO tipos_maquillaje(nombre,slug,descripcion,icon,categoria,precio,duracion_minutos)
+       VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
+      [b.nombre.trim(), b.slug, b.descripcion || null, b.icon || '💄', b.categoria || 'social', Number(b.precio), Number(b.duracion_minutos)]
+    );
+    await delPattern('catalogo:tipos:*');
+    await auditar(req, 'crear', 'servicio', rows[0].id, rows[0]);
+    return res.status(201).json({ servicio: rows[0] });
+  } catch (e) {
+    if (e.code === '23505') return res.status(409).json({ error: 'El slug ya existe.' });
+    throw e;
+  }
+}
+
+async function editarServicio(req, res) {
+  const error = validarServicio(req.body);
+  if (error) return res.status(400).json({ error });
+  const b = req.body;
+  try {
+    const { rows } = await query(
+      `UPDATE tipos_maquillaje SET nombre=$1,slug=$2,descripcion=$3,icon=$4,categoria=$5,
+       precio=$6,duracion_minutos=$7,activo=$8 WHERE id=$9 RETURNING *`,
+      [b.nombre.trim(), b.slug, b.descripcion || null, b.icon || '💄', b.categoria || 'social',
+       Number(b.precio), Number(b.duracion_minutos), b.activo !== false, req.params.id]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Servicio no encontrado.' });
+    await delPattern('catalogo:tipos:*');
+    await auditar(req, 'editar', 'servicio', rows[0].id, rows[0]);
+    return res.json({ servicio: rows[0] });
+  } catch (e) {
+    if (e.code === '23505') return res.status(409).json({ error: 'El slug ya existe.' });
+    throw e;
+  }
+}
+
+async function auditoria(_req, res) {
+  const { rows } = await query(`
+    SELECT a.id,a.accion,a.entidad,a.entidad_id,a.datos,a.ip,a.creado_en,
+           u.nombre AS usuario,u.email
+    FROM auditoria a LEFT JOIN usuarios u ON u.id=a.usuario_id
+    ORDER BY a.creado_en DESC LIMIT 300
+  `);
+  return res.json({ auditoria: rows });
+}
+
+module.exports = {
+  resumen, usuarios, citas, cambiarEstado,
+  listarEspecialistasAdmin, crearEspecialista, editarEspecialista,
+  listarServiciosAdmin, crearServicio, editarServicio, auditoria
+};

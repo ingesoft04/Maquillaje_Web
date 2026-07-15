@@ -247,6 +247,7 @@ docker compose logs -f api
 Abrir:
 
 - Aplicación: `http://localhost:8088`
+- Agenda y administración: `http://localhost:8088/citas`
 - Estado de la API: `http://localhost:8088/health`
 - API directa: `http://localhost:4000/health`
 
@@ -441,7 +442,7 @@ Si `pnpm` no está disponible localmente, también puede ejecutarse dentro del c
 docker compose exec -e TEST_BASE_URL=http://localhost:4000 api node --test --test-concurrency=1 tests/integration.test.js
 ```
 
-Las nueve verificaciones actuales cubren:
+Las once verificaciones actuales cubren:
 
 1. Estado de PostgreSQL y Redis.
 2. Catálogos públicos.
@@ -452,5 +453,225 @@ Las nueve verificaciones actuales cubren:
 7. Login y métricas administrativas.
 8. Actualización administrativa del estado.
 9. Respuesta JSON para rutas inexistentes.
+10. Reprogramación y liberación del horario anterior.
+11. Gestión administrativa del catálogo y registro de auditoría.
 
-Resultado validado: **9 pruebas aprobadas, 0 fallidas**.
+Resultado validado: **16 pruebas aprobadas, 0 fallidas**. La suite cubre salud de PostgreSQL y Redis, catálogos, autenticación y autorización, ficha cosmética, disponibilidad, creación y reprogramación de citas, administración, inventario, caja, analítica, OpenAPI, métricas y rutas inexistentes.
+
+## 23. Separación visual de la agenda
+
+La aplicación utiliza dos rutas visuales servidas por el mismo frontend:
+
+- `/`: página informativa, técnicas, productos, tendencias y galería.
+- `/citas`: registro, login, agenda personal, PDF y administración.
+
+Ambas rutas reutilizan el mismo HTML, CSS y JavaScript. La ruta activa agrega una clase de presentación al `<body>` y Nginx entrega el mismo archivo. Esta decisión evita duplicar formularios y lógica de autenticación.
+
+Los botones “Agendar una cita”, el enlace del menú y las reservas iniciadas desde la galería llevan a `/citas`. Cuando se elige un look desde la galería, el nombre del servicio se conserva temporalmente y se preselecciona al abrir la agenda.
+
+También se corrigió el tratamiento de fechas retornadas por PostgreSQL. Una fecha ISO como `2026-08-29T00:00:00.000Z` se normaliza primero a `2026-08-29` y se presenta como `29 Ago 26`, evitando que el componente de hora aparezca dentro del día.
+
+## 24. Disponibilidad y reprogramación
+
+Al seleccionar especialista y fecha, el frontend consulta `/api/citas/disponibilidad`. Las horas ocupadas se deshabilitan y muestran la etiqueta “Ocupado”.
+
+Para reprogramar:
+
+1. La cliente selecciona `Reprogramar` en una cita vigente.
+2. El formulario recupera servicio, especialista, fecha, hora y notas.
+3. La cliente elige el nuevo horario.
+4. La API verifica propiedad de la cita y disponibilidad.
+5. PostgreSQL actualiza el registro con estado `reprogramada`.
+6. Redis elimina la disponibilidad anterior, la nueva y el listado de la cliente.
+
+La unicidad de horarios utiliza un índice parcial que solo considera citas no canceladas. Así, cancelar una cita libera verdaderamente el espacio para otra reserva.
+
+## 25. Administración del catálogo y auditoría
+
+La pestaña `Catálogo` permite:
+
+- Crear especialistas.
+- Activar o desactivar especialistas.
+- Crear servicios con nombre, slug, descripción, categoría e ícono.
+- Configurar precio y duración en minutos.
+- Activar o desactivar servicios.
+
+Los servicios o especialistas inactivos dejan de aparecer en el formulario público, pero se conservan para no romper el historial de citas.
+
+La tabla `auditoria` registra usuario administrador, acción, entidad, identificador, datos, dirección IP y fecha. La pestaña `Auditoría` permite consultar los últimos movimientos.
+
+## 26. Preparación para servidor casero
+
+El archivo `docker-compose.home.yml` está diseñado para el equipo que alojará el proyecto permanentemente.
+
+### Diferencias frente al entorno de desarrollo
+
+- Solo el frontend publica un puerto en el servidor.
+- API, PostgreSQL y Redis permanecen dentro de una red Docker interna.
+- PostgreSQL y Redis utilizan volúmenes persistentes.
+- Redis habilita AOF para recuperar información temporal después de reinicios.
+- Un servicio independiente realiza copias de PostgreSQL.
+- Los respaldos se guardan físicamente en `backups/`.
+- Las contraseñas no tienen valores predeterminados en la composición de servidor.
+
+### Requisitos sugeridos del servidor
+
+- Linux de 64 bits, preferiblemente Debian o Ubuntu Server.
+- Docker Engine y complemento Docker Compose.
+- Dirección IP local reservada desde el router.
+- Disco con espacio para base de datos, imágenes y backups.
+- Hora y zona horaria correctamente configuradas.
+- Copia adicional en otro disco o equipo.
+- Sistema de alimentación estable; UPS recomendado.
+
+### Preparar configuración
+
+```bash
+cp .env.home.example .env.home
+nano .env.home
+mkdir -p backups
+chmod 700 backups
+```
+
+Se deben reemplazar todas las claves que empiezan por `CAMBIE_`. `FRONTEND_URL` debe contener la IP local o dominio real del servidor.
+
+### Iniciar en el servidor
+
+```bash
+docker compose --env-file .env.home -f docker-compose.home.yml up --build -d
+docker compose --env-file .env.home -f docker-compose.home.yml ps
+```
+
+### Ver registros
+
+```bash
+docker compose --env-file .env.home -f docker-compose.home.yml logs -f api
+docker compose --env-file .env.home -f docker-compose.home.yml logs -f backup
+```
+
+### Actualizar sin borrar datos
+
+```bash
+git pull
+docker compose --env-file .env.home -f docker-compose.home.yml up --build -d
+```
+
+No se debe ejecutar `down -v` en el servidor porque `-v` elimina los volúmenes de PostgreSQL y Redis.
+
+## 27. Copias y restauración
+
+El servicio `backup` crea un archivo PostgreSQL en formato custom cada 24 horas. La frecuencia y retención se configuran con:
+
+```env
+BACKUP_INTERVAL_SECONDS=86400
+BACKUP_RETENTION_DAYS=14
+```
+
+### Copia manual
+
+```bash
+chmod +x scripts/backup-now.sh scripts/restore.sh
+./scripts/backup-now.sh
+```
+
+### Restaurar
+
+```bash
+./scripts/restore.sh backups/maquillaje_YYYYMMDD_HHMMSS.dump
+```
+
+Antes de restaurar se recomienda crear otra copia y detener temporalmente el frontend para evitar escrituras durante el proceso.
+
+### Regla 3-2-1 recomendada
+
+- Mantener al menos tres copias de la información.
+- Utilizar dos medios diferentes.
+- Conservar una copia fuera del servidor principal.
+
+La carpeta `backups/` no se incluye en Git. Debe copiarse periódicamente a otro disco, NAS o almacenamiento externo.
+
+## 28. Publicación segura desde casa
+
+Para uso exclusivo dentro de la vivienda, se accede mediante la IP local y `WEB_PORT`.
+
+Para acceso desde Internet no se deben publicar directamente los puertos 4000, 5432 ni 6379. Las alternativas recomendadas son:
+
+- VPN privada como Tailscale o WireGuard para acceso limitado.
+- Dominio con proxy inverso HTTPS si será un servicio público.
+- Firewall que solo permita los puertos estrictamente necesarios.
+- Certificado TLS válido.
+- Actualizaciones periódicas del sistema y las imágenes Docker.
+
+Antes de abrir el servicio públicamente también se deben cambiar todas las credenciales de demostración, probar restauración de backups y agregar almacenamiento externo para las fotografías.
+
+## 29. Módulos Pro implementados
+
+### Agenda avanzada
+
+Cada especialista dispone de jornadas por día de la semana. Los intervalos se calculan cada 30 minutos y respetan la duración real del servicio, otras citas y los bloqueos administrativos. Una cita de 90 minutos impide que se ofrezca un turno superpuesto aunque la hora inicial sea distinta.
+
+El administrador puede consultar y crear horarios, además de bloquear periodos por almuerzo, incapacidad, vacaciones, capacitación o cualquier otro motivo. Al cambiar la agenda se invalida su caché en Redis.
+
+### CRM y ficha cosmética
+
+Cada cliente puede registrar tipo de piel, subtono, sensibilidad, alergias, condiciones, ingredientes que se deben evitar, preferencias y consentimientos. La información se mantiene separada por usuario y solo se obtiene con un JWT válido.
+
+Esta ficha no reemplaza una valoración médica. En la sustentación debe explicarse como información preventiva para personalizar el servicio y reducir riesgos cosméticos.
+
+### Caja, precios y abonos
+
+El precio se copia a la cita al reservar. Esto conserva el valor histórico aunque después cambie el catálogo. Caja permite registrar abonos por efectivo, transferencia, tarjeta u otro método. La API rechaza valores negativos y pagos que superen el saldo.
+
+### Inventario
+
+El módulo registra productos, marca, categoría, tono, lote, vencimiento, cantidad, unidad, stock mínimo y costo. Los movimientos de entrada, salida y ajuste se realizan dentro de una transacción PostgreSQL. Si una salida produce inventario negativo, toda la operación se cancela.
+
+### Analítica
+
+El panel resume citas, valor agendado, cancelaciones, inasistencias, servicios más solicitados, productividad por especialista, comportamiento mensual y alertas de inventario bajo o próximo a vencer.
+
+## 30. PWA, correo y observabilidad
+
+La aplicación incluye `manifest.webmanifest`, icono y service worker. En un servidor con HTTPS puede instalarse como PWA. En `localhost`, los navegadores también permiten probar esta función.
+
+Las confirmaciones, reprogramaciones, cancelaciones y recordatorios se guardan primero en la tabla `notificaciones`. Un proceso de la API revisa la cola. Si SMTP no está configurado, simula el envío en los registros sin perder el flujo funcional. Para habilitar correo real se completan `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` y `SMTP_FROM` en `.env.home`.
+
+Rutas operativas:
+
+- Documentación OpenAPI: `http://localhost:8088/api/docs`
+- Contrato JSON: `http://localhost:8088/api/openapi.json`
+- Salud: `http://localhost:8088/health`
+- Métricas Prometheus: `http://localhost:4000/metrics` en desarrollo
+
+En el servidor casero Prometheus y Grafana son opcionales:
+
+```bash
+docker compose --env-file .env.home -f docker-compose.home.yml --profile monitoring up -d
+```
+
+Sus puertos se enlazan únicamente a `127.0.0.1`; para consultarlos remotamente se recomienda un túnel SSH o una VPN, no publicarlos directamente en el router.
+
+## 31. Recorrido recomendado para la sustentación
+
+1. Abrir `http://localhost:8088` y explicar el contenido educativo.
+2. Entrar a `http://localhost:8088/citas`, crear un cliente y diligenciar la ficha cosmética.
+3. Elegir servicio y especialista; mostrar cómo cambian los horarios disponibles.
+4. Agendar, reprogramar y exportar el comprobante PDF.
+5. Iniciar como administrador y recorrer las ocho pestañas del panel.
+6. Crear un producto, registrar una salida y explicar la transacción de inventario.
+7. Registrar un abono y mostrarlo en la cuenta del cliente.
+8. Mostrar analítica, auditoría y documentación OpenAPI.
+9. Ejecutar la suite automatizada y enseñar el resultado de 16 pruebas.
+10. Cerrar explicando Docker, backups, red interna y migración al servidor casero.
+
+## 32. Decisiones técnicas para explicar al instructor
+
+- **PostgreSQL** almacena la información permanente y relacional.
+- **Redis** acelera consultas repetidas; nunca es la fuente principal de datos.
+- **Express** concentra reglas de negocio y evita exponer directamente la base de datos.
+- **JWT y roles** separan clientes y administradores.
+- **Docker Compose** reproduce la misma arquitectura en el portátil y en el servidor.
+- **Nginx** entrega la web y funciona como único punto de entrada en producción doméstica.
+- **OpenAPI** documenta el contrato que une frontend y backend.
+- **Prometheus/Grafana** permiten detectar degradación y observar el servicio.
+- **Backups probados** protegen los datos; un volumen por sí solo no es una copia de seguridad.

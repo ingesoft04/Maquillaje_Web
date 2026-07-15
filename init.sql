@@ -43,6 +43,8 @@ CREATE TABLE IF NOT EXISTS tipos_maquillaje (
   descripcion TEXT,
   icon        VARCHAR(10),
   categoria   VARCHAR(60),     -- social, artistico, especial, natural
+  precio      NUMERIC(12,2) DEFAULT 0 CHECK (precio >= 0),
+  duracion_minutos INT DEFAULT 60 CHECK (duracion_minutos > 0),
   activo      BOOLEAN DEFAULT TRUE
 );
 
@@ -69,10 +71,7 @@ CREATE TABLE IF NOT EXISTS citas (
   estado          VARCHAR(30) NOT NULL DEFAULT 'confirmada',
                   -- confirmada | cancelada | completada | reprogramada
   creado_en       TIMESTAMPTZ DEFAULT NOW(),
-  actualizado_en  TIMESTAMPTZ DEFAULT NOW(),
-
-  -- Evitar doble reserva del mismo especialista en la misma hora
-  CONSTRAINT uq_especialista_horario UNIQUE (especialista_id, fecha, hora)
+  actualizado_en  TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Índices para búsquedas frecuentes
@@ -80,6 +79,21 @@ CREATE INDEX IF NOT EXISTS idx_citas_usuario    ON citas(usuario_id);
 CREATE INDEX IF NOT EXISTS idx_citas_fecha      ON citas(fecha);
 CREATE INDEX IF NOT EXISTS idx_citas_estado     ON citas(estado);
 CREATE INDEX IF NOT EXISTS idx_citas_especialista ON citas(especialista_id);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_especialista_horario_activo
+  ON citas(especialista_id, fecha, hora) WHERE estado != 'cancelada';
+
+-- ── AUDITORÍA ADMINISTRATIVA ────────────────────
+CREATE TABLE IF NOT EXISTS auditoria (
+  id            BIGSERIAL PRIMARY KEY,
+  usuario_id    UUID REFERENCES usuarios(id) ON DELETE SET NULL,
+  accion        VARCHAR(80) NOT NULL,
+  entidad       VARCHAR(80) NOT NULL,
+  entidad_id    TEXT,
+  datos         JSONB,
+  ip            VARCHAR(80),
+  creado_en     TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_auditoria_creado ON auditoria(creado_en DESC);
 
 -- ── TONOS DE PIEL (resultados calculadora) ───────
 CREATE TABLE IF NOT EXISTS tonos_piel (
