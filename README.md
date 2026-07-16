@@ -1,4 +1,6 @@
-# 🌸 SENA Maquillaje — Backend API
+# 🌸 Arte & Belleza SENA
+
+> **Inicio recomendado:** consulta el [Manual de instalación y uso](MANUAL-INSTALACION-Y-USO.md) para instalar Docker, configurar SMTP, utilizar cada rol, desplegar en el servidor casero, agregar un dominio y administrar backups.
 
 > Documentación académica: consulta el [Manual técnico del proyecto](MANUAL-PROYECTO-SENA.md) para entender la arquitectura, Docker, base de datos, seguridad, endpoints y el guion de sustentación.
 
@@ -17,7 +19,7 @@ Backend completo para el proyecto **Arte & Belleza SENA**, construido con:
 
 ```bash
 git clone <tu-repositorio>
-cd maquillaje-sena-backend
+cd Maquillaje_Web
 
 cp .env.example .env
 # Edita .env con tus valores reales
@@ -26,20 +28,20 @@ cp .env.example .env
 ### 2. Levantar todo con Docker
 
 ```bash
-docker compose up -d
+docker compose up -d --build
 ```
 
 Docker automáticamente:
 - Crea la base de datos PostgreSQL
-- Ejecuta el schema SQL (`sql/init.sql`)
+- Ejecuta las migraciones y datos iniciales
 - Carga los datos iniciales (especialistas, tipos de maquillaje, tonos de piel)
 - Levanta Redis con contraseña
-- Inicia la API en el puerto 4000
+- Inicia la web en el puerto 8088 y la API en el puerto 4000
 
 ### 3. Verificar que funciona
 
 ```bash
-curl http://localhost:4000/health
+curl http://localhost:8088/health
 ```
 
 Respuesta esperada:
@@ -194,28 +196,24 @@ npm run dev
 
 ## 📁 Estructura del proyecto
 
-```
-maquillaje-sena-backend/
-├── docker-compose.yml      # Orquestación de servicios
-├── Dockerfile              # Imagen de la API
-├── .env.example            # Variables de entorno
-├── package.json
-├── sql/
-│   └── init.sql            # Schema + datos iniciales
-└── src/
-    ├── index.js            # Servidor Express
-    ├── config/
-    │   ├── db.js           # Pool PostgreSQL
-    │   └── redis.js        # Cliente Redis + helpers
-    ├── middleware/
-    │   └── auth.js         # Verificación JWT
-    ├── controllers/
-    │   ├── auth.controller.js
-    │   ├── citas.controller.js
-    │   ├── catalogo.controller.js
-    │   └── comparaciones.controller.js
-    └── routes/
-        ├── auth.routes.js
-        ├── citas.routes.js
-        └── catalogo.routes.js
+```text
+Maquillaje_Web/
+├── docker-compose.yml
+├── docker-compose.home.yml
+├── Dockerfile
+├── Dockerfile.frontend
+├── maquillaje-sena-v3.html
+├── index.js
+├── bootstrap.js
+├── routes/
+├── middleware/
+├── core/
+├── services/
+├── repositories/
+├── infrastructure/
+├── tests/
+├── scripts/
+├── docs/
+├── MANUAL-INSTALACION-Y-USO.md
+└── MANUAL-PROYECTO-SENA.md
 ```

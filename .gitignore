@@ -1,6 +1,7 @@
 node_modules/
 .pnpm-store/
 .env
+.env.home
 *.log
 backups/
 .DS_Store

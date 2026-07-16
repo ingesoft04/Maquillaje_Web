@@ -1,5 +1,7 @@
 # Manual técnico — Arte & Belleza SENA
 
+> Para instalar, configurar y operar el sistema, consulte [MANUAL-INSTALACION-Y-USO.md](MANUAL-INSTALACION-Y-USO.md). Este documento se concentra en la explicación académica y técnica.
+
 ## 1. Descripción del proyecto
 
 Arte & Belleza SENA es una aplicación web para consultar contenido educativo de maquillaje, explorar servicios, registrar usuarios y administrar citas con especialistas.
