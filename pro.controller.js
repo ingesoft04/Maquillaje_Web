@@ -1,5 +1,5 @@
 const { query, withTransaction } = require('./db');
-const { delPattern } = require('./redis');
+const { delPattern, delCache } = require('./redis');
 
 async function obtenerPerfil(req, res) {
   const { rows } = await query('SELECT * FROM perfiles_cosmeticos WHERE usuario_id=$1', [req.usuario.id]);
@@ -22,6 +22,25 @@ async function guardarPerfil(req, res) {
     [req.usuario.id,b.tipo_piel||null,b.subtono||null,b.sensibilidad||null,b.alergias||null,b.condiciones||null,
      b.productos_evitar||null,b.preferencias||null,Boolean(b.consentimiento_datos),Boolean(b.consentimiento_imagen)]
   );
+  const ip = req.ip || req.socket?.remoteAddress || null;
+  await query(
+    `INSERT INTO consentimientos(usuario_id,tipo,version,aceptado,ip,evidencia)
+     VALUES($1,'datos','1.0',$2,$4,$6),($1,'imagenes','1.0',$3,$4,$5)`,
+    [
+      req.usuario.id,
+      Boolean(b.consentimiento_datos),
+      Boolean(b.consentimiento_imagen),
+      ip,
+      JSON.stringify({ origen:'perfil_cosmetico', gestion_fotografias:'manual' }),
+      JSON.stringify({ origen:'perfil_cosmetico' })
+    ]
+  );
+  if (!Boolean(b.consentimiento_imagen)) {
+    await query(`UPDATE comparaciones SET publica=FALSE,consentimiento_id=NULL,actualizado_en=NOW()
+      WHERE usuario_id=$1 AND publica=TRUE`, [req.usuario.id]);
+    await delCache(`comparaciones:usuario:${req.usuario.id}`);
+    await delCache('comparaciones:publicas');
+  }
   return res.json({ perfil:rows[0] });
 }
 
@@ -41,14 +60,15 @@ async function listarPagos(_req,res) {
 
 async function registrarPago(req,res) {
   const { cita_id,monto,metodo,referencia }=req.body;
+  const concepto=['anticipo','abono','saldo'].includes(req.body.concepto)?req.body.concepto:'abono';
   const valor=Number(monto); const metodos=['efectivo','transferencia','tarjeta','otro'];
   if(!cita_id||!Number.isFinite(valor)||valor<=0||!metodos.includes(metodo)) return res.status(400).json({error:'Datos de pago inválidos.'});
   const cita=await query('SELECT id,precio_total FROM citas WHERE id=$1',[cita_id]);
   if(!cita.rows.length) return res.status(404).json({error:'Cita no encontrada.'});
-  const acumulado=await query(`SELECT COALESCE(SUM(CASE WHEN estado='registrado' THEN monto ELSE -monto END),0) total FROM pagos WHERE cita_id=$1`,[cita_id]);
+  const acumulado=await query(`SELECT COALESCE(SUM(CASE WHEN estado IN ('registrado','retenido') THEN monto WHEN estado='devuelto' THEN -monto ELSE 0 END),0) total FROM pagos WHERE cita_id=$1`,[cita_id]);
   if(Number(acumulado.rows[0].total)+valor>Number(cita.rows[0].precio_total)) return res.status(409).json({error:'El pago supera el saldo pendiente.'});
-  const {rows}=await query(`INSERT INTO pagos(cita_id,monto,metodo,referencia,registrado_por)
-    VALUES($1,$2,$3,$4,$5) RETURNING *`,[cita_id,valor,metodo,referencia||null,req.usuario.id]);
+  const {rows}=await query(`INSERT INTO pagos(cita_id,monto,metodo,referencia,registrado_por,concepto)
+    VALUES($1,$2,$3,$4,$5,$6) RETURNING *`,[cita_id,valor,metodo,referencia||null,req.usuario.id,concepto]);
   return res.status(201).json({pago:rows[0]});
 }
 
@@ -106,4 +126,15 @@ async function analitica(_req,res){
   return res.json({general:general.rows[0],servicios:servicios.rows,especialistas:especialistas.rows,mensual:mensual.rows,inventario:inventario.rows[0]});
 }
 
-module.exports={obtenerPerfil,guardarPerfil,misPagos,listarPagos,registrarPago,listarInventario,crearProducto,movimientoInventario,horarios,guardarHorario,eliminarHorario,bloqueos,crearBloqueo,eliminarBloqueo,analitica};
+async function recetas(_req,res){const {rows}=await query(`SELECT r.*,tm.nombre servicio,p.nombre producto,p.unidad
+  FROM inventario_recetas r JOIN tipos_maquillaje tm ON tm.id=r.tipo_id JOIN inventario_productos p ON p.id=r.producto_id
+  ORDER BY tm.nombre,p.nombre`);return res.json({recetas:rows});}
+async function guardarReceta(req,res){const b=req.body,cantidad=Number(b.cantidad);if(!b.tipo_id||!b.producto_id||!Number.isFinite(cantidad)||cantidad<=0)return res.status(400).json({error:'Receta inválida.'});
+  const {rows}=await query(`INSERT INTO inventario_recetas(tipo_id,producto_id,cantidad) VALUES($1,$2,$3)
+    ON CONFLICT(tipo_id,producto_id) DO UPDATE SET cantidad=EXCLUDED.cantidad RETURNING *`,[b.tipo_id,b.producto_id,cantidad]);return res.status(201).json({receta:rows[0]});}
+async function eliminarReceta(req,res){const {rows}=await query('DELETE FROM inventario_recetas WHERE id=$1 RETURNING *',[req.params.id]);if(!rows.length)return res.status(404).json({error:'Receta no encontrada.'});return res.json({mensaje:'Receta eliminada.'});}
+async function proveedores(_req,res){const {rows}=await query('SELECT * FROM proveedores ORDER BY activo DESC,nombre');return res.json({proveedores:rows});}
+async function crearProveedor(req,res){if(!String(req.body.nombre||'').trim())return res.status(400).json({error:'Nombre obligatorio.'});const b=req.body,{rows}=await query(`INSERT INTO proveedores(nombre,contacto,telefono,email) VALUES($1,$2,$3,$4) RETURNING *`,[b.nombre.trim(),b.contacto||null,b.telefono||null,b.email||null]);return res.status(201).json({proveedor:rows[0]});}
+
+module.exports={obtenerPerfil,guardarPerfil,misPagos,listarPagos,registrarPago,listarInventario,crearProducto,movimientoInventario,
+  horarios,guardarHorario,eliminarHorario,bloqueos,crearBloqueo,eliminarBloqueo,analitica,recetas,guardarReceta,eliminarReceta,proveedores,crearProveedor};

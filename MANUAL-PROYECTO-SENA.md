@@ -675,3 +675,157 @@ Sus puertos se enlazan únicamente a `127.0.0.1`; para consultarlos remotamente 
 - **OpenAPI** documenta el contrato que une frontend y backend.
 - **Prometheus/Grafana** permiten detectar degradación y observar el servicio.
 - **Backups probados** protegen los datos; un volumen por sí solo no es una copia de seguridad.
+
+## 33. Integración con Google Calendar
+
+La agenda incluye sincronización OAuth 2.0 con Google Calendar. La aplicación sigue funcionando si Google no está configurado o presenta una interrupción: PostgreSQL continúa siendo la fuente principal y una cola persistente reintenta la operación externa.
+
+### Preparar Google Cloud
+
+1. Crear un proyecto en Google Cloud Console.
+2. Activar **Google Calendar API**.
+3. Configurar Google Auth Platform con una pantalla de consentimiento.
+4. Si la aplicación está en modo de prueba, agregar el correo administrador como usuario de prueba.
+5. Crear un cliente OAuth 2.0 de tipo **Aplicación web**.
+6. Registrar `http://localhost:8088/api/google/oauth/callback`.
+7. Para el servidor doméstico, registrar también `https://DOMINIO/api/google/oauth/callback`.
+
+### Variables requeridas
+
+```env
+GOOGLE_CLIENT_ID=cliente.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=secreto_entregado_por_google
+GOOGLE_REDIRECT_URI=http://localhost:8088/api/google/oauth/callback
+GOOGLE_TOKEN_ENCRYPTION_KEY=clave_aleatoria_larga_y_exclusiva
+GOOGLE_TIMEZONE=America/Bogota
+GOOGLE_SYNC_INTERVAL_MS=15000
+GOOGLE_INVITE_CLIENTS=false
+```
+
+`GOOGLE_CLIENT_SECRET` y `GOOGLE_TOKEN_ENCRYPTION_KEY` nunca se almacenan en Git ni en el frontend. Al cambiar la clave de cifrado se debe desconectar Google y volver a conectarlo.
+
+Por privacidad, las notas de la cita y la ficha cosmética nunca se envían a Google. `GOOGLE_INVITE_CLIENTS=false` evita enviar invitaciones automáticas; puede cambiarse a `true` si el negocio informa previamente a sus clientes y desea que reciban el evento en su calendario.
+
+### Conectar la cuenta
+
+1. Reconstruir con `docker compose up -d --build`.
+2. Entrar a `/citas` como administrador.
+3. Abrir la pestaña **Google Calendar**.
+4. Pulsar **Conectar Google Calendar**.
+5. Seleccionar la cuenta y aceptar el permiso solicitado por Google.
+6. El callback devuelve al panel y pone en cola las citas activas sin evento.
+
+### Uno o varios calendarios
+
+- `primary`: todas las citas se guardan en el calendario principal conectado.
+- Un ID como `abc123@group.calendar.google.com`: la especialista utiliza un calendario separado.
+
+La cuenta conectada debe tener permiso de escritura sobre cada calendario asignado.
+
+### Ciclo de sincronización
+
+- Crear, reprogramar y cancelar generan trabajos persistentes independientes.
+- Los errores se reintentan con espera creciente, hasta cinco intentos automáticos.
+- El panel muestra estados `pendiente`, `sincronizado` o `error` y permite reintentar fallos.
+- La disponibilidad consulta FreeBusy y descarta turnos ocupados externamente.
+- Cada evento guarda el UUID de la cita como propiedad privada.
+- La cita conserva el ID del calendario donde se creó el evento, incluso si después cambia la configuración de la especialista.
+- El refresh token se cifra con AES-256-GCM antes de guardarse en PostgreSQL.
+
+### Diagnóstico
+
+```bash
+docker compose logs -f api
+docker compose exec api node --test --test-concurrency=1 tests/integration.test.js
+```
+
+Resultado actual: **20 pruebas aprobadas y 0 fallidas**, incluidas la configuración administrativa, el cifrado autenticado y la conversión horaria de Google Calendar.
+
+Prometheus publica `maquillaje_google_calendar_connected` y `maquillaje_google_calendar_sync_jobs{state="..."}` para supervisar la conexión y su cola desde Grafana.
+
+## 34. Evolución multirol y operación profesional
+
+La aplicación admite los roles `cliente`, `especialista` y `admin`. La cuenta de una especialista se crea desde Catálogo y queda vinculada a un único registro profesional. El backend no acepta un identificador arbitrario para decidir qué citas puede consultar: obtiene la especialista desde el JWT y la relación guardada en PostgreSQL.
+
+El portal profesional muestra indicadores, agenda propia, estados de atención y acceso al expediente. Permite registrar productos, tonos, técnicas, observaciones, reacciones y recomendaciones. Los seguimientos marcados como visibles aparecen en el historial del cliente.
+
+## 35. Reseñas, lista de espera y políticas
+
+Una reseña solo puede crearse una vez y exige que la cita pertenezca al cliente y esté completada. Administración puede responder y controlar su publicación.
+
+La lista de espera almacena servicio, especialista, rango de fechas y horas preferidas. Cuando una cita se cancela dentro de las políticas permitidas, el sistema ofrece el turno durante 30 minutos al primer registro compatible y genera una notificación.
+
+Las políticas se modifican desde Configuración: anticipo, plazo de cancelación, tolerancia e intervalo entre citas. El intervalo participa en el cálculo real de disponibilidad.
+
+## 36. Inventario y rentabilidad
+
+Cada servicio puede tener una receta de consumo. Cuando se completa una cita, el sistema descuenta automáticamente cada producto y crea un movimiento con origen `servicio`. Una restricción única evita descontar dos veces el mismo producto por la misma cita.
+
+Si no existe stock suficiente, la cita se completa pero la respuesta incluye una advertencia para no perder el registro real de atención. Administración debe corregir inventario y revisar la receta.
+
+El módulo también registra proveedores y los reportes comparan valor agendado, cobrado, pendiente, productividad, satisfacción, recurrencia y consumo.
+
+## 37. Seguridad y privacidad
+
+- Contraseñas de mínimo 10 caracteres con letras y números.
+- Bloqueo de 15 minutos después de cinco intentos fallidos.
+- Tokens de recuperación de un solo uso, con hash SHA-256 y vigencia de 30 minutos.
+- Exportación JSON de los datos personales del cliente.
+- Solicitudes de exportación, corrección o eliminación con trazabilidad.
+- Consentimientos versionados.
+- Acceso al expediente limitado por asignación profesional.
+
+## 38. Operación reforzada del servidor casero
+
+`docker-compose.home.yml` aplica límites de memoria y CPU, `no-new-privileges` y filesystem de solo lectura para frontend y API. Los comandos adicionales son:
+
+```bash
+./scripts/healthcheck-home.sh
+./scripts/verify-backup.sh backups/maquillaje_YYYYMMDD_HHMMSS.dump
+```
+
+La verificación restaura el archivo en una base temporal, comprueba que puede consultar usuarios y elimina la base de prueba al finalizar.
+
+Los diagramas, requisitos y matriz académica están en `docs/REQUISITOS-Y-DISENO-SENA.md`.
+
+## 39. Decisiones funcionales aprobadas
+
+Estas decisiones forman parte del alcance vigente y deben explicarse así durante la sustentación:
+
+1. **Fotografías:** se gestionan manualmente. Administración puede corregir enlaces y descripciones, publicar, ocultar o archivar. No existe eliminación automática. Para hacer pública una imagen debe existir un consentimiento de imágenes aceptado; si el cliente lo retira, el sistema despublica sus fotografías.
+2. **Anticipo:** corresponde al 20 % configurado del servicio y es **no reembolsable**. Cuando una cita se cancela, tanto desde el portal del cliente como desde administración, todo pago registrado con concepto `anticipo` cambia a estado `retenido`. La anticipación de la cancelación no genera devolución.
+3. **Segundo factor de autenticación:** 2FA queda pausado como mejora futura. Antes de publicar el sistema para clientes reales debe revisarse esta decisión y, preferiblemente, habilitarse para administración y especialistas.
+4. **Servidor casero:** la primera publicación podrá identificarse mediante la IP pública. El diseño deja preparado el cambio posterior a un dominio sin modificar la aplicación.
+
+## 40. Publicación inicial mediante IP pública
+
+La IP pública sirve para comprobar conectividad y realizar demostraciones controladas. No debe utilizarse para enviar contraseñas o datos personales por HTTP abierto, porque HTTP no cifra el tráfico.
+
+Antes de exponer el servidor:
+
+- Asignar una IP local fija al equipo anfitrión.
+- Abrir únicamente los puertos indispensables en el router.
+- Mantener PostgreSQL y Redis sin publicación directa a Internet.
+- Cambiar todas las claves de ejemplo y usar contraseñas largas.
+- Activar el firewall, copias de seguridad y verificación de restauración.
+- Ejecutar `scripts/healthcheck-home.sh` periódicamente.
+
+Para uso real se recomienda asociar un dominio o DNS dinámico y activar HTTPS con el archivo `Caddyfile.example`. El dominio apuntará a la misma IP pública y Caddy administrará el certificado TLS. La variable `GOOGLE_REDIRECT_URI`, si Google Calendar se retoma, también deberá cambiar a la URL HTTPS del dominio.
+
+## 41. Mejoras pausadas que deben recordarse
+
+- Habilitar 2FA para cuentas privilegiadas.
+- Finalizar la conexión con Google Calendar.
+- Sustituir el acceso por IP por dominio y HTTPS antes del uso real.
+
+Estas tareas no están eliminadas: quedan deliberadamente pausadas para no bloquear la terminación académica del núcleo del proyecto.
+
+## 42. Principios SOLID
+
+La arquitectura técnica y las reglas de implementación están descritas en `docs/ARQUITECTURA-SOLID.md`.
+
+El flujo de una petición es: ruta, controlador HTTP, servicio de aplicación, repositorio e infraestructura. Esto permite explicar en la sustentación que las reglas de negocio no dependen directamente de Express, PostgreSQL o Redis.
+
+El módulo de fotografías es la implementación de referencia: el controlador no contiene SQL; `ComparacionService` aplica consentimiento, publicación y archivo; `ComparacionRepository` concentra persistencia; `Database` y `Cache` son adaptadores intercambiables; `container.js` ensambla las dependencias.
+
+La adopción se valida mediante pruebas unitarias que sustituyen base de datos y caché por objetos en memoria, además de las pruebas integrales existentes.

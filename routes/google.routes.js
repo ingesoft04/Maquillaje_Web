@@ -1,0 +1,10 @@
+const router=require('express').Router();
+const c=require('../google.controller');
+const {autenticar,soloAdmin}=require('../middleware/auth');
+router.get('/google/oauth/iniciar',autenticar,soloAdmin,c.iniciar);
+router.get('/google/oauth/callback',c.callback);
+router.get('/admin/google/estado',autenticar,soloAdmin,c.estado);
+router.post('/admin/google/desconectar',autenticar,soloAdmin,c.desconectar);
+router.post('/admin/google/reintentar',autenticar,soloAdmin,c.reintentar);
+router.patch('/admin/google/especialistas/:id',autenticar,soloAdmin,c.asignarCalendario);
+module.exports=router;

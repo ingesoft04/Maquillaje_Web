@@ -648,6 +648,12 @@
     .admin-form-grid input { min-width:0; background:#2A1020; color:var(--cream); border:1px solid #5C2A3A; padding:.65rem; }
     .admin-form-grid button { background:var(--gold); color:var(--plum); border:0; padding:.65rem; cursor:pointer; font-weight:600; }
     .admin-section-title { color:var(--blush); font:400 1.15rem 'Cormorant Garamond',serif; margin:1rem 0 .7rem; }
+    .calendar-toolbar { display:flex; flex-wrap:wrap; gap:.6rem; align-items:center; justify-content:space-between; margin-bottom:1rem; }
+    .calendar-week { display:grid; grid-template-columns:repeat(7,minmax(145px,1fr)); gap:.55rem; min-width:1050px; }
+    .calendar-day { background:#2A1020; border:1px solid #51243B; min-height:260px; padding:.6rem; }
+    .calendar-day h6 { color:var(--gold); font-size:.66rem; letter-spacing:1px; margin-bottom:.65rem; text-transform:uppercase; }
+    .calendar-event { padding:.55rem; margin-bottom:.45rem; border-left:4px solid var(--blush); background:#3C1930; color:#F4E9E5; font-size:.66rem; line-height:1.45; }
+    .calendar-event.completada { border-color:#62B987; }.calendar-event.cancelada { border-color:#C65D67;opacity:.65}.calendar-event.en_servicio { border-color:#E7B75D; }
     .profile-panel { margin-top:1.5rem; padding:2rem; background:#2A1020; border:1px solid #5C2A3A; }
     .profile-panel h4 { color:var(--blush); font:400 1.35rem 'Cormorant Garamond',serif; margin-bottom:1rem; }
     .profile-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:.8rem; }
@@ -1356,6 +1362,7 @@
         <input type="password" id="log-pass" placeholder="Tu contraseña"/>
       </div>
       <button class="btn-auth" onclick="login()">Ingresar</button>
+      <button class="btn-cancelar" style="margin-top:.75rem" onclick="solicitarRecuperacion()">¿Olvidaste tu contraseña?</button>
       <div class="auth-msg" id="log-msg"></div>
     </div>
 
@@ -1385,7 +1392,7 @@
       </div>
 
       <!-- Formulario agendar -->
-      <div class="agendar-box">
+      <div class="agendar-box" id="agendarCliente">
         <h4>✦ Agendar nueva cita</h4>
 
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
@@ -1435,7 +1442,7 @@
       </div>
 
       <!-- Mis Citas -->
-      <div class="citas-box">
+      <div class="citas-box" id="citasCliente">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
           <h4>📋 Mis Citas</h4>
           <button class="btn-pdf" id="btnExportarPDF" onclick="exportarPDF()" disabled>
@@ -1463,6 +1470,36 @@
         <button class="btn-agendar" onclick="guardarPerfilCosmetico()">Guardar ficha</button>
         <h4 style="margin-top:1.5rem;">Pagos registrados</h4>
         <div id="misPagos"><p class="empty-citas">Sin pagos registrados.</p></div>
+        <h4 style="margin-top:1.5rem;">Historial profesional y recomendaciones</h4>
+        <div id="miHistorialProfesional"><p class="empty-citas">Aún no hay registros profesionales.</p></div>
+        <h4 style="margin-top:1.5rem;">Lista de espera</h4>
+        <div class="admin-form-grid">
+          <input id="esperaDesde" type="date" aria-label="Fecha inicial">
+          <input id="esperaHasta" type="date" aria-label="Fecha final">
+          <input id="esperaHoraDesde" type="time" value="08:00" aria-label="Hora inicial">
+          <input id="esperaHoraHasta" type="time" value="18:00" aria-label="Hora final">
+          <button onclick="crearListaEspera()">Avisarme si se libera un turno</button>
+        </div>
+        <div id="miListaEspera"></div>
+        <h4 style="margin-top:1.5rem;">Privacidad y mis datos</h4>
+        <p class="cita-meta">Puedes descargar una copia de tu información o solicitar corrección y eliminación.</p>
+        <button class="admin-tab" onclick="exportarMisDatos()">Descargar mis datos</button>
+        <button class="admin-tab" onclick="solicitarPrivacidadCliente('correccion')">Solicitar corrección</button>
+        <button class="admin-tab" onclick="solicitarPrivacidadCliente('eliminacion')">Solicitar eliminación</button>
+      </div>
+
+      <div class="admin-panel" id="profesionalPanel">
+        <div class="admin-title-row">
+          <h4>Portal de especialista</h4>
+          <span class="admin-badge">Agenda profesional</span>
+        </div>
+        <div class="admin-stats">
+          <div class="admin-stat"><strong id="proHoy">0</strong><span>Citas hoy</span></div>
+          <div class="admin-stat"><strong id="proProximas">0</strong><span>Próximas</span></div>
+          <div class="admin-stat"><strong id="proCompletadas">0</strong><span>Completadas</span></div>
+          <div class="admin-stat"><strong id="proCalificacion">—</strong><span>Calificación</span></div>
+        </div>
+        <div id="profesionalContenido"></div>
       </div>
 
       <!-- Administración: solo visible para el rol admin -->
@@ -1483,9 +1520,17 @@
           <button class="admin-tab" onclick="mostrarAdminVista('catalogo', this)">Catálogo</button>
           <button class="admin-tab" onclick="mostrarAdminVista('auditoria', this)">Auditoría</button>
           <button class="admin-tab" onclick="mostrarAdminVista('analitica', this)">Analítica</button>
+          <button class="admin-tab" onclick="mostrarAdminVista('reportes', this)">Reportes</button>
           <button class="admin-tab" onclick="mostrarAdminVista('pagos', this)">Caja</button>
           <button class="admin-tab" onclick="mostrarAdminVista('inventario', this)">Inventario</button>
           <button class="admin-tab" onclick="mostrarAdminVista('agenda', this)">Agenda</button>
+          <button class="admin-tab" onclick="mostrarAdminVista('calendario', this)">Calendario</button>
+          <button class="admin-tab" onclick="mostrarAdminVista('espera', this)">Lista de espera</button>
+          <button class="admin-tab" onclick="mostrarAdminVista('resenas', this)">Reseñas</button>
+          <button class="admin-tab" onclick="mostrarAdminVista('configuracion', this)">Configuración</button>
+          <button class="admin-tab" onclick="mostrarAdminVista('privacidad', this)">Privacidad</button>
+          <button class="admin-tab" onclick="mostrarAdminVista('fotografias', this)">Fotografías</button>
+          <button class="admin-tab" onclick="mostrarAdminVista('google', this)">Google Calendar</button>
         </div>
         <div class="admin-table-wrap" id="adminContenido"></div>
       </div>
@@ -1652,6 +1697,16 @@ let adminPagos = [];
 let adminInventario = [];
 let adminHorarios = [];
 let adminBloqueos = [];
+let adminGoogle = { configurado:false,conectado:false,cuenta:null,cola:{pendientes:0,fallidos:0} };
+let adminEspera=[];
+let adminResenas=[];
+let adminConfiguracion={};
+let agendaSemanaOffset=0;
+let adminRecetas=[];
+let adminProveedores=[];
+let adminReportes=null;
+let adminPrivacidad=[];
+let adminFotografias=[];
 
 function escaparHTML(valor) {
   return String(valor ?? '').replace(/[&<>'"]/g, caracter => ({
@@ -1784,6 +1839,7 @@ async function login() {
     mostrarToast('❗ ' + error.message, 'error');
   }
 }
+async function solicitarRecuperacion(){const email=document.getElementById('log-email').value.trim();if(!email){mostrarToast('Escribe primero tu correo','info');return;}try{await apiFetch('/auth/recuperacion/solicitar',{method:'POST',body:JSON.stringify({email})});mostrarToast('Si el correo existe, recibirás instrucciones','success');}catch(e){mostrarToast('❗ '+e.message,'error');}}
 
 // ── ENTRAR AL DASHBOARD ──
 async function entrarDashboard(usuario) {
@@ -1807,13 +1863,57 @@ async function entrarDashboard(usuario) {
   const hoy = new Date().toISOString().split('T')[0];
   document.getElementById('cita-fecha').min   = hoy;
   document.getElementById('cita-fecha').value = hoy;
+  ['esperaDesde','esperaHasta'].forEach((id,i)=>{const el=document.getElementById(id);if(el){el.min=hoy;el.value=new Date(Date.now()+i*7*86400000).toISOString().slice(0,10);}});
 
-  await renderCitas();
-  await cargarPerfilCosmetico();
-  await cargarMisPagos();
+  const esProfesional=usuarioActual.rol==='especialista';
+  document.getElementById('agendarCliente').style.display=esProfesional?'none':'block';
+  document.getElementById('citasCliente').style.display=esProfesional?'none':'block';
+  document.getElementById('perfilCosmeticoPanel').style.display=esProfesional?'none':'block';
+  document.getElementById('statsRow').style.display=esProfesional?'none':'flex';
+  document.getElementById('profesionalPanel').classList.toggle('visible',esProfesional);
+  if(esProfesional) await cargarPortalProfesional();
+  else {
+    await renderCitas();
+    await cargarPerfilCosmetico();
+    await cargarMisPagos();
+    await cargarHistorialProfesional();
+    await cargarListaEspera();
+  }
   const adminPanel = document.getElementById('adminPanel');
   adminPanel.classList.toggle('visible', usuarioActual.rol === 'admin');
   if (usuarioActual.rol === 'admin') await cargarAdmin();
+}
+
+async function cargarPortalProfesional(){
+  try{
+    const data=await apiFetch('/profesional/resumen');
+    document.getElementById('proHoy').textContent=data.resumen.hoy||0;
+    document.getElementById('proProximas').textContent=data.resumen.proximas||0;
+    document.getElementById('proCompletadas').textContent=data.resumen.completadas||0;
+    document.getElementById('proCalificacion').textContent=Number(data.resumen.promedio||0).toFixed(1);
+    const cont=document.getElementById('profesionalContenido');
+    cont.innerHTML=data.citas.length?`<div class="admin-table-wrap"><table class="admin-table">
+      <thead><tr><th>Fecha</th><th>Cliente</th><th>Servicio</th><th>Contacto</th><th>Atención</th><th>Expediente</th></tr></thead>
+      <tbody>${data.citas.map(c=>`<tr><td>${formatFecha(c.fecha)}<br>${String(c.hora).slice(0,5)}</td>
+      <td>${escaparHTML(c.cliente)}</td><td>${escaparHTML(c.servicio||'Servicio')}</td><td>${escaparHTML(c.telefono||'—')}</td>
+      <td><select class="admin-select" onchange="estadoProfesional('${c.id}',this.value)">
+      ${['confirmada','en_servicio','completada','no_asistio'].map(x=>`<option value="${x}" ${(x==='no_asistio'?c.asistencia==='no_asistio':c.estado===x)?'selected':''}>${x.replace('_',' ')}</option>`).join('')}</select></td>
+      <td><button class="admin-tab" onclick="editarExpedienteProfesional('${c.id}')">Abrir ficha</button></td></tr>`).join('')}</tbody></table></div>`:
+      '<p class="empty-citas">No hay próximas citas asignadas.</p>';
+  }catch(e){document.getElementById('profesionalContenido').innerHTML=`<p class="empty-citas">${escaparHTML(e.message)}</p>`;}
+}
+async function estadoProfesional(id,estado){try{await apiFetch(`/profesional/citas/${id}/estado`,{method:'PATCH',body:JSON.stringify({estado})});mostrarToast('Atención actualizada','success');await cargarPortalProfesional();}catch(e){mostrarToast('❗ '+e.message,'error');}}
+async function editarExpedienteProfesional(id){
+  try{
+    const data=await apiFetch(`/profesional/citas/${id}/expediente`),e=data.expediente;
+    const productos=prompt(`Cliente: ${e.cliente}\nPiel: ${e.tipo_piel||'sin registrar'} · ${e.subtono||'sin subtono'}\nAlergias: ${e.alergias||'ninguna declarada'}\n\nProductos utilizados:`,e.productos_usados||'');
+    if(productos===null)return;
+    const tecnicas=prompt('Tonos y técnicas aplicadas:',e.tonos_tecnicas||'');if(tecnicas===null)return;
+    const recomendaciones=prompt('Recomendaciones posteriores:',e.recomendaciones||'');if(recomendaciones===null)return;
+    await apiFetch(`/profesional/citas/${id}/expediente`,{method:'PUT',body:JSON.stringify({...e,productos_usados:productos,tonos_tecnicas:tecnicas,recomendaciones})});
+    if(recomendaciones.trim())await apiFetch(`/profesional/citas/${id}/seguimiento`,{method:'POST',body:JSON.stringify({tipo:'cuidados',contenido:recomendaciones,visible_cliente:true})});
+    mostrarToast('Expediente guardado','success');
+  }catch(e){mostrarToast('❗ '+e.message,'error');}
 }
 
 async function cargarPerfilCosmetico() {
@@ -1853,6 +1953,23 @@ async function cargarMisPagos(){
   }catch(error){document.getElementById('misPagos').innerHTML=`<p class="empty-citas">${escaparHTML(error.message)}</p>`;}
 }
 
+async function cargarHistorialProfesional(){
+  try{const d=await apiFetch('/historial-profesional'),cont=document.getElementById('miHistorialProfesional');
+    const registros=[...d.expedientes.map(x=>`<div class="cita-card"><div class="cita-info"><div class="cita-servicio">${escaparHTML(x.servicio||'Servicio')} · ${formatFecha(x.fecha)}</div><div class="cita-meta">👩‍🎨 ${escaparHTML(x.especialista)}${x.tonos_tecnicas?`<br>🎨 ${escaparHTML(x.tonos_tecnicas)}`:''}${x.recomendaciones?`<br>🌿 ${escaparHTML(x.recomendaciones)}`:''}</div></div></div>`),
+      ...d.seguimientos.map(x=>`<div class="cita-card"><div class="cita-info"><div class="cita-servicio">${escaparHTML(x.tipo)}</div><div class="cita-meta">${escaparHTML(x.contenido)}</div></div></div>`)];
+    cont.innerHTML=registros.length?registros.join(''):'<p class="empty-citas">Aún no hay registros profesionales.</p>';
+  }catch(e){document.getElementById('miHistorialProfesional').innerHTML=`<p class="empty-citas">${escaparHTML(e.message)}</p>`;}
+}
+async function calificarCita(id){const valor=prompt('Calificación general de 1 a 5:','5');if(valor===null)return;const comentario=prompt('Comentario opcional:','')??'';try{await apiFetch(`/citas/${id}/resena`,{method:'POST',body:JSON.stringify({calificacion:Number(valor),comentario})});mostrarToast('Gracias por tu calificación','success');}catch(e){mostrarToast('❗ '+e.message,'error');}}
+async function crearListaEspera(){try{const servicio=document.getElementById('cita-servicio').value||null,especialista=document.getElementById('cita-especialista').value||null;
+  await apiFetch('/lista-espera',{method:'POST',body:JSON.stringify({tipo_id:servicio?Number(servicio):null,especialista_id:especialista?Number(especialista):null,
+  fecha_desde:document.getElementById('esperaDesde').value,fecha_hasta:document.getElementById('esperaHasta').value,hora_desde:document.getElementById('esperaHoraDesde').value,hora_hasta:document.getElementById('esperaHoraHasta').value})});
+  mostrarToast('Solicitud agregada a lista de espera','success');await cargarListaEspera();}catch(e){mostrarToast('❗ '+e.message,'error');}}
+async function cargarListaEspera(){try{const d=await apiFetch('/lista-espera/mis'),c=document.getElementById('miListaEspera');c.innerHTML=d.espera.length?`<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Rango</th><th>Horario</th><th>Estado</th><th></th></tr></thead><tbody>${d.espera.map(x=>`<tr><td>${formatFecha(x.fecha_desde)} – ${formatFecha(x.fecha_hasta)}</td><td>${String(x.hora_desde||'').slice(0,5)} – ${String(x.hora_hasta||'').slice(0,5)}</td><td>${escaparHTML(x.estado)}</td><td>${['activa','ofrecida'].includes(x.estado)?`<button class="admin-tab" onclick="cancelarListaEspera('${x.id}')">Cancelar</button>`:''}</td></tr>`).join('')}</tbody></table></div>`:'<p class="empty-citas">No tienes solicitudes activas.</p>';}catch(e){}}
+async function cancelarListaEspera(id){try{await apiFetch(`/lista-espera/${id}/cancelar`,{method:'PATCH'});await cargarListaEspera();}catch(e){mostrarToast('❗ '+e.message,'error');}}
+async function exportarMisDatos(){try{const r=await fetch(`${API}/privacidad/exportar`,{headers:{Authorization:`Bearer ${token}`}}),blob=await r.blob(),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='mis-datos-arte-belleza.json';a.click();URL.revokeObjectURL(url);}catch(e){mostrarToast('❗ No se pudo exportar','error');}}
+async function solicitarPrivacidadCliente(tipo){const detalle=prompt(`Describe tu solicitud de ${tipo}:`,'');if(detalle===null)return;try{await apiFetch('/privacidad/solicitudes',{method:'POST',body:JSON.stringify({tipo,detalle})});mostrarToast('Solicitud registrada','success');}catch(e){mostrarToast('❗ '+e.message,'error');}}
+
 // ── LOGOUT ──
 async function logout() {
   try { await apiFetch('/auth/logout', { method: 'POST' }); } catch (_) {}
@@ -1861,6 +1978,7 @@ async function logout() {
   dash.classList.remove('visible');
   dash.style.display = 'none';
   document.getElementById('adminPanel').classList.remove('visible');
+  document.getElementById('profesionalPanel').classList.remove('visible');
 
   document.getElementById('authTabs').style.display = 'flex';
   showTab('login');
@@ -2027,6 +2145,7 @@ async function renderCitas() {
         <span class="cita-estado">✓ ${cita.estado}</span>
         ${cita.estado !== 'cancelada' && cita.estado !== 'completada' ? `<button class="btn-cancelar" onclick="editarCita('${cita.id}')">📅 Reprogramar</button>` : ''}
         ${cita.estado !== 'cancelada' && cita.estado !== 'completada' ? `<button class="btn-cancelar" onclick="cancelarCita('${cita.id}')">❌ Cancelar</button>` : ''}
+        ${cita.estado === 'completada' ? `<button class="btn-cancelar" onclick="calificarCita('${cita.id}')">⭐ Calificar</button>` : ''}
       </div>
     </div>
   `).join('');
@@ -2036,11 +2155,15 @@ async function renderCitas() {
 async function cargarAdmin() {
   try {
     const [resumen, citasData, usuariosData, especialistasData, serviciosData, auditoriaData,
-      analiticaData,pagosData,inventarioData,horariosData,bloqueosData] = await Promise.all([
+      analiticaData,pagosData,inventarioData,horariosData,bloqueosData,googleData,esperaData,resenasData,configData,
+      recetasData,proveedoresData,reportesData,privacidadData,fotografiasData] = await Promise.all([
       apiFetch('/admin/resumen'), apiFetch('/admin/citas'), apiFetch('/admin/usuarios'),
       apiFetch('/admin/especialistas'), apiFetch('/admin/servicios'), apiFetch('/admin/auditoria'),
       apiFetch('/admin/analitica'),apiFetch('/admin/pagos'),apiFetch('/admin/inventario'),
-      apiFetch('/admin/horarios'),apiFetch('/admin/bloqueos')
+      apiFetch('/admin/horarios'),apiFetch('/admin/bloqueos'),apiFetch('/admin/google/estado'),
+      apiFetch('/admin/lista-espera'),apiFetch('/admin/resenas'),apiFetch('/admin/configuracion'),
+      apiFetch('/admin/inventario-recetas'),apiFetch('/admin/proveedores'),apiFetch('/admin/reportes'),apiFetch('/admin/privacidad/solicitudes'),
+      apiFetch('/comparaciones/admin')
     ]);
     adminCitas = citasData.citas || [];
     adminUsuarios = usuariosData.usuarios || [];
@@ -2049,6 +2172,11 @@ async function cargarAdmin() {
     adminAuditoria = auditoriaData.auditoria || [];
     adminAnalitica=analiticaData; adminPagos=pagosData.pagos||[]; adminInventario=inventarioData.productos||[];
     adminHorarios=horariosData.horarios||[]; adminBloqueos=bloqueosData.bloqueos||[];
+    adminGoogle=googleData;
+    adminEspera=esperaData.espera||[];adminResenas=resenasData.resenas||[];adminConfiguracion=configData.configuracion||{};
+    adminRecetas=recetasData.recetas||[];adminProveedores=proveedoresData.proveedores||[];adminReportes=reportesData;
+    adminPrivacidad=privacidadData.solicitudes||[];
+    adminFotografias=fotografiasData.comparaciones||[];
     document.getElementById('adminUsuarios').textContent = resumen.usuarios;
     document.getElementById('adminCitas').textContent = resumen.citas_total;
     document.getElementById('adminProximas').textContent = resumen.citas_proximas;
@@ -2066,9 +2194,17 @@ function mostrarAdminVista(vista, boton) {
   else if (vista === 'catalogo') renderAdminCatalogo();
   else if (vista === 'auditoria') renderAdminAuditoria();
   else if (vista === 'analitica') renderAdminAnalitica();
+  else if (vista === 'reportes') renderAdminReportes();
   else if (vista === 'pagos') renderAdminPagos();
   else if (vista === 'inventario') renderAdminInventario();
   else if (vista === 'agenda') renderAdminAgenda();
+  else if (vista === 'calendario') renderAdminCalendario();
+  else if (vista === 'espera') renderAdminEspera();
+  else if (vista === 'resenas') renderAdminResenas();
+  else if (vista === 'configuracion') renderAdminConfiguracion();
+  else if (vista === 'privacidad') renderAdminPrivacidad();
+  else if (vista === 'fotografias') renderAdminFotografias();
+  else if (vista === 'google') renderAdminGoogle();
   else renderAdminCitas();
 }
 
@@ -2079,12 +2215,13 @@ function renderAdminCitas() {
     return;
   }
   contenido.innerHTML = `<table class="admin-table">
-    <thead><tr><th>Fecha</th><th>Cliente</th><th>Servicio</th><th>Especialista</th><th>Estado</th></tr></thead>
+    <thead><tr><th>Fecha</th><th>Cliente</th><th>Servicio</th><th>Especialista</th><th>Google</th><th>Estado</th></tr></thead>
     <tbody>${adminCitas.map(cita => `<tr>
       <td>${formatFecha(cita.fecha)}<br>${escaparHTML(String(cita.hora).slice(0,5))}</td>
       <td>${escaparHTML(cita.cliente)}<br><small>${escaparHTML(cita.cliente_email)}</small></td>
       <td>${escaparHTML(cita.servicio || 'Sin servicio')}</td>
       <td>${escaparHTML(cita.especialista)}</td>
+      <td>${cita.google_event_url?`<a href="${escaparHTML(cita.google_event_url)}" target="_blank" rel="noopener">✓ Evento</a>`:escaparHTML(cita.google_sync_estado||'no configurado')}${cita.google_sync_error?`<br><small title="${escaparHTML(cita.google_sync_error)}">⚠ Error</small>`:''}</td>
       <td><select class="admin-select" onchange="cambiarEstadoAdmin('${cita.id}', this.value)">
         ${['confirmada','completada','reprogramada','cancelada'].map(estado =>
           `<option value="${estado}" ${cita.estado === estado ? 'selected' : ''}>${estado}</option>`).join('')}
@@ -2106,6 +2243,9 @@ function renderAdminUsuarios() {
 
 function renderAdminCatalogo() {
   document.getElementById('adminContenido').innerHTML = `
+    <h5 class="admin-section-title">Crear acceso para especialista</h5>
+    <div class="admin-form-grid"><select class="admin-select" id="cuentaEsp">${adminEspecialistas.filter(e=>!e.usuario_id&&e.activo).map(e=>`<option value="${e.id}">${escaparHTML(e.nombre)}</option>`).join('')}</select>
+    <input id="cuentaEspEmail" type="email" placeholder="Correo de acceso"><input id="cuentaEspPassword" type="password" placeholder="Contraseña temporal (10+)"><button onclick="crearCuentaEspecialistaAdmin()">Crear acceso</button></div>
     <h5 class="admin-section-title">Nueva especialista</h5>
     <div class="admin-form-grid">
       <input id="adminEspNombre" placeholder="Nombre completo">
@@ -2131,6 +2271,9 @@ function renderAdminCatalogo() {
       <tbody>${adminServicios.map(item => `<tr><td>${escaparHTML(item.nombre)}</td><td>$${Number(item.precio || 0).toLocaleString('es-CO')}</td>
       <td>${item.duracion_minutos} min</td><td>${item.activo ? 'Activo' : 'Inactivo'}</td><td><button class="admin-tab" onclick="toggleServicioAdmin(${item.id})">${item.activo ? 'Desactivar' : 'Activar'}</button></td></tr>`).join('')}</tbody></table></div>`;
 }
+async function crearCuentaEspecialistaAdmin(){try{await apiFetch('/admin/especialistas/cuenta',{method:'POST',body:JSON.stringify({
+  especialista_id:Number(document.getElementById('cuentaEsp').value),email:document.getElementById('cuentaEspEmail').value,password:document.getElementById('cuentaEspPassword').value})});
+  mostrarToast('Acceso profesional creado','success');await cargarAdmin();renderAdminCatalogo();}catch(e){mostrarToast('❗ '+e.message,'error');}}
 
 function renderAdminAuditoria() {
   document.getElementById('adminContenido').innerHTML = `<table class="admin-table"><thead><tr><th>Fecha</th><th>Usuario</th><th>Acción</th><th>Entidad</th><th>ID</th></tr></thead>
@@ -2149,23 +2292,40 @@ function renderAdminAnalitica(){
     <h5 class="admin-section-title">Servicios más solicitados</h5><table class="admin-table"><thead><tr><th>Servicio</th><th>Citas</th><th>Valor</th></tr></thead><tbody>${a.servicios.map(x=>`<tr><td>${escaparHTML(x.nombre||'Sin servicio')}</td><td>${x.total}</td><td>$${Number(x.ingresos||0).toLocaleString('es-CO')}</td></tr>`).join('')}</tbody></table>
     <h5 class="admin-section-title">Evolución mensual</h5><table class="admin-table"><thead><tr><th>Mes</th><th>Citas</th><th>Valor</th></tr></thead><tbody>${a.mensual.map(x=>`<tr><td>${x.mes}</td><td>${x.total}</td><td>$${Number(x.valor||0).toLocaleString('es-CO')}</td></tr>`).join('')}</tbody></table>`;
 }
+function renderAdminReportes(){const r=adminReportes||{finanzas:[],especialistas:[],horas:[]};document.getElementById('adminContenido').innerHTML=`
+  <div class="calendar-toolbar"><h5 class="admin-section-title">Reportes gerenciales</h5><div>
+  ${['finanzas','servicios','especialistas','clientes','inventario'].map(x=>`<a class="admin-tab" href="/api/admin/reportes/${x}.csv" onclick="descargarReporte(event,'${x}')">CSV ${x}</a>`).join(' ')}</div></div>
+  <h5 class="admin-section-title">Finanzas mensuales</h5><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Mes</th><th>Citas</th><th>Agendado</th><th>Cobrado</th><th>Pendiente</th><th>Canceladas</th><th>Inasistencias</th></tr></thead>
+  <tbody>${r.finanzas.map(x=>`<tr><td>${x.mes}</td><td>${x.citas}</td><td>$${Number(x.agendado).toLocaleString('es-CO')}</td><td>$${Number(x.cobrado).toLocaleString('es-CO')}</td><td>$${Number(x.pendiente).toLocaleString('es-CO')}</td><td>${x.canceladas}</td><td>${x.inasistencias}</td></tr>`).join('')}</tbody></table></div>
+  <h5 class="admin-section-title">Productividad y satisfacción</h5><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Especialista</th><th>Citas</th><th>Completadas</th><th>Valor</th><th>Satisfacción</th></tr></thead>
+  <tbody>${r.especialistas.map(x=>`<tr><td>${escaparHTML(x.nombre)}</td><td>${x.citas}</td><td>${x.completadas}</td><td>$${Number(x.valor).toLocaleString('es-CO')}</td><td>${Number(x.satisfaccion).toFixed(1)}</td></tr>`).join('')}</tbody></table></div>`;}
+async function descargarReporte(event,seccion){event.preventDefault();try{const r=await fetch(`${API}/admin/reportes/${seccion}.csv`,{headers:{Authorization:`Bearer ${token}`}});if(!r.ok)throw new Error('No se pudo generar el reporte.');const blob=await r.blob(),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`reporte-${seccion}.csv`;a.click();URL.revokeObjectURL(url);}catch(e){mostrarToast('❗ '+e.message,'error');}}
 
 function renderAdminPagos(){
   document.getElementById('adminContenido').innerHTML=`<h5 class="admin-section-title">Registrar pago o abono</h5><div class="admin-form-grid">
     <select class="admin-select" id="pagoCita"><option value="">Selecciona cita</option>${adminCitas.filter(c=>c.estado!=='cancelada').map(c=>`<option value="${c.id}">${escaparHTML(c.cliente)} · ${escaparHTML(c.servicio||'Servicio')} · ${formatFecha(c.fecha)}</option>`).join('')}</select>
-    <input id="pagoMonto" type="number" min="1" placeholder="Monto COP"><select class="admin-select" id="pagoMetodo"><option>efectivo</option><option>transferencia</option><option>tarjeta</option><option>otro</option></select><button onclick="registrarPagoAdmin()">Registrar pago</button></div>
+    <input id="pagoMonto" type="number" min="1" placeholder="Monto COP"><select class="admin-select" id="pagoMetodo"><option>efectivo</option><option>transferencia</option><option>tarjeta</option><option>otro</option></select>
+    <select class="admin-select" id="pagoConcepto"><option value="anticipo">Anticipo no reembolsable</option><option value="abono">Abono</option><option value="saldo">Pago del saldo</option></select><button onclick="registrarPagoAdmin()">Registrar pago</button></div>
     <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Fecha</th><th>Cliente</th><th>Servicio</th><th>Monto</th><th>Método</th></tr></thead><tbody>${adminPagos.map(p=>`<tr><td>${new Date(p.creado_en).toLocaleDateString('es-CO')}</td><td>${escaparHTML(p.cliente)}</td><td>${escaparHTML(p.servicio||'Servicio')}</td><td>$${Number(p.monto).toLocaleString('es-CO')}</td><td>${escaparHTML(p.metodo)}</td></tr>`).join('')}</tbody></table></div>`;
 }
 
-async function registrarPagoAdmin(){try{await apiFetch('/admin/pagos',{method:'POST',body:JSON.stringify({cita_id:document.getElementById('pagoCita').value,monto:document.getElementById('pagoMonto').value,metodo:document.getElementById('pagoMetodo').value})});mostrarToast('Pago registrado','success');await cargarAdmin();renderAdminPagos();await cargarMisPagos();}catch(e){mostrarToast('❗ '+e.message,'error');}}
+async function registrarPagoAdmin(){try{await apiFetch('/admin/pagos',{method:'POST',body:JSON.stringify({cita_id:document.getElementById('pagoCita').value,monto:document.getElementById('pagoMonto').value,metodo:document.getElementById('pagoMetodo').value,concepto:document.getElementById('pagoConcepto').value})});mostrarToast('Pago registrado','success');await cargarAdmin();renderAdminPagos();await cargarMisPagos();}catch(e){mostrarToast('❗ '+e.message,'error');}}
 
 function renderAdminInventario(){
   document.getElementById('adminContenido').innerHTML=`<h5 class="admin-section-title">Nuevo producto</h5><div class="admin-form-grid"><input id="invNombre" placeholder="Producto"><input id="invMarca" placeholder="Marca"><input id="invCategoria" placeholder="Categoría"><input id="invCantidad" type="number" min="0" placeholder="Cantidad"><input id="invUnidad" value="unidad" placeholder="Unidad"><input id="invMinimo" type="number" min="0" placeholder="Stock mínimo"><input id="invVence" type="date"><button onclick="crearProductoAdmin()">Agregar producto</button></div>
-    <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Producto</th><th>Marca</th><th>Stock</th><th>Vence</th><th>Alertas</th><th>Movimientos</th></tr></thead><tbody>${adminInventario.map(p=>`<tr><td>${escaparHTML(p.nombre)}</td><td>${escaparHTML(p.marca||'—')}</td><td>${p.cantidad} ${escaparHTML(p.unidad)}</td><td>${p.vence_en?formatFecha(p.vence_en):'—'}</td><td>${p.stock_bajo?'⚠ Stock bajo ':''}${p.por_vencer?'⚠ Vence pronto':''}</td><td><button class="admin-tab" onclick="moverInventario('${p.id}','entrada')">+ Entrada</button> <button class="admin-tab" onclick="moverInventario('${p.id}','salida')">− Salida</button></td></tr>`).join('')}</tbody></table></div>`;
+    <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Producto</th><th>Marca</th><th>Stock</th><th>Vence</th><th>Alertas</th><th>Movimientos</th></tr></thead><tbody>${adminInventario.map(p=>`<tr><td>${escaparHTML(p.nombre)}</td><td>${escaparHTML(p.marca||'—')}</td><td>${p.cantidad} ${escaparHTML(p.unidad)}</td><td>${p.vence_en?formatFecha(p.vence_en):'—'}</td><td>${p.stock_bajo?'⚠ Stock bajo ':''}${p.por_vencer?'⚠ Vence pronto':''}</td><td><button class="admin-tab" onclick="moverInventario('${p.id}','entrada')">+ Entrada</button> <button class="admin-tab" onclick="moverInventario('${p.id}','salida')">− Salida</button></td></tr>`).join('')}</tbody></table></div>
+    <h5 class="admin-section-title">Receta de consumo por servicio</h5><div class="admin-form-grid"><select class="admin-select" id="recServicio">${adminServicios.filter(x=>x.activo).map(x=>`<option value="${x.id}">${escaparHTML(x.nombre)}</option>`).join('')}</select>
+    <select class="admin-select" id="recProducto">${adminInventario.filter(x=>x.activo).map(x=>`<option value="${x.id}">${escaparHTML(x.nombre)} (${escaparHTML(x.unidad)})</option>`).join('')}</select><input id="recCantidad" type="number" min=".001" step=".001" placeholder="Consumo"><button onclick="guardarRecetaAdmin()">Guardar receta</button></div>
+    <table class="admin-table"><thead><tr><th>Servicio</th><th>Producto</th><th>Cantidad</th><th></th></tr></thead><tbody>${adminRecetas.map(x=>`<tr><td>${escaparHTML(x.servicio)}</td><td>${escaparHTML(x.producto)}</td><td>${x.cantidad} ${escaparHTML(x.unidad)}</td><td><button class="admin-tab" onclick="eliminarRecetaAdmin(${x.id})">Eliminar</button></td></tr>`).join('')}</tbody></table>
+    <h5 class="admin-section-title">Proveedores</h5><div class="admin-form-grid"><input id="provNombre" placeholder="Proveedor"><input id="provContacto" placeholder="Contacto"><input id="provTelefono" placeholder="Teléfono"><input id="provEmail" type="email" placeholder="Correo"><button onclick="crearProveedorAdmin()">Agregar proveedor</button></div>
+    <table class="admin-table"><thead><tr><th>Proveedor</th><th>Contacto</th><th>Teléfono</th><th>Correo</th></tr></thead><tbody>${adminProveedores.map(x=>`<tr><td>${escaparHTML(x.nombre)}</td><td>${escaparHTML(x.contacto||'—')}</td><td>${escaparHTML(x.telefono||'—')}</td><td>${escaparHTML(x.email||'—')}</td></tr>`).join('')}</tbody></table>`;
 }
 
 async function crearProductoAdmin(){try{await apiFetch('/admin/inventario',{method:'POST',body:JSON.stringify({nombre:document.getElementById('invNombre').value,marca:document.getElementById('invMarca').value,categoria:document.getElementById('invCategoria').value,cantidad:document.getElementById('invCantidad').value,unidad:document.getElementById('invUnidad').value,stock_minimo:document.getElementById('invMinimo').value,vence_en:document.getElementById('invVence').value||null})});mostrarToast('Producto agregado','success');await cargarAdmin();renderAdminInventario();}catch(e){mostrarToast('❗ '+e.message,'error');}}
 async function moverInventario(id,tipo){const cantidad=window.prompt(`Cantidad de ${tipo}:`);if(!cantidad)return;try{await apiFetch(`/admin/inventario/${id}/movimientos`,{method:'POST',body:JSON.stringify({tipo,cantidad:Number(cantidad),motivo:'Movimiento desde panel'})});mostrarToast('Inventario actualizado','success');await cargarAdmin();renderAdminInventario();}catch(e){mostrarToast('❗ '+e.message,'error');}}
+async function guardarRecetaAdmin(){try{await apiFetch('/admin/inventario-recetas',{method:'POST',body:JSON.stringify({tipo_id:Number(document.getElementById('recServicio').value),producto_id:document.getElementById('recProducto').value,cantidad:Number(document.getElementById('recCantidad').value)})});await cargarAdmin();renderAdminInventario();}catch(e){mostrarToast('❗ '+e.message,'error');}}
+async function eliminarRecetaAdmin(id){try{await apiFetch(`/admin/inventario-recetas/${id}`,{method:'DELETE'});await cargarAdmin();renderAdminInventario();}catch(e){mostrarToast('❗ '+e.message,'error');}}
+async function crearProveedorAdmin(){try{await apiFetch('/admin/proveedores',{method:'POST',body:JSON.stringify({nombre:document.getElementById('provNombre').value,contacto:document.getElementById('provContacto').value,telefono:document.getElementById('provTelefono').value,email:document.getElementById('provEmail').value})});await cargarAdmin();renderAdminInventario();}catch(e){mostrarToast('❗ '+e.message,'error');}}
 
 function renderAdminAgenda(){const dias=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];document.getElementById('adminContenido').innerHTML=`<h5 class="admin-section-title">Agregar jornada</h5><div class="admin-form-grid"><select class="admin-select" id="horEsp">${adminEspecialistas.filter(e=>e.activo).map(e=>`<option value="${e.id}">${escaparHTML(e.nombre)}</option>`).join('')}</select><select class="admin-select" id="horDia">${dias.map((d,i)=>`<option value="${i}">${d}</option>`).join('')}</select><input id="horInicio" type="time" value="08:00"><input id="horFin" type="time" value="18:00"><button onclick="crearHorarioAdmin()">Agregar jornada</button></div>
   <table class="admin-table"><thead><tr><th>Especialista</th><th>Día</th><th>Inicio</th><th>Fin</th><th></th></tr></thead><tbody>${adminHorarios.map(h=>`<tr><td>${escaparHTML(h.especialista)}</td><td>${dias[h.dia_semana]}</td><td>${String(h.hora_inicio).slice(0,5)}</td><td>${String(h.hora_fin).slice(0,5)}</td><td><button class="admin-tab" onclick="eliminarHorarioAdmin(${h.id})">Eliminar</button></td></tr>`).join('')}</tbody></table>
@@ -2176,6 +2336,80 @@ async function crearHorarioAdmin(){try{await apiFetch('/admin/horarios',{method:
 async function eliminarHorarioAdmin(id){try{await apiFetch(`/admin/horarios/${id}`,{method:'DELETE'});await cargarAdmin();renderAdminAgenda();}catch(e){mostrarToast('❗ '+e.message,'error');}}
 async function crearBloqueoAdmin(){try{await apiFetch('/admin/bloqueos',{method:'POST',body:JSON.stringify({especialista_id:Number(document.getElementById('bloqEsp').value),inicio:document.getElementById('bloqInicio').value,fin:document.getElementById('bloqFin').value,motivo:document.getElementById('bloqMotivo').value})});mostrarToast('Bloqueo creado','success');await cargarAdmin();renderAdminAgenda();}catch(e){mostrarToast('❗ '+e.message,'error');}}
 async function eliminarBloqueoAdmin(id){try{await apiFetch(`/admin/bloqueos/${id}`,{method:'DELETE'});await cargarAdmin();renderAdminAgenda();}catch(e){mostrarToast('❗ '+e.message,'error');}}
+
+function renderAdminGoogle(){const g=adminGoogle||{};document.getElementById('adminContenido').innerHTML=`
+  <div class="pro-summary"><div class="admin-stat"><strong>${g.conectado?'✓':'—'}</strong><span>Conexión</span></div>
+  <div class="admin-stat"><strong>${g.cola?.pendientes||0}</strong><span>Pendientes</span></div><div class="admin-stat"><strong>${g.cola?.fallidos||0}</strong><span>Fallidos</span></div></div>
+  <h5 class="admin-section-title">Conexión con Google Calendar</h5>
+  <p>${!g.configurado?'Faltan GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET y GOOGLE_TOKEN_ENCRYPTION_KEY en el servidor.':g.conectado?`Conectado como <strong>${escaparHTML(g.cuenta?.cuenta_email||'cuenta Google')}</strong>.`:'Credenciales listas. Conecte la cuenta que administrará la agenda.'}</p>
+  <p>${g.conectado?'<button class="admin-tab" onclick="desconectarGoogle()">Desconectar</button>':'<button class="admin-tab" onclick="conectarGoogle()" '+(!g.configurado?'disabled':'')+'>Conectar Google Calendar</button>'} <button class="admin-tab" onclick="reintentarGoogle()">Reintentar fallidos</button></p>
+  <h5 class="admin-section-title">Calendario por especialista</h5><table class="admin-table"><thead><tr><th>Especialista</th><th>ID del calendario</th><th></th></tr></thead><tbody>${adminEspecialistas.map(e=>`<tr><td>${escaparHTML(e.nombre)}</td><td><input id="gcal-${e.id}" value="${escaparHTML(e.google_calendar_id||'primary')}" placeholder="primary o correo @group.calendar.google.com"></td><td><button class="admin-tab" onclick="guardarCalendarioEspecialista(${e.id})">Guardar</button></td></tr>`).join('')}</tbody></table>
+  <p><small>Use <code>primary</code> para un calendario único, o el ID de un calendario compartido para separar la agenda de cada especialista.</small></p>`;}
+async function conectarGoogle(){try{const d=await apiFetch('/google/oauth/iniciar');location.href=d.url;}catch(e){mostrarToast('❗ '+e.message,'error');}}
+async function desconectarGoogle(){if(!confirm('¿Desconectar Google Calendar? Las citas seguirán guardadas localmente.'))return;try{await apiFetch('/admin/google/desconectar',{method:'POST'});await cargarAdmin();renderAdminGoogle();}catch(e){mostrarToast('❗ '+e.message,'error');}}
+async function reintentarGoogle(){try{await apiFetch('/admin/google/reintentar',{method:'POST'});mostrarToast('Reintento iniciado','success');await cargarAdmin();renderAdminGoogle();}catch(e){mostrarToast('❗ '+e.message,'error');}}
+async function guardarCalendarioEspecialista(id){try{await apiFetch(`/admin/google/especialistas/${id}`,{method:'PATCH',body:JSON.stringify({google_calendar_id:document.getElementById(`gcal-${id}`).value})});mostrarToast('Calendario asignado','success');await cargarAdmin();renderAdminGoogle();}catch(e){mostrarToast('❗ '+e.message,'error');}}
+
+function renderAdminEspera(){document.getElementById('adminContenido').innerHTML=`<h5 class="admin-section-title">Solicitudes de turnos liberados</h5>
+  <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Cliente</th><th>Servicio</th><th>Especialista</th><th>Fechas</th><th>Horario</th><th>Estado</th></tr></thead>
+  <tbody>${adminEspera.map(x=>`<tr><td>${escaparHTML(x.cliente)}<br><small>${escaparHTML(x.email)}</small></td><td>${escaparHTML(x.servicio||'Cualquiera')}</td>
+  <td>${escaparHTML(x.especialista||'Cualquiera')}</td><td>${formatFecha(x.fecha_desde)} – ${formatFecha(x.fecha_hasta)}</td>
+  <td>${String(x.hora_desde||'').slice(0,5)} – ${String(x.hora_hasta||'').slice(0,5)}</td><td>${escaparHTML(x.estado)}</td></tr>`).join('')}</tbody></table></div>`;}
+function renderAdminResenas(){document.getElementById('adminContenido').innerHTML=`<h5 class="admin-section-title">Satisfacción del servicio</h5>
+  <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Cliente</th><th>Especialista</th><th>Nota</th><th>Comentario</th><th>Respuesta</th><th>Visible</th></tr></thead>
+  <tbody>${adminResenas.map(x=>`<tr><td>${escaparHTML(x.cliente)}</td><td>${escaparHTML(x.especialista)}</td><td>${'★'.repeat(x.calificacion)}${'☆'.repeat(5-x.calificacion)}</td>
+  <td>${escaparHTML(x.comentario||'—')}</td><td><input id="resp-${x.id}" value="${escaparHTML(x.respuesta||'')}" placeholder="Respuesta del negocio"></td>
+  <td><button class="admin-tab" onclick="moderarResenaAdmin('${x.id}',${!x.visible})">${x.visible?'Ocultar':'Publicar'}</button>
+  <button class="admin-tab" onclick="moderarResenaAdmin('${x.id}',${x.visible})">Responder</button></td></tr>`).join('')}</tbody></table></div>`;}
+async function moderarResenaAdmin(id,visible){try{await apiFetch(`/admin/resenas/${id}`,{method:'PATCH',body:JSON.stringify({visible,respuesta:document.getElementById(`resp-${id}`).value})});await cargarAdmin();renderAdminResenas();}catch(e){mostrarToast('❗ '+e.message,'error');}}
+function renderAdminConfiguracion(){const i=adminConfiguracion.identidad||{},r=adminConfiguracion.reservas||{},p=adminConfiguracion.privacidad||{},n=adminConfiguracion.notificaciones||{};
+  document.getElementById('adminContenido').innerHTML=`<h5 class="admin-section-title">Identidad</h5><div class="admin-form-grid">
+  <input id="cfgNombre" value="${escaparHTML(i.nombre||'')}"><input id="cfgMoneda" value="${escaparHTML(i.moneda||'COP')}"><input id="cfgZona" value="${escaparHTML(i.zona_horaria||'America/Bogota')}"><button onclick="guardarConfigAdmin('identidad')">Guardar identidad</button></div>
+  <h5 class="admin-section-title">Políticas de reserva</h5><div class="admin-form-grid"><input id="cfgAnticipo" type="number" min="0" max="100" value="${Number(r.anticipo_porcentaje||0)}" placeholder="% anticipo">
+  <input id="cfgCancelacion" type="number" min="0" value="${Number(r.cancelacion_horas||24)}" placeholder="Horas para cancelar"><input id="cfgTolerancia" type="number" min="0" value="${Number(r.tolerancia_minutos||15)}" placeholder="Tolerancia">
+  <input id="cfgIntervalo" type="number" min="0" value="${Number(r.intervalo_minutos||0)}" placeholder="Intervalo entre citas"><button onclick="guardarConfigAdmin('reservas')">Guardar políticas</button></div>
+  <h5 class="admin-section-title">Privacidad</h5><div class="admin-form-grid"><input id="cfgAuditoria" type="number" value="${Number(p.retencion_auditoria_dias||730)}"><input value="Fotografías: gestión manual" disabled><input id="cfgVersion" value="${escaparHTML(p.version_aviso||'1.0')}"><button onclick="guardarConfigAdmin('privacidad')">Guardar privacidad</button></div>
+  <h5 class="admin-section-title">Notificaciones</h5><div class="admin-form-grid"><input id="cfgRecordatorios" value="${escaparHTML((n.recordatorio_horas||[24,2]).join(','))}" placeholder="Horas: 24,2"><input id="cfgSeguimiento" type="number" value="${Number(n.seguimiento_horas||24)}"><button onclick="guardarConfigAdmin('notificaciones')">Guardar avisos</button></div>`;}
+async function guardarConfigAdmin(tipo){let valor;if(tipo==='identidad')valor={nombre:document.getElementById('cfgNombre').value,moneda:document.getElementById('cfgMoneda').value,zona_horaria:document.getElementById('cfgZona').value};
+  if(tipo==='reservas')valor={anticipo_porcentaje:Number(document.getElementById('cfgAnticipo').value),cancelacion_horas:Number(document.getElementById('cfgCancelacion').value),tolerancia_minutos:Number(document.getElementById('cfgTolerancia').value),intervalo_minutos:Number(document.getElementById('cfgIntervalo').value),bloquear_con_deuda:false};
+  if(tipo==='privacidad')valor={retencion_auditoria_dias:Number(document.getElementById('cfgAuditoria').value),gestion_fotografias:'manual',eliminacion_automatica_fotografias:false,version_aviso:document.getElementById('cfgVersion').value};
+  if(tipo==='notificaciones')valor={recordatorio_horas:document.getElementById('cfgRecordatorios').value.split(',').map(Number).filter(Number.isFinite),seguimiento_horas:Number(document.getElementById('cfgSeguimiento').value),solicitar_resena:true};
+  try{await apiFetch(`/admin/configuracion/${tipo}`,{method:'PUT',body:JSON.stringify({valor})});mostrarToast('Configuración guardada','success');await cargarAdmin();renderAdminConfiguracion();}catch(e){mostrarToast('❗ '+e.message,'error');}}
+
+function inicioSemana(offset=0){const hoy=new Date(),dia=(hoy.getDay()+6)%7;hoy.setHours(0,0,0,0);hoy.setDate(hoy.getDate()-dia+offset*7);return hoy;}
+function renderAdminCalendario(){
+  const inicio=inicioSemana(agendaSemanaOffset),dias=Array.from({length:7},(_,i)=>{const d=new Date(inicio);d.setDate(d.getDate()+i);return d;});
+  const filtro=Number(document.getElementById('calFiltroEsp')?.value||0);
+  document.getElementById('adminContenido').innerHTML=`<div class="calendar-toolbar">
+    <div><button class="admin-tab" onclick="moverSemana(-1)">← Anterior</button> <button class="admin-tab" onclick="moverSemana(0,true)">Hoy</button> <button class="admin-tab" onclick="moverSemana(1)">Siguiente →</button></div>
+    <strong>${dias[0].toLocaleDateString('es-CO')} – ${dias[6].toLocaleDateString('es-CO')}</strong>
+    <select class="admin-select" id="calFiltroEsp" onchange="renderAdminCalendario()"><option value="0">Todas las especialistas</option>${adminEspecialistas.map(e=>`<option value="${e.id}" ${filtro===e.id?'selected':''}>${escaparHTML(e.nombre)}</option>`).join('')}</select></div>
+    <div class="admin-table-wrap"><div class="calendar-week">${dias.map(d=>{const iso=d.toISOString().slice(0,10),eventos=adminCitas.filter(c=>String(c.fecha).slice(0,10)===iso&&(!filtro||c.especialista_id===filtro));
+      return `<section class="calendar-day"><h6>${d.toLocaleDateString('es-CO',{weekday:'short',day:'2-digit',month:'short'})}</h6>${eventos.sort((a,b)=>String(a.hora).localeCompare(String(b.hora))).map(c=>`<div class="calendar-event ${escaparHTML(c.estado)}"><strong>${String(c.hora).slice(0,5)} · ${escaparHTML(c.cliente)}</strong><br>${escaparHTML(c.servicio||'Servicio')}<br>${escaparHTML(c.especialista)}<br><small>${escaparHTML(c.estado)}</small></div>`).join('')||'<small style="color:#8F7481">Sin citas</small>'}</section>`;}).join('')}</div></div>`;
+}
+function moverSemana(delta,hoy=false){agendaSemanaOffset=hoy?0:agendaSemanaOffset+delta;renderAdminCalendario();}
+function renderAdminPrivacidad(){document.getElementById('adminContenido').innerHTML=`<h5 class="admin-section-title">Solicitudes de datos personales</h5>
+  <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Fecha</th><th>Usuario</th><th>Tipo</th><th>Detalle</th><th>Estado</th><th>Respuesta</th></tr></thead><tbody>${adminPrivacidad.map(x=>`<tr>
+  <td>${new Date(x.creado_en).toLocaleDateString('es-CO')}</td><td>${escaparHTML(x.nombre)}<br><small>${escaparHTML(x.email)}</small></td><td>${escaparHTML(x.tipo)}</td><td>${escaparHTML(x.detalle||'—')}</td>
+  <td><select class="admin-select" id="priv-est-${x.id}">${['pendiente','en_proceso','completada','rechazada'].map(e=>`<option ${x.estado===e?'selected':''}>${e}</option>`).join('')}</select></td>
+  <td><input id="priv-resp-${x.id}" value="${escaparHTML(x.respuesta||'')}" placeholder="Respuesta"><button class="admin-tab" onclick="resolverPrivacidadAdmin('${x.id}')">Guardar</button></td></tr>`).join('')}</tbody></table></div>`;}
+async function resolverPrivacidadAdmin(id){try{await apiFetch(`/admin/privacidad/solicitudes/${id}`,{method:'PATCH',body:JSON.stringify({estado:document.getElementById(`priv-est-${id}`).value,respuesta:document.getElementById(`priv-resp-${id}`).value})});await cargarAdmin();renderAdminPrivacidad();}catch(e){mostrarToast('❗ '+e.message,'error');}}
+
+function renderAdminFotografias(){document.getElementById('adminContenido').innerHTML=`<h5 class="admin-section-title">Gestión manual de fotografías</h5>
+  <p class="empty-citas">Las imágenes no se eliminan automáticamente. Aquí puede corregir sus enlaces, descripción, visibilidad o archivarlas. Una publicación pública exige consentimiento registrado.</p>
+  <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Cliente</th><th>Información</th><th>Enlaces</th><th>Control</th></tr></thead><tbody>${adminFotografias.map(x=>`<tr>
+  <td>${escaparHTML(x.cliente_nombre)}<br><small>${escaparHTML(x.cliente_email)}</small></td>
+  <td><input id="foto-titulo-${x.id}" value="${escaparHTML(x.titulo||'')}" placeholder="Título"><br><input id="foto-desc-${x.id}" value="${escaparHTML(x.descripcion||'')}" placeholder="Descripción"></td>
+  <td><input id="foto-antes-${x.id}" value="${escaparHTML(x.antes_url)}" placeholder="URL antes"><br><input id="foto-despues-${x.id}" value="${escaparHTML(x.despues_url)}" placeholder="URL después"></td>
+  <td><label><input id="foto-publica-${x.id}" type="checkbox" ${x.publica?'checked':''}> Pública</label><br>
+  <select id="foto-estado-${x.id}"><option value="activa" ${x.estado==='activa'?'selected':''}>Activa</option><option value="archivada" ${x.estado==='archivada'?'selected':''}>Archivada</option></select><br>
+  <small>${x.consentimiento_fecha?'Consentimiento: '+formatearFecha(x.consentimiento_fecha):'Sin consentimiento asociado'}</small><br>
+  <button class="admin-tab" onclick="guardarFotografiaAdmin('${x.id}')">Guardar</button></td></tr>`).join('')}</tbody></table></div>`;}
+async function guardarFotografiaAdmin(id){try{await apiFetch(`/comparaciones/admin/${id}`,{method:'PATCH',body:JSON.stringify({
+  titulo:document.getElementById(`foto-titulo-${id}`).value,descripcion:document.getElementById(`foto-desc-${id}`).value,
+  antes_url:document.getElementById(`foto-antes-${id}`).value,despues_url:document.getElementById(`foto-despues-${id}`).value,
+  publica:document.getElementById(`foto-publica-${id}`).checked,estado:document.getElementById(`foto-estado-${id}`).value
+})});mostrarToast('Fotografías actualizadas','success');await cargarAdmin();renderAdminFotografias();}catch(e){mostrarToast('❗ '+e.message,'error');}}
 
 async function crearEspecialistaAdmin() {
   try {
@@ -2384,6 +2618,13 @@ document.getElementById('lookModal').addEventListener('click', function(e) {
 
 // ── INICIALIZACIÓN ──
 document.addEventListener('DOMContentLoaded', async function() {
+  const googleResultado=new URLSearchParams(location.search);
+  if(googleResultado.get('google')==='conectado')mostrarToast(`Google Calendar conectado: ${googleResultado.get('cuenta')||''}`,'success');
+  if(googleResultado.get('google')==='error')mostrarToast(`Google Calendar: ${googleResultado.get('mensaje')||'Error de autorización'}`,'error');
+  if(googleResultado.get('recuperar')){
+    const nueva=prompt('Escribe una nueva contraseña de mínimo 10 caracteres, con letras y números:');
+    if(nueva)try{await apiFetch('/auth/recuperacion/restablecer',{method:'POST',body:JSON.stringify({token:googleResultado.get('recuperar'),password:nueva})});mostrarToast('Contraseña actualizada','success');history.replaceState({},'',location.pathname);}catch(e){mostrarToast('❗ '+e.message,'error');}
+  }
   const dash = document.getElementById('dashboard');
   dash.style.display = 'none';
   dash.classList.remove('visible');

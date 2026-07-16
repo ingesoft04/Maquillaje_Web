@@ -4,7 +4,9 @@ module.exports={
   servers:[{url:'/api',description:'Servidor actual'}],
   tags:[
     {name:'Autenticación'},{name:'Catálogo'},{name:'Citas'},{name:'Perfil cosmético'},
-    {name:'Pagos'},{name:'Inventario'},{name:'Agenda avanzada'},{name:'Administración'}
+    {name:'Pagos'},{name:'Inventario'},{name:'Agenda avanzada'},{name:'Portal profesional'},
+    {name:'Expedientes'},{name:'Reseñas'},{name:'Lista de espera'},{name:'Configuración'},
+    {name:'Google Calendar'},{name:'Administración'}
   ],
   components:{
     securitySchemes:{bearerAuth:{type:'http',scheme:'bearer',bearerFormat:'JWT'}},
@@ -42,6 +44,16 @@ module.exports={
     },
     '/admin/analitica':{get:{tags:['Administración'],security:[{bearerAuth:[]}],summary:'Indicadores operativos y financieros',responses:{200:{description:'Analítica'}}}},
     '/admin/horarios':{get:{tags:['Agenda avanzada'],security:[{bearerAuth:[]}],summary:'Jornadas por especialista',responses:{200:{description:'Horarios'}}},post:{tags:['Agenda avanzada'],security:[{bearerAuth:[]}],summary:'Crear tramo laboral',responses:{201:{description:'Horario creado'}}}},
-    '/admin/bloqueos':{get:{tags:['Agenda avanzada'],security:[{bearerAuth:[]}],summary:'Vacaciones y bloqueos',responses:{200:{description:'Bloqueos'}}},post:{tags:['Agenda avanzada'],security:[{bearerAuth:[]}],summary:'Crear bloqueo',responses:{201:{description:'Bloqueo creado'}}}}
+    '/admin/bloqueos':{get:{tags:['Agenda avanzada'],security:[{bearerAuth:[]}],summary:'Vacaciones y bloqueos',responses:{200:{description:'Bloqueos'}}},post:{tags:['Agenda avanzada'],security:[{bearerAuth:[]}],summary:'Crear bloqueo',responses:{201:{description:'Bloqueo creado'}}}},
+    '/google/oauth/iniciar':{get:{tags:['Google Calendar'],security:[{bearerAuth:[]}],summary:'Generar URL segura de autorización OAuth',responses:{200:{description:'URL de Google'},503:{description:'Credenciales no configuradas'}}}},
+    '/google/oauth/callback':{get:{tags:['Google Calendar'],summary:'Recibir autorización OAuth de Google',responses:{302:{description:'Redirección a la agenda'}}}},
+    '/admin/google/estado':{get:{tags:['Google Calendar'],security:[{bearerAuth:[]}],summary:'Estado de conexión y cola de sincronización',responses:{200:{description:'Estado'}}}},
+    '/admin/google/especialistas/{id}':{patch:{tags:['Google Calendar'],security:[{bearerAuth:[]}],summary:'Asignar calendario a especialista',parameters:[{in:'path',name:'id',required:true,schema:{type:'integer'}}],responses:{200:{description:'Calendario asignado'}}}},
+    '/profesional/resumen':{get:{tags:['Portal profesional'],security:[{bearerAuth:[]}],summary:'Agenda e indicadores de la especialista autenticada',responses:{200:{description:'Panel profesional'},403:{description:'Cuenta no vinculada'}}}},
+    '/profesional/citas/{citaId}/expediente':{get:{tags:['Expedientes'],security:[{bearerAuth:[]}],summary:'Consultar expediente de una cita asignada',responses:{200:{description:'Expediente'}}},put:{tags:['Expedientes'],security:[{bearerAuth:[]}],summary:'Guardar expediente profesional',responses:{200:{description:'Expediente guardado'}}}},
+    '/historial-profesional':{get:{tags:['Expedientes'],security:[{bearerAuth:[]}],summary:'Historial y recomendaciones visibles para el cliente',responses:{200:{description:'Historial'}}}},
+    '/citas/{citaId}/resena':{post:{tags:['Reseñas'],security:[{bearerAuth:[]}],summary:'Calificar una cita propia completada',responses:{201:{description:'Reseña creada'},409:{description:'Cita no calificable'}}}},
+    '/lista-espera':{post:{tags:['Lista de espera'],security:[{bearerAuth:[]}],summary:'Solicitar aviso por un turno compatible',responses:{201:{description:'Solicitud creada'}}}},
+    '/admin/configuracion/{clave}':{put:{tags:['Configuración'],security:[{bearerAuth:[]}],summary:'Actualizar políticas del negocio',responses:{200:{description:'Configuración guardada'}}}}
   }
 };

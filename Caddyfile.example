@@ -1,0 +1,11 @@
+# Active este archivo cuando tenga un dominio apuntando a la IP pública.
+# Reemplace citas.example.com y ejecute Caddy delante del puerto WEB_PORT.
+citas.example.com {
+  encode zstd gzip
+  reverse_proxy frontend:80
+  header {
+    Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    X-Content-Type-Options "nosniff"
+    Referrer-Policy "strict-origin-when-cross-origin"
+  }
+}

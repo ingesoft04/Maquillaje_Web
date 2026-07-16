@@ -1,5 +1,7 @@
 const { query } = require('./db');
 const { delCache, delPattern } = require('./redis');
+const googleCalendar = require('./google-calendar');
+const {consumirPorCita}=require('./inventario.service');
 
 async function auditar(req, accion, entidad, entidadId, datos = {}) {
   await query(
@@ -37,9 +39,9 @@ async function citas(req, res) {
     filtro = 'WHERE c.estado = $1';
   }
   const { rows } = await query(`
-    SELECT c.id, c.fecha, c.hora, c.estado, c.notas, c.creado_en,
+    SELECT c.id, c.fecha, c.hora, c.estado, c.notas, c.creado_en,c.especialista_id,c.tipo_id,
            u.nombre AS cliente, u.email AS cliente_email,
-           e.nombre AS especialista, tm.nombre AS servicio
+           e.nombre AS especialista, tm.nombre AS servicio,c.google_sync_estado,c.google_event_url,c.google_sync_error
     FROM citas c
     JOIN usuarios u ON u.id = c.usuario_id
     JOIN especialistas e ON e.id = c.especialista_id
@@ -51,7 +53,7 @@ async function citas(req, res) {
 }
 
 async function cambiarEstado(req, res) {
-  const estados = ['confirmada', 'cancelada', 'completada', 'reprogramada'];
+  const estados = ['confirmada', 'en_servicio', 'cancelada', 'completada', 'reprogramada'];
   const estado = String(req.body.estado || '').toLowerCase();
   if (!estados.includes(estado)) {
     return res.status(400).json({ error: 'Estado de cita no permitido.' });
@@ -65,14 +67,31 @@ async function cambiarEstado(req, res) {
   if (!rows.length) return res.status(404).json({ error: 'Cita no encontrada.' });
 
   const cita = rows[0];
+  let advertenciaInventario=null;
+  let anticipoRetenido=0;
+  if(estado==='completada'){
+    try{await consumirPorCita(cita.id);}catch(e){advertenciaInventario=e.message;}
+  }
+  if(estado==='cancelada'){
+    const retenidos=await query(`UPDATE pagos SET estado='retenido'
+      WHERE cita_id=$1 AND concepto='anticipo' AND estado='registrado' RETURNING monto`,[cita.id]);
+    anticipoRetenido=retenidos.rows.reduce((total,p)=>total+Number(p.monto),0);
+  }
   await delCache(`citas:usuario:${cita.usuario_id}`);
-  await delCache(`disponibilidad:${cita.especialista_id}:${cita.fecha}`);
+  await delPattern(`disponibilidad:${cita.especialista_id}:${cita.fecha}:*`);
+  if (estado === 'cancelada') await googleCalendar.encolar(cita.id, 'eliminar');
+  else if (estado !== 'completada') await googleCalendar.encolar(cita.id, 'actualizar');
   await auditar(req, 'cambiar_estado', 'cita', cita.id, { estado });
-  return res.json({ mensaje: 'Estado actualizado.', cita });
+  return res.json({
+    mensaje: anticipoRetenido>0
+      ? `Estado actualizado. El anticipo de $${anticipoRetenido.toLocaleString('es-CO')} quedó retenido.`
+      : 'Estado actualizado.',
+    cita,advertencia_inventario:advertenciaInventario,anticipo_retenido:anticipoRetenido
+  });
 }
 
 async function listarEspecialistasAdmin(_req, res) {
-  const { rows } = await query('SELECT id, nombre, bio, foto_url, activo FROM especialistas ORDER BY id');
+  const { rows } = await query('SELECT id, nombre, bio, foto_url, activo,google_calendar_id,usuario_id FROM especialistas ORDER BY id');
   return res.json({ especialistas: rows });
 }
 
@@ -83,6 +102,8 @@ async function crearEspecialista(req, res) {
     `INSERT INTO especialistas(nombre,bio,foto_url) VALUES($1,$2,$3) RETURNING *`,
     [nombre.trim(), bio || null, foto_url || null]
   );
+  await query(`INSERT INTO horarios_especialista(especialista_id,dia_semana,hora_inicio,hora_fin)
+    SELECT $1,dia,'08:00','18:00' FROM (VALUES(1),(2),(3),(4),(5),(6)) d(dia) ON CONFLICT DO NOTHING`,[rows[0].id]);
   await delCache('catalogo:especialistas');
   await auditar(req, 'crear', 'especialista', rows[0].id, rows[0]);
   return res.status(201).json({ especialista: rows[0] });

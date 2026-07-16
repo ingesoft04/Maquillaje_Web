@@ -24,6 +24,9 @@ let citaId;
 let citaDatos;
 let productoId;
 let servicioPagadoId;
+let especialistaToken;
+let citaProfesionalId;
+let citaPagadaId;
 
 test('health check confirma PostgreSQL y Redis', async () => {
   const { status, data } = await request('/health');
@@ -107,15 +110,20 @@ test('cita creada aparece en el listado del cliente', async () => {
 });
 
 test('cliente puede reprogramar y el horario anterior queda libre', async () => {
-  const disponibilidad = await request(
-    `/api/citas/disponibilidad?especialista_id=${citaDatos.especialista_id}&tipo_id=${citaDatos.tipo_id}&fecha=${citaDatos.fecha}`,
-    { token: clienteToken }
-  );
-  const nuevaHora = disponibilidad.data.disponibles[0];
-  assert.ok(nuevaHora);
+  let nuevaFecha;
+  let nuevaHora;
+  for (let desplazamiento=31; desplazamiento<45 && !nuevaHora; desplazamiento++) {
+    nuevaFecha = new Date(Date.now() + desplazamiento * 86400000).toISOString().slice(0,10);
+    const disponibilidad = await request(
+      `/api/citas/disponibilidad?especialista_id=${citaDatos.especialista_id}&tipo_id=${citaDatos.tipo_id}&fecha=${nuevaFecha}`,
+      { token: clienteToken }
+    );
+    nuevaHora = disponibilidad.data.disponibles?.[0];
+  }
+  assert.ok(nuevaHora, 'Debe existir un horario alternativo para reprogramar');
   const resultado = await request(`/api/citas/${citaId}/reprogramar`, {
     method: 'PATCH', token: clienteToken,
-    body: JSON.stringify({ ...citaDatos, hora: nuevaHora, notas: 'Reprogramada por prueba automatizada' })
+    body: JSON.stringify({ ...citaDatos, fecha:nuevaFecha, hora:nuevaHora, notas:'Reprogramada por prueba automatizada' })
   });
   assert.equal(resultado.status, 200);
   assert.equal(resultado.data.cita.estado, 'reprogramada');
@@ -135,12 +143,119 @@ test('administrador inicia sesión y consulta métricas', async () => {
   assert.ok(resumen.data.especialistas >= 1);
 });
 
+test('fotografías se administran manualmente y exigen consentimiento para publicar', async () => {
+  const sinConsentimiento = await request('/api/comparaciones', {
+    method:'POST', token:clienteToken,
+    body:JSON.stringify({ titulo:'Look de prueba', antes_url:'https://example.com/antes.jpg', despues_url:'https://example.com/despues.jpg', publica:true })
+  });
+  assert.equal(sinConsentimiento.status,409);
+  await request('/api/perfil-cosmetico', {
+    method:'PUT', token:clienteToken,
+    body:JSON.stringify({ tipo_piel:'mixta', consentimiento_datos:true, consentimiento_imagen:true })
+  });
+  const creada = await request('/api/comparaciones', {
+    method:'POST', token:clienteToken,
+    body:JSON.stringify({ titulo:'Look autorizado', antes_url:'https://example.com/antes.jpg', despues_url:'https://example.com/despues.jpg', publica:true })
+  });
+  assert.equal(creada.status,201);
+  assert.equal(creada.data.comparacion.publica,true);
+  const admin = await request('/api/comparaciones/admin',{token:adminToken});
+  assert.equal(admin.status,200);
+  assert.ok(admin.data.comparaciones.some(x=>x.id===creada.data.comparacion.id && x.consentimiento_fecha));
+  const archivada = await request(`/api/comparaciones/admin/${creada.data.comparacion.id}`,{
+    method:'PATCH',token:adminToken,body:JSON.stringify({estado:'archivada',publica:false,descripcion:'Archivada manualmente'})
+  });
+  assert.equal(archivada.status,200);
+  assert.equal(archivada.data.comparacion.estado,'archivada');
+});
+
 test('administrador actualiza estado de cita', async () => {
   const { status, data } = await request(`/api/admin/citas/${citaId}/estado`, {
     method: 'PATCH', token: adminToken, body: JSON.stringify({ estado: 'completada' })
   });
   assert.equal(status, 200);
   assert.equal(data.cita.estado, 'completada');
+});
+
+test('administrador crea cuenta profesional y la especialista accede solo a su agenda', async () => {
+  const nueva=await request('/api/admin/especialistas',{
+    method:'POST',token:adminToken,body:JSON.stringify({nombre:`Profesional Portal ${Date.now()}`,bio:'Cuenta de prueba del portal'})
+  });
+  assert.equal(nueva.status,201);
+  const email=`especialista.${Date.now()}@example.com`;
+  const cuenta=await request('/api/admin/especialistas/cuenta',{
+    method:'POST',token:adminToken,
+    body:JSON.stringify({especialista_id:nueva.data.especialista.id,email,password:'EspecialistaSegura123!'})
+  });
+  assert.equal(cuenta.status,201);
+  assert.equal(cuenta.data.usuario.rol,'especialista');
+  const login=await request('/api/auth/login',{method:'POST',body:JSON.stringify({email,password:'EspecialistaSegura123!'})});
+  assert.equal(login.status,200);
+  especialistaToken=login.data.token;
+  const fecha=new Date(Date.now()+60*86400000).toISOString().slice(0,10);
+  const disp=await request(`/api/citas/disponibilidad?especialista_id=${nueva.data.especialista.id}&tipo_id=${citaDatos.tipo_id}&fecha=${fecha}`,{token:clienteToken});
+  assert.ok(disp.data.disponibles.length);
+  const cita=await request('/api/citas',{method:'POST',token:clienteToken,body:JSON.stringify({
+    especialista_id:nueva.data.especialista.id,tipo_id:citaDatos.tipo_id,fecha,hora:disp.data.disponibles[0]
+  })});
+  assert.equal(cita.status,201);
+  citaProfesionalId=cita.data.cita.id;
+  const panel=await request('/api/profesional/resumen',{token:especialistaToken});
+  assert.equal(panel.status,200);
+  assert.equal(panel.data.especialista_id,nueva.data.especialista.id);
+  assert.ok(panel.data.citas.some(c=>c.id===citaProfesionalId));
+  const adminDenegado=await request('/api/admin/usuarios',{token:especialistaToken});
+  assert.equal(adminDenegado.status,403);
+});
+
+test('especialista registra expediente y seguimiento visible para el cliente',async()=>{
+  const expediente=await request(`/api/profesional/citas/${citaProfesionalId}/expediente`,{
+    method:'PUT',token:especialistaToken,
+    body:JSON.stringify({productos_usados:'Base tono medio y fijador',tonos_tecnicas:'Subtono cálido, técnica natural',recomendaciones:'Hidratar la piel'})
+  });
+  assert.equal(expediente.status,200);
+  const seguimiento=await request(`/api/profesional/citas/${citaProfesionalId}/seguimiento`,{
+    method:'POST',token:especialistaToken,
+    body:JSON.stringify({tipo:'cuidados',contenido:'Retirar el maquillaje antes de dormir.',visible_cliente:true})
+  });
+  assert.equal(seguimiento.status,201);
+  const historial=await request('/api/historial-profesional',{token:clienteToken});
+  assert.equal(historial.status,200);
+  assert.ok(historial.data.expedientes.some(x=>x.cita_id===citaProfesionalId));
+  assert.ok(historial.data.seguimientos.some(x=>x.cita_id===citaProfesionalId));
+});
+
+test('cliente califica una cita completada y administración puede moderarla',async()=>{
+  const crear=await request(`/api/citas/${citaId}/resena`,{
+    method:'POST',token:clienteToken,
+    body:JSON.stringify({calificacion:5,puntualidad:5,atencion:5,resultado:5,comentario:'Excelente atención'})
+  });
+  assert.equal(crear.status,201);
+  const lista=await request('/api/admin/resenas',{token:adminToken});
+  assert.equal(lista.status,200);
+  assert.ok(lista.data.resenas.some(x=>x.id===crear.data.resena.id));
+  const moderar=await request(`/api/admin/resenas/${crear.data.resena.id}`,{
+    method:'PATCH',token:adminToken,body:JSON.stringify({visible:true,respuesta:'Gracias por confiar en nosotros.'})
+  });
+  assert.equal(moderar.status,200);
+});
+
+test('cliente administra lista de espera y admin consulta políticas configurables',async()=>{
+  const desde=new Date(Date.now()+50*86400000).toISOString().slice(0,10);
+  const hasta=new Date(Date.now()+55*86400000).toISOString().slice(0,10);
+  const crear=await request('/api/lista-espera',{method:'POST',token:clienteToken,body:JSON.stringify({
+    tipo_id:citaDatos.tipo_id,especialista_id:citaDatos.especialista_id,fecha_desde:desde,fecha_hasta:hasta,hora_desde:'08:00',hora_hasta:'12:00'
+  })});
+  assert.equal(crear.status,201);
+  const propia=await request('/api/lista-espera/mis',{token:clienteToken});
+  assert.ok(propia.data.espera.some(x=>x.id===crear.data.espera.id));
+  const admin=await request('/api/admin/lista-espera',{token:adminToken});
+  assert.ok(admin.data.espera.some(x=>x.id===crear.data.espera.id));
+  const config=await request('/api/admin/configuracion',{token:adminToken});
+  assert.equal(config.status,200);
+  assert.ok(config.data.configuracion.reservas);
+  const cancelar=await request(`/api/lista-espera/${crear.data.espera.id}/cancelar`,{method:'PATCH',token:clienteToken});
+  assert.equal(cancelar.data.espera.estado,'cancelada');
 });
 
 test('administrador consulta analítica y gestiona inventario', async () => {
@@ -160,6 +275,10 @@ test('administrador consulta analítica y gestiona inventario', async () => {
   });
   assert.equal(salida.status, 200);
   assert.equal(Number(salida.data.producto.cantidad), 7);
+  const receta=await request('/api/admin/inventario-recetas',{method:'POST',token:adminToken,body:JSON.stringify({
+    tipo_id:citaDatos.tipo_id,producto_id:productoId,cantidad:1
+  })});
+  assert.equal(receta.status,201);
 });
 
 test('administrador consulta caja, horarios y bloqueos', async () => {
@@ -172,6 +291,23 @@ test('administrador consulta caja, horarios y bloqueos', async () => {
   assert.equal(horarios.status, 200);
   assert.equal(bloqueos.status, 200);
   assert.ok(horarios.data.horarios.length >= 1);
+});
+
+test('integración Google Calendar expone estado y asignación por especialista', async () => {
+  const estado = await request('/api/admin/google/estado', { token: adminToken });
+  assert.equal(estado.status, 200);
+  assert.equal(typeof estado.data.configurado, 'boolean');
+  assert.equal(typeof estado.data.conectado, 'boolean');
+  const especialista = (await request('/api/admin/especialistas', { token: adminToken })).data.especialistas[0];
+  const asignar = await request(`/api/admin/google/especialistas/${especialista.id}`, {
+    method: 'PATCH', token: adminToken, body: JSON.stringify({ google_calendar_id:'primary' })
+  });
+  assert.equal(asignar.status, 200);
+  assert.equal(asignar.data.especialista.google_calendar_id, 'primary');
+  if (!estado.data.configurado) {
+    const inicio = await request('/api/google/oauth/iniciar', { token: adminToken });
+    assert.equal(inicio.status, 503);
+  }
 });
 
 test('OpenAPI y métricas operativas están publicados', async () => {
@@ -228,12 +364,15 @@ test('administrador gestiona catálogo y genera auditoría', async () => {
 });
 
 test('flujo de cita con precio, abono administrativo y consulta del cliente', async () => {
-  const fecha = new Date(Date.now() + 45 * 86400000).toISOString().slice(0, 10);
   const especialistas = (await request('/api/especialistas')).data.especialistas;
   let seleccion;
-  for (const especialista of especialistas) {
-    const disp = await request(`/api/citas/disponibilidad?especialista_id=${especialista.id}&tipo_id=${servicioPagadoId}&fecha=${fecha}`, { token: clienteToken });
-    if (disp.data.disponibles?.length) { seleccion = { especialista_id: especialista.id, hora: disp.data.disponibles[0] }; break; }
+  let fecha;
+  for (let desplazamiento=45; desplazamiento<52 && !seleccion; desplazamiento++) {
+    fecha = new Date(Date.now() + desplazamiento * 86400000).toISOString().slice(0, 10);
+    for (const especialista of especialistas) {
+      const disp = await request(`/api/citas/disponibilidad?especialista_id=${especialista.id}&tipo_id=${servicioPagadoId}&fecha=${fecha}`, { token: clienteToken });
+      if (disp.data.disponibles?.length) { seleccion = { especialista_id: especialista.id, hora: disp.data.disponibles[0] }; break; }
+    }
   }
   assert.ok(seleccion);
   const cita = await request('/api/citas', {
@@ -241,15 +380,45 @@ test('flujo de cita con precio, abono administrativo y consulta del cliente', as
     body: JSON.stringify({ ...seleccion, tipo_id: servicioPagadoId, fecha })
   });
   assert.equal(cita.status, 201);
+  citaPagadaId=cita.data.cita.id;
   assert.equal(Number(cita.data.cita.precio_total), 80000);
   const pago = await request('/api/admin/pagos', {
     method: 'POST', token: adminToken,
-    body: JSON.stringify({ cita_id: cita.data.cita.id, monto: 30000, metodo: 'transferencia', referencia: 'TEST-AUTOMATICO' })
+    body: JSON.stringify({ cita_id: cita.data.cita.id, monto: 30000, metodo: 'transferencia', concepto:'anticipo', referencia: 'TEST-AUTOMATICO' })
   });
   assert.equal(pago.status, 201);
   const propios = await request('/api/pagos/mis', { token: clienteToken });
   assert.equal(propios.status, 200);
   assert.ok(propios.data.pagos.some(item => item.id === pago.data.pago.id));
+});
+
+test('el anticipo queda retenido cuando administración cancela la cita',async()=>{
+  const cancelada=await request(`/api/admin/citas/${citaPagadaId}/estado`,{
+    method:'PATCH',token:adminToken,body:JSON.stringify({estado:'cancelada'})
+  });
+  assert.equal(cancelada.status,200);
+  assert.equal(Number(cancelada.data.anticipo_retenido),30000);
+  const propios=await request('/api/pagos/mis',{token:clienteToken});
+  const anticipo=propios.data.pagos.find(x=>x.cita_id===citaPagadaId && x.concepto==='anticipo');
+  assert.equal(anticipo.estado,'retenido');
+});
+
+test('reportes, privacidad y configuración operan con control de acceso',async()=>{
+  const reporte=await request('/api/admin/reportes',{token:adminToken});
+  assert.equal(reporte.status,200);
+  assert.ok(Array.isArray(reporte.data.finanzas));
+  const csv=await fetch(BASE+'/api/admin/reportes/servicios.csv',{headers:{Authorization:`Bearer ${adminToken}`}});
+  assert.equal(csv.status,200);
+  assert.match(csv.headers.get('content-type'),/text\/csv/);
+  const exportacion=await request('/api/privacidad/exportar',{token:clienteToken});
+  assert.equal(exportacion.status,200);
+  assert.equal(exportacion.data.usuario.rol,'cliente');
+  const solicitud=await request('/api/privacidad/solicitudes',{method:'POST',token:clienteToken,body:JSON.stringify({tipo:'correccion',detalle:'Actualizar información de contacto'})});
+  assert.equal(solicitud.status,201);
+  const admin=await request('/api/admin/privacidad/solicitudes',{token:adminToken});
+  assert.ok(admin.data.solicitudes.some(x=>x.id===solicitud.data.solicitud.id));
+  const config=await request('/api/admin/configuracion/reservas',{method:'PUT',token:adminToken,body:JSON.stringify({valor:{anticipo_porcentaje:20,cancelacion_horas:12,tolerancia_minutos:15,intervalo_minutos:10,bloquear_con_deuda:false}})});
+  assert.equal(config.status,200);
 });
 
 test('endpoint inexistente devuelve 404 JSON', async () => {

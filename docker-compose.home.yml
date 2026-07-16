@@ -10,6 +10,14 @@ services:
     ports:
       - "${WEB_PORT:-8088}:80"
     networks: [web, internal]
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx
+      - /var/run
+      - /tmp
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 128m
+    cpus: 0.50
 
   api:
     build:
@@ -34,6 +42,7 @@ services:
       REDIS_PASS: ${REDIS_PASS}
       JWT_SECRET: ${JWT_SECRET}
       FRONTEND_URL: ${FRONTEND_URL}
+      TRUST_PROXY: ${TRUST_PROXY:-1}
       ADMIN_NAME: ${ADMIN_NAME}
       ADMIN_EMAIL: ${ADMIN_EMAIL}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
@@ -44,6 +53,13 @@ services:
       SMTP_PASS: ${SMTP_PASS:-}
       SMTP_FROM: ${SMTP_FROM:-Arte y Belleza <no-reply@example.com>}
       NOTIFICATION_INTERVAL_MS: ${NOTIFICATION_INTERVAL_MS:-60000}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-}
+      GOOGLE_TOKEN_ENCRYPTION_KEY: ${GOOGLE_TOKEN_ENCRYPTION_KEY:-}
+      GOOGLE_TIMEZONE: ${GOOGLE_TIMEZONE:-America/Bogota}
+      GOOGLE_SYNC_INTERVAL_MS: ${GOOGLE_SYNC_INTERVAL_MS:-15000}
+      GOOGLE_INVITE_CLIENTS: ${GOOGLE_INVITE_CLIENTS:-false}
     expose: ["4000"]
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:4000/health"]
@@ -52,6 +68,11 @@ services:
       retries: 5
       start_period: 15s
     networks: [internal]
+    read_only: true
+    tmpfs: ["/tmp"]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 512m
+    cpus: 1.00
 
   postgres:
     image: postgres:16-alpine
@@ -69,6 +90,9 @@ services:
       timeout: 5s
       retries: 5
     networks: [internal]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 1g
+    cpus: 1.50
 
   redis:
     image: redis:7-alpine
@@ -82,6 +106,9 @@ services:
       timeout: 5s
       retries: 5
     networks: [internal]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 384m
+    cpus: 0.75
 
   backup:
     image: postgres:16-alpine
@@ -107,6 +134,9 @@ services:
       sleep $$BACKUP_INTERVAL_SECONDS;
       done'
     networks: [internal]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 256m
+    cpus: 0.50
 
   prometheus:
     image: prom/prometheus:v3.5.0
@@ -118,6 +148,8 @@ services:
     ports:
       - "127.0.0.1:${PROMETHEUS_PORT:-9090}:9090"
     networks: [internal, monitoring]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 384m
 
   grafana:
     image: grafana/grafana:12.1.0
@@ -131,6 +163,8 @@ services:
     ports:
       - "127.0.0.1:${GRAFANA_PORT:-3001}:3000"
     networks: [monitoring]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 512m
 
 volumes:
   postgres_data:

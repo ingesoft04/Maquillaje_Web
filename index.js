@@ -6,6 +6,7 @@ const helmet     = require('helmet');
 const morgan     = require('morgan');
 const rateLimit  = require('express-rate-limit');
 const { pool }   = require('./db');
+const { errorHandler } = require('./middleware/errorHandler');
 const { redis }  = require('./redis');
 
 const authRoutes       = require('./routes/auth.routes');
@@ -14,13 +15,17 @@ const catalogoRoutes   = require('./routes/catalogo.routes');
 const comparacionesRoutes = require('./routes/comparaciones.routes');
 const adminRoutes = require('./routes/admin.routes');
 const proRoutes = require('./routes/pro.routes');
+const googleRoutes = require('./routes/google.routes');
+const profesionalRoutes = require('./routes/profesional.routes');
 const { prepararBaseDeDatos } = require('./bootstrap');
 const { iniciarNotificaciones } = require('./notifications');
+const { iniciarSincronizacion } = require('./google-calendar');
 const { middlewareMetricas, endpointMetricas } = require('./metrics');
 const openapi = require('./openapi');
 
 const app  = express();
 const PORT = process.env.PORT || 4000;
+if (process.env.TRUST_PROXY) app.set('trust proxy', Number(process.env.TRUST_PROXY) || 1);
 
 // ── SEGURIDAD ────────────────────────────────────
 app.use(helmet());
@@ -58,8 +63,9 @@ if (process.env.NODE_ENV !== 'test') {
 app.get('/health', async (req, res) => {
   let dbOk    = false;
   let redisOk = false;
+  let googleConectado = false;
 
-  try { await pool.query('SELECT 1'); dbOk = true; } catch (_) {}
+  try { const g=await pool.query('SELECT EXISTS(SELECT 1 FROM google_oauth WHERE id=1) conectado'); dbOk = true; googleConectado=g.rows[0].conectado; } catch (_) {}
   try { await redis.ping();           redisOk = true; } catch (_) {}
 
   const status = dbOk && redisOk ? 200 : 503;
@@ -67,6 +73,7 @@ app.get('/health', async (req, res) => {
     status: status === 200 ? 'ok' : 'degraded',
     postgres: dbOk    ? '✔ online' : '✖ offline',
     redis:    redisOk ? '✔ online' : '✖ offline',
+    google_calendar: googleConectado ? '✔ conectado' : '○ no conectado',
     uptime:   process.uptime().toFixed(1) + 's',
     timestamp: new Date().toISOString()
   });
@@ -95,6 +102,8 @@ app.use('/api',          catalogoRoutes);
 app.use('/api/comparaciones', comparacionesRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api', proRoutes);
+app.use('/api', googleRoutes);
+app.use('/api', profesionalRoutes);
 
 // ── 404 ───────────────────────────────────────────
 app.use((req, res) => {
@@ -102,20 +111,13 @@ app.use((req, res) => {
 });
 
 // ── ERROR GLOBAL ──────────────────────────────────
-app.use((err, req, res, _next) => {
-  console.error('[ERROR]', err);
-  const status = err.status || 500;
-  res.status(status).json({
-    error: process.env.NODE_ENV === 'production'
-      ? 'Error interno del servidor.'
-      : err.message
-  });
-});
+app.use(errorHandler);
 
 // ── ARRANQUE ──────────────────────────────────────
 async function iniciar() {
   await prepararBaseDeDatos();
   iniciarNotificaciones();
+  iniciarSincronizacion();
   return app.listen(PORT, () => {
   console.log(`
   ╔══════════════════════════════════════╗

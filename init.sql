@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
   telefono    VARCHAR(20),
   password_hash TEXT        NOT NULL,
   tono_piel   VARCHAR(60),          -- resultado guardado de la calculadora
-  rol         VARCHAR(20) NOT NULL DEFAULT 'cliente' CHECK (rol IN ('cliente', 'admin')),
+  rol         VARCHAR(20) NOT NULL DEFAULT 'cliente' CHECK (rol IN ('cliente', 'especialista', 'admin')),
   creado_en   TIMESTAMPTZ   DEFAULT NOW(),
   actualizado_en TIMESTAMPTZ DEFAULT NOW()
 );
@@ -25,7 +25,8 @@ CREATE TABLE IF NOT EXISTS especialistas (
   nombre    VARCHAR(120) NOT NULL,
   foto_url  TEXT,
   bio       TEXT,
-  activo    BOOLEAN DEFAULT TRUE
+  activo    BOOLEAN DEFAULT TRUE,
+  usuario_id UUID UNIQUE REFERENCES usuarios(id) ON DELETE SET NULL
 );
 
 INSERT INTO especialistas (nombre, bio) VALUES
@@ -132,11 +133,14 @@ CREATE TABLE IF NOT EXISTS comparaciones (
   titulo      VARCHAR(200),
   tipo_id     INT REFERENCES tipos_maquillaje(id),
   antes_url   TEXT NOT NULL,
-  despues_url TEXT NOT NULL,
-  descripcion TEXT,
-  publica     BOOLEAN DEFAULT FALSE,
-  creado_en   TIMESTAMPTZ DEFAULT NOW()
-);
+    despues_url TEXT NOT NULL,
+    descripcion TEXT,
+    publica     BOOLEAN DEFAULT FALSE,
+    estado      VARCHAR(20) DEFAULT 'activa' CHECK(estado IN ('activa','archivada')),
+    consentimiento_id UUID,
+    actualizado_en TIMESTAMPTZ DEFAULT NOW(),
+    creado_en   TIMESTAMPTZ DEFAULT NOW()
+  );
 
 CREATE INDEX IF NOT EXISTS idx_comparaciones_usuario ON comparaciones(usuario_id);
 CREATE INDEX IF NOT EXISTS idx_comparaciones_publicas ON comparaciones(publica) WHERE publica = TRUE;

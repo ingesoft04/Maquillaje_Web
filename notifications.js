@@ -12,7 +12,7 @@ function transporte(){
 }
 
 function contenido(tipo,nombre,fecha,hora){
-  const asuntos={confirmacion:'Cita confirmada',recordatorio:'Recordatorio de cita',reprogramacion:'Cita reprogramada',cancelacion:'Cita cancelada'};
+  const asuntos={confirmacion:'Cita confirmada',recordatorio:'Recordatorio de cita',reprogramacion:'Cita reprogramada',cancelacion:'Cita cancelada',turno_disponible:'Se liberó un turno compatible',cuidados:'Recomendaciones posteriores',solicitar_resena:'¿Cómo fue tu experiencia?'};
   return {subject:`Arte & Belleza · ${asuntos[tipo]||'Notificación'}`,
     text:`Hola ${nombre}. ${asuntos[tipo]||'Tenemos una actualización'}${fecha?` para el ${String(fecha).slice(0,10)} a las ${String(hora).slice(0,5)}`:''}. Arte & Belleza SENA.`};
 }
@@ -27,7 +27,7 @@ async function procesarNotificaciones(){
     const tx=transporte();
     for(const item of rows){
       try{
-        const mensaje=contenido(item.tipo,item.nombre,item.fecha,item.hora);
+        const mensaje=item.asunto?{subject:item.asunto,text:item.contenido}:contenido(item.tipo,item.nombre,item.fecha,item.hora);
         if(tx)await tx.sendMail({from:process.env.SMTP_FROM||'Arte & Belleza <no-reply@localhost>',to:item.destino,...mensaje});
         else console.log(`[Notificación simulada] ${item.destino}: ${mensaje.subject}`);
         await query(`UPDATE notificaciones SET estado=$1,enviado_en=NOW(),intentos=intentos+1 WHERE id=$2`,[tx?'enviada':'simulada',item.id]);
