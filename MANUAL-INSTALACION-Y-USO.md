@@ -140,12 +140,14 @@ Dirección local:
 
 ```env
 FRONTEND_URL=http://localhost:8088
+CORS_ORIGINS=http://localhost:8088
 ```
 
 IP pública temporal:
 
 ```env
 FRONTEND_URL=http://IP_PUBLICA:8088
+CORS_ORIGINS=http://IP_PUBLICA:8088
 TRUST_PROXY=1
 ```
 
@@ -153,6 +155,7 @@ Dominio:
 
 ```env
 FRONTEND_URL=https://citas.sudominio.com
+CORS_ORIGINS=https://citas.sudominio.com
 TRUST_PROXY=1
 ```
 

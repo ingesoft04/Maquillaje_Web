@@ -26,13 +26,28 @@ const openapi = require('./openapi');
 const app  = express();
 const PORT = process.env.PORT || 4000;
 if (process.env.TRUST_PROXY) app.set('trust proxy', Number(process.env.TRUST_PROXY) || 1);
+app.disable('x-powered-by');
 
 // ── SEGURIDAD ────────────────────────────────────
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy:'same-site' },
+  referrerPolicy: { policy:'strict-origin-when-cross-origin' }
+}));
+const allowedOrigins = String(process.env.CORS_ORIGINS || process.env.FRONTEND_URL || 'http://localhost:8088')
+  .split(',').map(value => value.trim()).filter(Boolean);
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(Object.assign(new Error('Origen no autorizado.'), { status:403, code:'ORIGIN_NOT_ALLOWED' }));
+  },
   credentials: true,
 }));
+app.use((req, res, next) => {
+  if (!['POST','PUT','PATCH','DELETE'].includes(req.method)) return next();
+  const origin = req.get('origin');
+  if (!origin || allowedOrigins.includes(origin)) return next();
+  return res.status(403).json({ error:'Origen no autorizado.', codigo:'ORIGIN_NOT_ALLOWED' });
+});
 
 // Rate limiting global
 app.use(rateLimit({
@@ -50,9 +65,13 @@ const authLimiter = rateLimit({
 });
 
 // ── PARSERS ───────────────────────────────────────
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '1mb', strict:true }));
+app.use(express.urlencoded({ extended:false, limit:'100kb' }));
 app.use(middlewareMetricas);
+app.use('/api', (_req, res, next) => {
+  res.set('Cache-Control', 'no-store');
+  next();
+});
 
 // ── LOGGING ───────────────────────────────────────
 if (process.env.NODE_ENV !== 'test') {

@@ -21,6 +21,7 @@
       --gold:  #C9A96E;
       --text:  #2A1A1A;
       --muted: #7A6060;
+      color-scheme: light;
     }
 
     html { scroll-behavior: smooth; }
@@ -30,7 +31,15 @@
       background: var(--cream);
       color: var(--text);
       overflow-x: hidden;
+      line-height: 1.5;
     }
+
+    :focus-visible {
+      outline: 3px solid var(--gold);
+      outline-offset: 3px;
+    }
+    button, input, select, textarea, a { -webkit-tap-highlight-color: transparent; }
+    button { min-height: 42px; }
 
     .citas-topbar { display: none; }
     body:not(.citas-view) #citas-wrapper { display: none; }
@@ -129,7 +138,7 @@
 
     .hero-proof {
       display: flex; justify-content: center; gap: 0; margin: 2.4rem auto 0;
-      color: #CFAAA4;
+      color: #E1C2BC;
     }
     .hero-proof span { padding: 0 1rem; font-size: .64rem; letter-spacing: 1.5px; text-transform: uppercase; }
     .hero-proof span + span { border-left: 1px solid #C9A96E55; }
@@ -166,7 +175,7 @@
 
     header p.subtitle {
       margin-top: 1.5rem;
-      color: #D4B0A8;
+      color: #E1C2BC;
       font-weight: 200;
       font-size: 1rem;
       letter-spacing: 2px;
@@ -217,6 +226,7 @@
     }
     nav a:hover { color: var(--deep); border-bottom-color: var(--rose); }
     nav a.active { color: var(--deep); border-bottom-color: var(--rose); }
+    nav a[aria-current="location"] { background: #E8C4B825; }
 
     /* ── SECTIONS ── */
     section { padding: 6rem 2rem; max-width: 1100px; margin: 0 auto; }
@@ -768,11 +778,21 @@
       .hero-kicker { font-size: 1.05rem; }
       .hero-btn { width: 100%; }
       .hero-proof span { font-size: .57rem; }
+      section { padding: 4rem 1.15rem; }
+      .agendar-grid, .admin-form-grid, .admin-stats { grid-template-columns: 1fr; }
+      .stats-row { display:grid; grid-template-columns:1fr 1fr; }
+      .cita-card { align-items:flex-start; flex-wrap:wrap; gap:.65rem; }
+      .btn-cancelar { margin-left:0; }
+      .admin-tabs { overflow-x:auto; flex-wrap:nowrap; padding-bottom:.5rem; }
+      .admin-tab { flex:0 0 auto; }
     }
 
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior: auto; }
       *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+    @media (max-height: 800px) {
+      .scroll-cue { display:none; }
     }
     /* ── TOAST NOTIFICATIONS ── */
 .toast {
@@ -1683,7 +1703,7 @@ navSections.forEach(section => navObserver.observe(section));
 
 // ── API Y ESTADO GLOBAL ──
 const API = '/api';
-let token = localStorage.getItem('sena_token') || '';
+let token = '';
 let usuarioActual = null;
 let todasLasCitas = [];
 let citaEditandoId = null;
@@ -1717,12 +1737,10 @@ function escaparHTML(valor) {
 async function apiFetch(ruta, opciones = {}) {
   const headers = { ...(opciones.headers || {}) };
   if (opciones.body) headers['Content-Type'] = 'application/json';
-  if (token) headers.Authorization = `Bearer ${token}`;
-
-  const respuesta = await fetch(`${API}${ruta}`, { ...opciones, headers });
+  const respuesta = await fetch(`${API}${ruta}`, { ...opciones, headers, credentials:'same-origin' });
   const data = await respuesta.json().catch(() => ({}));
   if (!respuesta.ok) {
-    if (respuesta.status === 401 && token) limpiarSesion();
+    if (respuesta.status === 401) limpiarSesion();
     throw new Error(data.error || 'No fue posible completar la solicitud.');
   }
   return data;
@@ -1732,7 +1750,6 @@ function limpiarSesion() {
   token = '';
   usuarioActual = null;
   todasLasCitas = [];
-  localStorage.removeItem('sena_token');
 }
 
 async function cargarCatalogos() {
@@ -1761,6 +1778,8 @@ function mostrarToast(mensaje, tipo = 'success') {
   const toast = document.createElement('div');
   // El CSS usa .toast.success / .toast.error / .toast.info
   toast.className = 'toast ' + tipo;
+  toast.setAttribute('role', tipo === 'error' ? 'alert' : 'status');
+  toast.setAttribute('aria-live', tipo === 'error' ? 'assertive' : 'polite');
   toast.textContent = mensaje;
   document.body.appendChild(toast);
 
@@ -1802,16 +1821,14 @@ async function registrar() {
   if (!/^3\d{9}$/.test(tel.replace(/\D/g, ''))) {
     mostrarToast('❗ Teléfono inválido (ej: 3001234567)', 'error'); return;
   }
-  if (pass.length < 6) {
-    mostrarToast('❗ Contraseña mínimo 6 caracteres', 'error'); return;
+  if (pass.length < 10 || !/[A-Za-z]/.test(pass) || !/\d/.test(pass)) {
+    mostrarToast('❗ Usa mínimo 10 caracteres, con letras y números', 'error'); return;
   }
   try {
     const data = await apiFetch('/auth/registro', {
       method: 'POST',
       body: JSON.stringify({ nombre, email, telefono: tel, password: pass })
     });
-    token = data.token;
-    localStorage.setItem('sena_token', token);
     mostrarToast('✅ ¡Cuenta creada!', 'success');
     await entrarDashboard(data.usuario);
   } catch (error) {
@@ -1831,8 +1848,6 @@ async function login() {
     const data = await apiFetch('/auth/login', {
       method: 'POST', body: JSON.stringify({ email, password: pass })
     });
-    token = data.token;
-    localStorage.setItem('sena_token', token);
     mostrarToast('✅ ¡Bienvenida, ' + data.usuario.nombre.split(' ')[0] + '!', 'success');
     await entrarDashboard(data.usuario);
   } catch (error) {
@@ -1967,7 +1982,7 @@ async function crearListaEspera(){try{const servicio=document.getElementById('ci
   mostrarToast('Solicitud agregada a lista de espera','success');await cargarListaEspera();}catch(e){mostrarToast('❗ '+e.message,'error');}}
 async function cargarListaEspera(){try{const d=await apiFetch('/lista-espera/mis'),c=document.getElementById('miListaEspera');c.innerHTML=d.espera.length?`<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Rango</th><th>Horario</th><th>Estado</th><th></th></tr></thead><tbody>${d.espera.map(x=>`<tr><td>${formatFecha(x.fecha_desde)} – ${formatFecha(x.fecha_hasta)}</td><td>${String(x.hora_desde||'').slice(0,5)} – ${String(x.hora_hasta||'').slice(0,5)}</td><td>${escaparHTML(x.estado)}</td><td>${['activa','ofrecida'].includes(x.estado)?`<button class="admin-tab" onclick="cancelarListaEspera('${x.id}')">Cancelar</button>`:''}</td></tr>`).join('')}</tbody></table></div>`:'<p class="empty-citas">No tienes solicitudes activas.</p>';}catch(e){}}
 async function cancelarListaEspera(id){try{await apiFetch(`/lista-espera/${id}/cancelar`,{method:'PATCH'});await cargarListaEspera();}catch(e){mostrarToast('❗ '+e.message,'error');}}
-async function exportarMisDatos(){try{const r=await fetch(`${API}/privacidad/exportar`,{headers:{Authorization:`Bearer ${token}`}}),blob=await r.blob(),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='mis-datos-arte-belleza.json';a.click();URL.revokeObjectURL(url);}catch(e){mostrarToast('❗ No se pudo exportar','error');}}
+async function exportarMisDatos(){try{const r=await fetch(`${API}/privacidad/exportar`,{credentials:'same-origin'});if(!r.ok)throw new Error();const blob=await r.blob(),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='mis-datos-arte-belleza.json';a.click();URL.revokeObjectURL(url);}catch(e){mostrarToast('❗ No se pudo exportar','error');}}
 async function solicitarPrivacidadCliente(tipo){const detalle=prompt(`Describe tu solicitud de ${tipo}:`,'');if(detalle===null)return;try{await apiFetch('/privacidad/solicitudes',{method:'POST',body:JSON.stringify({tipo,detalle})});mostrarToast('Solicitud registrada','success');}catch(e){mostrarToast('❗ '+e.message,'error');}}
 
 // ── LOGOUT ──
@@ -2299,7 +2314,7 @@ function renderAdminReportes(){const r=adminReportes||{finanzas:[],especialistas
   <tbody>${r.finanzas.map(x=>`<tr><td>${x.mes}</td><td>${x.citas}</td><td>$${Number(x.agendado).toLocaleString('es-CO')}</td><td>$${Number(x.cobrado).toLocaleString('es-CO')}</td><td>$${Number(x.pendiente).toLocaleString('es-CO')}</td><td>${x.canceladas}</td><td>${x.inasistencias}</td></tr>`).join('')}</tbody></table></div>
   <h5 class="admin-section-title">Productividad y satisfacción</h5><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Especialista</th><th>Citas</th><th>Completadas</th><th>Valor</th><th>Satisfacción</th></tr></thead>
   <tbody>${r.especialistas.map(x=>`<tr><td>${escaparHTML(x.nombre)}</td><td>${x.citas}</td><td>${x.completadas}</td><td>$${Number(x.valor).toLocaleString('es-CO')}</td><td>${Number(x.satisfaccion).toFixed(1)}</td></tr>`).join('')}</tbody></table></div>`;}
-async function descargarReporte(event,seccion){event.preventDefault();try{const r=await fetch(`${API}/admin/reportes/${seccion}.csv`,{headers:{Authorization:`Bearer ${token}`}});if(!r.ok)throw new Error('No se pudo generar el reporte.');const blob=await r.blob(),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`reporte-${seccion}.csv`;a.click();URL.revokeObjectURL(url);}catch(e){mostrarToast('❗ '+e.message,'error');}}
+async function descargarReporte(event,seccion){event.preventDefault();try{const r=await fetch(`${API}/admin/reportes/${seccion}.csv`,{credentials:'same-origin'});if(!r.ok)throw new Error('No se pudo generar el reporte.');const blob=await r.blob(),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`reporte-${seccion}.csv`;a.click();URL.revokeObjectURL(url);}catch(e){mostrarToast('❗ '+e.message,'error');}}
 
 function renderAdminPagos(){
   document.getElementById('adminContenido').innerHTML=`<h5 class="admin-section-title">Registrar pago o abono</h5><div class="admin-form-grid">
@@ -2618,6 +2633,7 @@ document.getElementById('lookModal').addEventListener('click', function(e) {
 
 // ── INICIALIZACIÓN ──
 document.addEventListener('DOMContentLoaded', async function() {
+  localStorage.removeItem('sena_token');
   const googleResultado=new URLSearchParams(location.search);
   if(googleResultado.get('google')==='conectado')mostrarToast(`Google Calendar conectado: ${googleResultado.get('cuenta')||''}`,'success');
   if(googleResultado.get('google')==='error')mostrarToast(`Google Calendar: ${googleResultado.get('mensaje')||'Error de autorización'}`,'error');
@@ -2645,14 +2661,12 @@ document.addEventListener('DOMContentLoaded', async function() {
     sessionStorage.removeItem('sena_servicio_pendiente');
   }
 
-  if (token) {
-    try {
-      const perfil = await apiFetch('/auth/perfil');
-      await entrarDashboard(perfil);
-    } catch (_) {
-      limpiarSesion();
-      showTab('login');
-    }
+  try {
+    const perfil = await apiFetch('/auth/perfil');
+    await entrarDashboard(perfil);
+  } catch (_) {
+    limpiarSesion();
+    showTab('login');
   }
 });
 

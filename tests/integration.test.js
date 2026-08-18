@@ -15,7 +15,7 @@ async function request(path, options = {}) {
     }
   });
   const data = await response.json().catch(() => ({}));
-  return { status: response.status, data };
+  return { status: response.status, data, headers:response.headers };
 }
 
 let clienteToken;
@@ -141,6 +141,29 @@ test('administrador inicia sesión y consulta métricas', async () => {
   assert.equal(resumen.status, 200);
   assert.ok(resumen.data.usuarios >= 2);
   assert.ok(resumen.data.especialistas >= 1);
+});
+
+test('autenticación web usa cookie HttpOnly y rechaza orígenes no autorizados', async () => {
+  const login = await request('/api/auth/login', {
+    method:'POST', body:JSON.stringify({ email:ADMIN_EMAIL, password:ADMIN_PASSWORD })
+  });
+  const cookie = login.headers.get('set-cookie');
+  assert.match(cookie, /sena_session=/);
+  assert.match(cookie, /HttpOnly/i);
+  assert.match(cookie, /SameSite=Lax/i);
+
+  const perfil = await fetch(BASE + '/api/auth/perfil', {
+    headers:{ Cookie:cookie.split(';')[0] }
+  });
+  assert.equal(perfil.status, 200);
+  assert.equal((await perfil.json()).rol, 'admin');
+
+  const origenExterno = await fetch(BASE + '/api/auth/recuperacion/solicitar', {
+    method:'POST',
+    headers:{ 'Content-Type':'application/json', Origin:'https://sitio-malicioso.example' },
+    body:JSON.stringify({ email:ADMIN_EMAIL })
+  });
+  assert.equal(origenExterno.status, 403);
 });
 
 test('fotografías se administran manualmente y exigen consentimiento para publicar', async () => {

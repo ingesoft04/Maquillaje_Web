@@ -1,11 +1,26 @@
 const jwt = require('jsonwebtoken');
 const { getCache } = require('../redis');
 
-async function autenticar(req, res, next) {
-  const header = req.headers.authorization || '';
-  const [tipo, token] = header.split(' ');
+function cookieToken(req) {
+  const cookies = String(req.headers.cookie || '').split(';');
+  for (const cookie of cookies) {
+    const separator = cookie.indexOf('=');
+    if (separator < 0) continue;
+    if (cookie.slice(0, separator).trim() === 'sena_session') {
+      return decodeURIComponent(cookie.slice(separator + 1).trim());
+    }
+  }
+  return '';
+}
 
-  if (tipo !== 'Bearer' || !token) {
+function requestToken(req) {
+  const [type, bearer] = String(req.headers.authorization || '').split(' ');
+  return type === 'Bearer' && bearer ? bearer : cookieToken(req);
+}
+
+async function autenticar(req, res, next) {
+  const token = requestToken(req);
+  if (!token) {
     return res.status(401).json({ error: 'Token de acceso requerido.' });
   }
 
@@ -13,8 +28,11 @@ async function autenticar(req, res, next) {
     if (await getCache(`revoked:${token}`)) {
       return res.status(401).json({ error: 'La sesión ya no es válida.' });
     }
-
-    req.usuario = jwt.verify(token, process.env.JWT_SECRET);
+    const usuario = jwt.verify(token, process.env.JWT_SECRET);
+    if (!await getCache(`session:${usuario.id}`)) {
+      return res.status(401).json({ error: 'La sesión venció o fue cerrada.' });
+    }
+    req.usuario = usuario;
     req.token = token;
     return next();
   } catch (_) {
@@ -23,14 +41,16 @@ async function autenticar(req, res, next) {
 }
 
 async function autenticacionOpcional(req, _res, next) {
-  const header = req.headers.authorization || '';
-  const [tipo, token] = header.split(' ');
-  if (tipo !== 'Bearer' || !token) return next();
+  const token = requestToken(req);
+  if (!token) return next();
 
   try {
     if (!(await getCache(`revoked:${token}`))) {
-      req.usuario = jwt.verify(token, process.env.JWT_SECRET);
-      req.token = token;
+      const usuario = jwt.verify(token, process.env.JWT_SECRET);
+      if (await getCache(`session:${usuario.id}`)) {
+        req.usuario = usuario;
+        req.token = token;
+      }
     }
   } catch (_) {}
   return next();
@@ -43,4 +63,4 @@ function soloAdmin(req, res, next) {
   return next();
 }
 
-module.exports = { autenticar, autenticacionOpcional, soloAdmin };
+module.exports = { autenticar, autenticacionOpcional, soloAdmin, requestToken };
