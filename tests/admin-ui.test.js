@@ -31,4 +31,6 @@ test('formulario de cita informa valores, modalidad y política de anticipo', ()
   assert.match(html, /value="nequi"/);
   assert.match(html, /function actualizarResumenPago\(\)/);
   assert.match(html, /anticipo no es reembolsable/i);
+  assert.match(html, /async function cargarOpcionesPago\(\)/);
+  assert.doesNotMatch(html, /Promise\.all\(\[\s*apiFetch\('\/tipos'\), apiFetch\('\/especialistas'\), apiFetch\('\/pagos\/opciones'\)/);
 });

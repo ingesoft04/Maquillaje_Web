@@ -1801,16 +1801,16 @@ async function cargarCatalogos() {
   const servicios = document.getElementById('cita-servicio');
   const especialistas = document.getElementById('cita-especialista');
   try {
-    const [tiposData, especialistasData, pagosData] = await Promise.all([
-      apiFetch('/tipos'), apiFetch('/especialistas'), apiFetch('/pagos/opciones')
+    const [tiposData, especialistasData] = await Promise.all([
+      apiFetch('/tipos'), apiFetch('/especialistas')
     ]);
     catalogoServicios=tiposData.tipos||[];
-    opcionesPagoActual=pagosData;
     servicios.innerHTML = '<option value="">Selecciona...</option>' +
       catalogoServicios.map(item => `<option value="${item.id}">${escaparHTML(item.nombre)} · $${Number(item.precio||0).toLocaleString('es-CO')}</option>`).join('');
     especialistas.innerHTML = '<option value="">Selecciona...</option>' +
       especialistasData.especialistas.map(item => `<option value="${item.id}">${item.nombre}</option>`).join('');
     actualizarResumenPago();
+    cargarOpcionesPago();
   } catch (error) {
     servicios.innerHTML = '<option value="">API no disponible</option>';
     especialistas.innerHTML = '<option value="">API no disponible</option>';
@@ -2259,6 +2259,17 @@ async function cargarAdmin() {
     contenido.innerHTML = `<p class="empty-citas">${escaparHTML(error.message)}</p>`;
   } finally {
     contenido.setAttribute('aria-busy', 'false');
+  }
+}
+
+async function cargarOpcionesPago(){
+  try{
+    opcionesPagoActual=await apiFetch('/pagos/opciones');
+    actualizarResumenPago();
+  }catch(error){
+    opcionesPagoActual={anticipo_porcentaje:20,anticipo_reembolsable:false,
+      politica_cancelacion:'El anticipo no es reembolsable y queda retenido si la cita se cancela.'};
+    console.warn('Opciones de pago no disponibles; se aplicaron valores predeterminados.');
   }
 }
 
