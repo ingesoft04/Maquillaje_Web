@@ -1,4 +1,4 @@
-const CACHE='arte-belleza-v6';
+const CACHE='arte-belleza-v7';
 const ESTATICOS=['/','/citas','/manifest.webmanifest','/icon.svg'];
 
 self.addEventListener('install',evento=>{

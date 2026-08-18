@@ -214,6 +214,8 @@ El catálogo de servicios es público en `/citas`: cualquier visitante puede con
 
 El valor se configura en cada servicio desde **Administración → Catálogo**. Al reservar, la cliente ve el valor total y elige una modalidad:
 
+La instalación incluye precios demostrativos entre $60.000 y $250.000 COP. Son datos de muestra y la administradora puede sustituirlos por los valores reales del negocio desde el catálogo.
+
 - **Anticipo:** se calcula el porcentaje configurado (20 % por defecto); el saldo se paga durante la sesión.
 - **Pago en la sesión:** se paga el valor completo al recibir el servicio.
 

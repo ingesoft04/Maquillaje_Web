@@ -4,7 +4,7 @@ const { getCache, setCache, TTL } = require('./redis');
 // ── TIPOS DE MAQUILLAJE (con filtro por categoría) ──
 async function tipos(req, res) {
   const { categoria } = req.query;
-  const cacheKey = `catalogo:tipos:${categoria || 'all'}`;
+  const cacheKey = `catalogo:v2:tipos:${categoria || 'all'}`;
 
   const cached = await getCache(cacheKey);
   if (cached) return res.json({ fuente: 'cache', tipos: cached });

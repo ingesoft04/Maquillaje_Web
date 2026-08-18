@@ -49,15 +49,15 @@ CREATE TABLE IF NOT EXISTS tipos_maquillaje (
   activo      BOOLEAN DEFAULT TRUE
 );
 
-INSERT INTO tipos_maquillaje (nombre, slug, descripcion, icon, categoria) VALUES
-  ('Maquillaje Social',         'social',         'Ideal para eventos cotidianos y reuniones.', '💄', 'social'),
-  ('Maquillaje Nupcial',        'nupcial',        'Diseñado para el día más especial.', '💍', 'especial'),
-  ('Maquillaje Artístico',      'artistico',      'Expresión creativa sin límites.', '🎨', 'artistico'),
-  ('Maquillaje de Fantasía',    'fantasia',       'Transformaciones mágicas y teatrales.', '✨', 'artistico'),
-  ('Maquillaje Natural',        'natural',        'Realza tu belleza con sutileza.', '🌿', 'natural'),
-  ('Maquillaje de Pasarela',    'pasarela',       'Alta moda y tendencias internacionales.', '👑', 'social'),
-  ('Efectos Especiales',        'efectos',        'Caracterización para cine y teatro.', '🎭', 'artistico'),
-  ('Maquillaje Airbrush',       'airbrush',       'Acabado perfecto con pistola aerógrafo.', '🌬️', 'especial')
+INSERT INTO tipos_maquillaje (nombre, slug, descripcion, icon, categoria, precio) VALUES
+  ('Maquillaje Social',         'social',         'Ideal para eventos cotidianos y reuniones.', '💄', 'social', 80000),
+  ('Maquillaje Nupcial',        'nupcial',        'Diseñado para el día más especial.', '💍', 'especial', 250000),
+  ('Maquillaje Artístico',      'artistico',      'Expresión creativa sin límites.', '🎨', 'artistico', 150000),
+  ('Maquillaje de Fantasía',    'fantasia',       'Transformaciones mágicas y teatrales.', '✨', 'artistico', 180000),
+  ('Maquillaje Natural',        'natural',        'Realza tu belleza con sutileza.', '🌿', 'natural', 60000),
+  ('Maquillaje de Pasarela',    'pasarela',       'Alta moda y tendencias internacionales.', '👑', 'social', 140000),
+  ('Efectos Especiales',        'efectos',        'Caracterización para cine y teatro.', '🎭', 'artistico', 220000),
+  ('Maquillaje Airbrush',       'airbrush',       'Acabado perfecto con pistola aerógrafo.', '🌬️', 'especial', 120000)
 ON CONFLICT DO NOTHING;
 
 -- ── CITAS ───────────────────────────────────────

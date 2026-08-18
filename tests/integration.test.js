@@ -43,6 +43,8 @@ test('catálogos públicos contienen servicios y especialistas', async () => {
   assert.equal(tipos.status, 200);
   assert.equal(especialistas.status, 200);
   assert.ok(tipos.data.tipos.length >= 1);
+  const social = tipos.data.tipos.find(item => item.slug === 'social');
+  assert.ok(Number(social?.precio) > 0);
   assert.ok(especialistas.data.especialistas.length >= 1);
 });
 
