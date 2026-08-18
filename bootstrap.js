@@ -9,6 +9,7 @@ async function prepararBaseDeDatos() {
   await query(`ALTER TABLE usuarios DROP CONSTRAINT IF EXISTS usuarios_rol_check`);
   await query(`ALTER TABLE usuarios ADD CONSTRAINT usuarios_rol_check CHECK (rol IN ('cliente','especialista','admin'))`);
   await query(`ALTER TABLE especialistas ADD COLUMN IF NOT EXISTS usuario_id UUID UNIQUE REFERENCES usuarios(id) ON DELETE SET NULL`);
+  await query(`ALTER TABLE especialistas ADD COLUMN IF NOT EXISTS es_prueba BOOLEAN NOT NULL DEFAULT FALSE`);
   await query(`ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS intentos_fallidos INT NOT NULL DEFAULT 0`);
   await query(`ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS bloqueado_hasta TIMESTAMPTZ`);
   await query(`ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS password_actualizado_en TIMESTAMPTZ DEFAULT NOW()`);
@@ -22,6 +23,16 @@ async function prepararBaseDeDatos() {
   )`);
   await query(`ALTER TABLE tipos_maquillaje ADD COLUMN IF NOT EXISTS precio NUMERIC(12,2) DEFAULT 0`);
   await query(`ALTER TABLE tipos_maquillaje ADD COLUMN IF NOT EXISTS duracion_minutos INT DEFAULT 60`);
+  await query(`ALTER TABLE tipos_maquillaje ADD COLUMN IF NOT EXISTS es_prueba BOOLEAN NOT NULL DEFAULT FALSE`);
+  await query(`UPDATE tipos_maquillaje SET es_prueba=TRUE
+    WHERE slug LIKE 'servicio-%' OR slug LIKE 'pago-%' OR nombre LIKE 'Servicio Automatizado %' OR nombre LIKE 'Maquillaje pago %'`);
+  await query(`UPDATE especialistas SET es_prueba=TRUE
+    WHERE nombre LIKE 'Especialista Automatizada %' OR nombre LIKE 'Profesional Portal %'`);
+  await query(`UPDATE tipos_maquillaje SET precio=CASE slug
+    WHEN 'social' THEN 80000 WHEN 'nupcial' THEN 250000 WHEN 'artistico' THEN 150000
+    WHEN 'fantasia' THEN 180000 WHEN 'natural' THEN 60000 WHEN 'pasarela' THEN 140000
+    WHEN 'efectos' THEN 220000 WHEN 'airbrush' THEN 120000 ELSE precio END
+    WHERE precio=0 AND slug IN ('social','nupcial','artistico','fantasia','natural','pasarela','efectos','airbrush')`);
   await query(`ALTER TABLE citas DROP CONSTRAINT IF EXISTS uq_especialista_horario`);
   await query(`CREATE UNIQUE INDEX IF NOT EXISTS uq_especialista_horario_activo
                ON citas(especialista_id, fecha, hora) WHERE estado != 'cancelada'`);
