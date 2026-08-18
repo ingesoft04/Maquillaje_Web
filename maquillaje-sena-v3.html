@@ -510,6 +510,21 @@
     #citas-wrapper .section-label { color: var(--blush); }
     #citas-wrapper h2 { color: var(--cream); }
     #citas-wrapper .lead { color: #C8ABA5; }
+    .public-catalog { max-width:none; margin:2.5rem 0 3rem; padding:0; }
+    .public-catalog-heading { display:flex; justify-content:space-between; align-items:end; gap:1rem; margin-bottom:1rem; }
+    .public-catalog-heading h3 { color:var(--blush); font:400 1.6rem 'Cormorant Garamond',serif; }
+    .public-catalog-heading p { color:#A08080; font-size:.72rem; }
+    .public-service-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:.8rem; }
+    .public-service-card { display:flex; flex-direction:column; min-height:210px; padding:1.2rem; background:#2A1020; border:1px solid #5C2A3A; transition:transform .2s,border-color .2s; }
+    .public-service-card:hover { transform:translateY(-3px); border-color:var(--rose); }
+    .public-service-icon { font-size:1.7rem; }
+    .public-service-card h4 { margin:.5rem 0; color:var(--cream); font:400 1.15rem 'Cormorant Garamond',serif; }
+    .public-service-card p { flex:1; color:#A08080; font-size:.7rem; line-height:1.55; }
+    .public-service-meta { display:flex; justify-content:space-between; gap:.5rem; margin:.8rem 0; color:var(--gold); font-size:.7rem; }
+    .public-service-card button { border:1px solid var(--rose); background:transparent; color:var(--blush); padding:.55rem; cursor:pointer; }
+    .public-specialists { display:flex; flex-wrap:wrap; gap:.55rem; margin-top:1rem; }
+    .public-specialist { padding:.5rem .75rem; border:1px solid #5C2A3A; color:#D8C2C0; font-size:.7rem; background:#321729; }
+    .catalog-loading { color:#A08080; padding:1.5rem; border:1px dashed #5C2A3A; text-align:center; }
 
     /* Auth tabs */
     .auth-tabs {
@@ -795,6 +810,7 @@
       .admin-form-grid { grid-template-columns:1fr 1fr; }
       .profile-grid { grid-template-columns:1fr; }
       .payment-choice-grid { grid-template-columns:1fr; }
+      .public-catalog-heading { align-items:start; flex-direction:column; }
       .admin-navigation { padding:.75rem; }
       .admin-nav-group { display:none; }
       .admin-mobile-select { display:block; }
@@ -1368,7 +1384,13 @@
   <div class="inner">
     <p class="section-label">07 — Agenda tu Cita</p>
     <h2>Tu belleza, a tu <em>horario</em></h2>
-    <p class="lead">Crea tu cuenta o inicia sesión para agendar tu cita de maquillaje con nuestras especialistas. Elige el servicio, la fecha y la hora que mejor se adapten a ti.</p>
+    <p class="lead">Explora nuestros servicios, compara precios y elige la opción que mejor se adapte a tu ocasión. Cuando estés lista, podrás continuar con la reserva.</p>
+
+    <section class="public-catalog" id="catalogoPublico" aria-labelledby="catalogoPublicoTitulo">
+      <div class="public-catalog-heading"><div><p class="section-label">Catálogo público</p><h3 id="catalogoPublicoTitulo">Servicios, precios y duración</h3></div><p>Valores demostrativos editables desde administración.</p></div>
+      <div id="catalogoPublicoServicios" class="catalog-loading" aria-live="polite">Cargando servicios…</div>
+      <div id="catalogoPublicoEspecialistas" class="public-specialists" aria-label="Especialistas disponibles"></div>
+    </section>
 
     <!-- AUTH TABS -->
     <div class="auth-tabs" id="authTabs">
@@ -1809,13 +1831,37 @@ async function cargarCatalogos() {
       catalogoServicios.map(item => `<option value="${item.id}">${escaparHTML(item.nombre)} · $${Number(item.precio||0).toLocaleString('es-CO')}</option>`).join('');
     especialistas.innerHTML = '<option value="">Selecciona...</option>' +
       especialistasData.especialistas.map(item => `<option value="${item.id}">${item.nombre}</option>`).join('');
+    renderCatalogoPublico(catalogoServicios,especialistasData.especialistas||[]);
     actualizarResumenPago();
     cargarOpcionesPago();
   } catch (error) {
     servicios.innerHTML = '<option value="">API no disponible</option>';
     especialistas.innerHTML = '<option value="">API no disponible</option>';
+    const publico=document.getElementById('catalogoPublicoServicios');
+    if(publico)publico.innerHTML='<p>No fue posible consultar el catálogo en este momento. Intenta actualizar la página.</p>';
     mostrarToast('No fue posible cargar el catálogo: ' + error.message, 'error');
   }
+}
+
+function renderCatalogoPublico(servicios,especialistas){
+  const cont=document.getElementById('catalogoPublicoServicios');
+  const equipo=document.getElementById('catalogoPublicoEspecialistas');
+  if(!cont||!equipo)return;
+  cont.className='public-service-grid';
+  cont.innerHTML=servicios.length?servicios.map(item=>`<article class="public-service-card">
+    <span class="public-service-icon" aria-hidden="true">${escaparHTML(item.icon||'💄')}</span>
+    <h4>${escaparHTML(item.nombre)}</h4><p>${escaparHTML(item.descripcion||'Servicio profesional de maquillaje.')}</p>
+    <div class="public-service-meta"><strong>$${Number(item.precio||0).toLocaleString('es-CO')} COP</strong><span>${Number(item.duracion_minutos||60)} min</span></div>
+    <button type="button" onclick="seleccionarServicioPublico('${item.id}')">Elegir para reservar</button></article>`).join(''):'<p class="catalog-loading">No hay servicios publicados.</p>';
+  equipo.innerHTML=especialistas.length?'<span class="admin-nav-label">Especialistas</span>'+especialistas.map(item=>`<span class="public-specialist">👩‍🎨 ${escaparHTML(item.nombre)}</span>`).join(''):'';
+}
+
+function seleccionarServicioPublico(id){
+  const selector=document.getElementById('cita-servicio');
+  selector.value=String(id);
+  actualizarResumenPago();
+  document.getElementById('authTabs').scrollIntoView({behavior:'smooth',block:'center'});
+  mostrarToast('Servicio seleccionado. Regístrate o inicia sesión para reservar.','info');
 }
 
 // ── TOAST (corregido: usa clases correctas del CSS) ──

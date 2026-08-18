@@ -4,12 +4,12 @@ const { getCache, setCache, TTL } = require('./redis');
 // ── TIPOS DE MAQUILLAJE (con filtro por categoría) ──
 async function tipos(req, res) {
   const { categoria } = req.query;
-  const cacheKey = `catalogo:tipos:${categoria || 'all'}`;
+  const cacheKey = `catalogo:v3:tipos:${categoria || 'all'}`;
 
   const cached = await getCache(cacheKey);
   if (cached) return res.json({ fuente: 'cache', tipos: cached });
 
-  let sql    = 'SELECT * FROM tipos_maquillaje WHERE activo = TRUE';
+  let sql    = 'SELECT * FROM tipos_maquillaje WHERE activo = TRUE AND es_prueba = FALSE';
   let params = [];
 
   if (categoria) {
@@ -26,13 +26,13 @@ async function tipos(req, res) {
 
 // ── ESPECIALISTAS ────────────────────────────────
 async function especialistas(req, res) {
-  const cacheKey = 'catalogo:especialistas';
+  const cacheKey = 'catalogo:v2:especialistas';
 
   const cached = await getCache(cacheKey);
   if (cached) return res.json({ fuente: 'cache', especialistas: cached });
 
   const { rows } = await query(
-    'SELECT id, nombre, bio, foto_url FROM especialistas WHERE activo = TRUE ORDER BY id'
+    'SELECT id, nombre, bio, foto_url FROM especialistas WHERE activo = TRUE AND es_prueba = FALSE ORDER BY id'
   );
   await setCache(cacheKey, rows, TTL.CATALOGO);
 
