@@ -204,7 +204,7 @@ test('administrador actualiza estado de cita', async () => {
 
 test('administrador crea cuenta profesional y la especialista accede solo a su agenda', async () => {
   const nueva=await request('/api/admin/especialistas',{
-    method:'POST',token:adminToken,body:JSON.stringify({nombre:`Profesional Portal ${Date.now()}`,bio:'Cuenta de prueba del portal'})
+    method:'POST',token:adminToken,body:JSON.stringify({nombre:`Profesional Portal ${Date.now()}`,bio:'Cuenta de prueba del portal',es_prueba:true})
   });
   assert.equal(nueva.status,201);
   const email=`especialista.${Date.now()}@example.com`;
@@ -351,7 +351,7 @@ test('administrador gestiona catálogo y genera auditoría', async () => {
   const sello = Date.now();
   const especialista = await request('/api/admin/especialistas', {
     method: 'POST', token: adminToken,
-    body: JSON.stringify({ nombre: `Especialista Automatizada ${sello}`, bio: 'Registro de prueba' })
+    body: JSON.stringify({ nombre: `Especialista Automatizada ${sello}`, bio: 'Registro de prueba',es_prueba:true })
   });
   assert.equal(especialista.status, 201);
 
@@ -360,7 +360,7 @@ test('administrador gestiona catálogo y genera auditoría', async () => {
     body: JSON.stringify({
       nombre: `Servicio Automatizado ${sello}`, slug: `servicio-${sello}`,
       descripcion: 'Registro de prueba', categoria: 'social', icon: '💄',
-      precio: 50000, duracion_minutos: 60
+      precio: 50000, duracion_minutos: 60,es_prueba:true
     })
   });
   assert.equal(servicio.status, 201);
@@ -377,11 +377,14 @@ test('administrador gestiona catálogo y genera auditoría', async () => {
     body: JSON.stringify({
       nombre: `Maquillaje pago ${sello}`, slug: `pago-${sello}`,
       descripcion: 'Servicio para validar caja', categoria: 'social', icon: '✨',
-      precio: 80000, duracion_minutos: 60
+      precio: 80000, duracion_minutos: 60,es_prueba:true
     })
   });
   assert.equal(servicioPagado.status, 201);
   servicioPagadoId = servicioPagado.data.servicio.id;
+
+  const catalogoPublico = await request('/api/tipos');
+  assert.ok(!catalogoPublico.data.tipos.some(item => item.id === servicioPagadoId));
 
   const auditoria = await request('/api/admin/auditoria', { token: adminToken });
   assert.equal(auditoria.status, 200);
