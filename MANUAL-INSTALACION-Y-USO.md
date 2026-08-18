@@ -208,6 +208,17 @@ Prueba:
 
 El anticipo es no reembolsable y queda retenido al cancelar.
 
+### Valores y modalidades de pago
+
+El valor se configura en cada servicio desde **Administración → Catálogo**. Al reservar, la cliente ve el valor total y elige una modalidad:
+
+- **Anticipo:** se calcula el porcentaje configurado (20 % por defecto); el saldo se paga durante la sesión.
+- **Pago en la sesión:** se paga el valor completo al recibir el servicio.
+
+Los métodos disponibles son efectivo, transferencia, tarjeta débito, tarjeta crédito, Nequi, Daviplata y otro. Esta selección registra la preferencia; no realiza todavía un débito bancario automático. Para cobrar en línea se deberá integrar posteriormente una pasarela como Wompi o Mercado Pago con las credenciales comerciales del negocio.
+
+Si la cliente cancela una cita que ya tiene un anticipo registrado, el pago cambia a estado **retenido**. El anticipo no se devuelve, incluso si la cancelación se hizo con anticipación, conforme a la política definida para el proyecto. Los abonos o pagos de saldo no se convierten automáticamente en anticipos.
+
 ### Especialista
 
 1. Administración crea su especialista y acceso.

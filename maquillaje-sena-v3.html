@@ -677,6 +677,10 @@
     .admin-form-grid input { min-width:0; background:#2A1020; color:var(--cream); border:1px solid #5C2A3A; padding:.65rem; }
     .admin-form-grid button { background:var(--gold); color:var(--plum); border:0; padding:.65rem; cursor:pointer; font-weight:600; }
     .admin-section-title { color:var(--blush); font:400 1.15rem 'Cormorant Garamond',serif; margin:1rem 0 .7rem; }
+    .payment-choice { margin:1rem 0; padding:1rem; border:1px solid #5C2A3A; background:#321729; }
+    .payment-choice-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+    .payment-summary { margin-top:.8rem; color:#D8C2C0; font-size:.75rem; line-height:1.7; }
+    .payment-policy { color:var(--blush); }
     .calendar-toolbar { display:flex; flex-wrap:wrap; gap:.6rem; align-items:center; justify-content:space-between; margin-bottom:1rem; }
     .calendar-week { display:grid; grid-template-columns:repeat(7,minmax(145px,1fr)); gap:.55rem; min-width:1050px; }
     .calendar-day { background:#2A1020; border:1px solid #51243B; min-height:260px; padding:.6rem; }
@@ -790,6 +794,7 @@
       .admin-panel { padding:1rem; }
       .admin-form-grid { grid-template-columns:1fr 1fr; }
       .profile-grid { grid-template-columns:1fr; }
+      .payment-choice-grid { grid-template-columns:1fr; }
       .admin-navigation { padding:.75rem; }
       .admin-nav-group { display:none; }
       .admin-mobile-select { display:block; }
@@ -1476,6 +1481,14 @@
           </div>
         </div>
 
+        <div class="payment-choice">
+          <div class="payment-choice-grid">
+            <div class="field"><label>¿Cuándo deseas pagar?</label><select id="cita-modalidad-pago" onchange="actualizarResumenPago()"><option value="sesion">Pagar en la sesión</option><option value="anticipo">Pagar anticipo</option></select></div>
+            <div class="field"><label>Método de pago preferido</label><select id="cita-metodo-pago"><option value="efectivo">Efectivo</option><option value="transferencia">Transferencia</option><option value="tarjeta_debito">Tarjeta débito</option><option value="tarjeta_credito">Tarjeta crédito</option><option value="nequi">Nequi</option><option value="daviplata">Daviplata</option><option value="otro">Otro</option></select></div>
+          </div>
+          <div id="resumenPagoCita" class="payment-summary" aria-live="polite">Selecciona un servicio para consultar su valor.</div>
+        </div>
+
         <div class="field" style="margin-bottom:1rem;">
           <label>Notas (opcional)</label>
           <input type="text" id="cita-notas" placeholder="Ej: piel sensible, evento especial..."/>
@@ -1757,6 +1770,8 @@ let adminReportes=null;
 let adminPrivacidad=[];
 let adminFotografias=[];
 let adminVistaActual='citas';
+let catalogoServicios=[];
+let opcionesPagoActual={anticipo_porcentaje:20,anticipo_reembolsable:false};
 
 function escaparHTML(valor) {
   return String(valor ?? '').replace(/[&<>'"]/g, caracter => ({
@@ -1786,13 +1801,16 @@ async function cargarCatalogos() {
   const servicios = document.getElementById('cita-servicio');
   const especialistas = document.getElementById('cita-especialista');
   try {
-    const [tiposData, especialistasData] = await Promise.all([
-      apiFetch('/tipos'), apiFetch('/especialistas')
+    const [tiposData, especialistasData, pagosData] = await Promise.all([
+      apiFetch('/tipos'), apiFetch('/especialistas'), apiFetch('/pagos/opciones')
     ]);
+    catalogoServicios=tiposData.tipos||[];
+    opcionesPagoActual=pagosData;
     servicios.innerHTML = '<option value="">Selecciona...</option>' +
-      tiposData.tipos.map(item => `<option value="${item.id}">${item.nombre}</option>`).join('');
+      catalogoServicios.map(item => `<option value="${item.id}">${escaparHTML(item.nombre)} · $${Number(item.precio||0).toLocaleString('es-CO')}</option>`).join('');
     especialistas.innerHTML = '<option value="">Selecciona...</option>' +
       especialistasData.especialistas.map(item => `<option value="${item.id}">${item.nombre}</option>`).join('');
+    actualizarResumenPago();
   } catch (error) {
     servicios.innerHTML = '<option value="">API no disponible</option>';
     especialistas.innerHTML = '<option value="">API no disponible</option>';
@@ -1994,7 +2012,7 @@ async function guardarPerfilCosmetico() {
 
 async function cargarMisPagos(){
   try{const data=await apiFetch('/pagos/mis');const cont=document.getElementById('misPagos');
-    cont.innerHTML=data.pagos.length?`<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Fecha</th><th>Servicio</th><th>Monto</th><th>Método</th><th>Estado</th></tr></thead><tbody>${data.pagos.map(p=>`<tr><td>${new Date(p.creado_en).toLocaleDateString('es-CO')}</td><td>${escaparHTML(p.servicio||'Servicio')}</td><td>$${Number(p.monto).toLocaleString('es-CO')}</td><td>${escaparHTML(p.metodo)}</td><td>${escaparHTML(p.estado)}</td></tr>`).join('')}</tbody></table></div>`:'<p class="empty-citas">Sin pagos registrados.</p>';
+    cont.innerHTML=data.pagos.length?`<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Fecha</th><th>Servicio</th><th>Monto</th><th>Método</th><th>Concepto</th><th>Estado</th></tr></thead><tbody>${data.pagos.map(p=>`<tr><td>${new Date(p.creado_en).toLocaleDateString('es-CO')}</td><td>${escaparHTML(p.servicio||'Servicio')}</td><td>$${Number(p.monto).toLocaleString('es-CO')}</td><td>${escaparHTML(p.metodo)}</td><td>${escaparHTML(p.concepto)}</td><td>${escaparHTML(p.estado)}</td></tr>`).join('')}</tbody></table></div>`:'<p class="empty-citas">Sin pagos registrados.</p>';
   }catch(error){document.getElementById('misPagos').innerHTML=`<p class="empty-citas">${escaparHTML(error.message)}</p>`;}
 }
 
@@ -2052,13 +2070,15 @@ async function agendarCita() {
 
   try {
     const ruta = citaEditandoId ? `/citas/${citaEditandoId}/reprogramar` : '/citas';
-    await apiFetch(ruta, {
+    const respuesta = await apiFetch(ruta, {
       method: citaEditandoId ? 'PATCH' : 'POST',
-      body: JSON.stringify({ especialista_id: Number(especialista), tipo_id: Number(servicio), fecha, hora, notas })
+      body: JSON.stringify({ especialista_id: Number(especialista), tipo_id: Number(servicio), fecha, hora, notas,
+        modalidad_pago:document.getElementById('cita-modalidad-pago').value,
+        metodo_pago_preferido:document.getElementById('cita-metodo-pago').value })
     });
     const msg = document.getElementById('cita-msg');
     msg.className = 'auth-msg success';
-    msg.innerHTML = `✅ <strong>¡Cita ${citaEditandoId ? 'reprogramada' : 'confirmada'}!</strong> ` + servicioEl.options[servicioEl.selectedIndex].text + ' · ' + formatFecha(fecha) + ' · ' + hora;
+    msg.innerHTML = `✅ <strong>¡Cita ${citaEditandoId ? 'reprogramada' : 'confirmada'}!</strong> ` + servicioEl.options[servicioEl.selectedIndex].text + ' · ' + formatFecha(fecha) + ' · ' + hora + (respuesta.pago ? (respuesta.pago.anticipo_requerido ? `<br>Anticipo acordado: $${Number(respuesta.pago.anticipo_requerido).toLocaleString('es-CO')} COP. No reembolsable en caso de cancelación.` : '<br>Pago acordado durante la sesión.') : '');
     msg.style.display = 'block';
     mostrarToast(citaEditandoId ? '¡Cita reprogramada! ✨' : '¡Cita agendada! ✨', 'success');
     citaEditandoId = null;
@@ -2112,6 +2132,9 @@ async function editarCita(id) {
   document.getElementById('cita-especialista').value = cita.especialista_id;
   document.getElementById('cita-fecha').value = String(cita.fecha).slice(0, 10);
   document.getElementById('cita-notas').value = cita.notas === 'Sin notas' ? '' : (cita.notas || '');
+  document.getElementById('cita-modalidad-pago').value = cita.modalidad_pago || 'sesion';
+  document.getElementById('cita-metodo-pago').value = cita.metodo_pago_preferido || 'efectivo';
+  actualizarResumenPago();
   await actualizarDisponibilidad();
   document.getElementById('cita-hora').value = String(cita.hora).slice(0, 5);
   document.querySelector('.btn-agendar').textContent = 'Guardar reprogramación ✨';
@@ -2183,6 +2206,8 @@ async function renderCitas() {
         <div class="cita-meta">
           📅 ${formatFecha(cita.fecha)} &nbsp;·&nbsp; ⏰ ${cita.hora}
           &nbsp;·&nbsp; 👩‍🎨 ${escaparHTML(cita.especialista)}
+          <br>💳 Valor: $${Number(cita.precio_total||0).toLocaleString('es-CO')} COP · Pagado: $${Number(cita.total_pagado||0).toLocaleString('es-CO')} · Saldo: $${Math.max(Number(cita.precio_total||0)-Number(cita.total_pagado||0),0).toLocaleString('es-CO')}
+          · ${cita.modalidad_pago==='anticipo'?'Anticipo acordado':'Pago en sesión'} (${escaparHTML(cita.metodo_pago_preferido||'efectivo')})
           ${cita.notas && cita.notas !== 'Sin notas' ? '<br>📝 ' + escaparHTML(cita.notas) : ''}
         </div>
       </div>
@@ -2235,6 +2260,17 @@ async function cargarAdmin() {
   } finally {
     contenido.setAttribute('aria-busy', 'false');
   }
+}
+
+function actualizarResumenPago(){
+  const cont=document.getElementById('resumenPagoCita');
+  if(!cont)return;
+  const servicio=catalogoServicios.find(item=>String(item.id)===document.getElementById('cita-servicio').value);
+  if(!servicio){cont.textContent='Selecciona un servicio para consultar su valor.';return;}
+  const total=Number(servicio.precio||0),porcentaje=Number(opcionesPagoActual.anticipo_porcentaje||0);
+  const anticipado=document.getElementById('cita-modalidad-pago').value==='anticipo';
+  const anticipo=anticipado?Math.round(total*porcentaje/100):0;
+  cont.innerHTML=`<strong>Valor total:</strong> $${total.toLocaleString('es-CO')} COP · <strong>${anticipado?'Anticipo':'Pago en sesión'}:</strong> $${(anticipado?anticipo:total).toLocaleString('es-CO')} COP${anticipado?` · <strong>Saldo en la sesión:</strong> $${(total-anticipo).toLocaleString('es-CO')} COP`:''}<br><span class="payment-policy">${escaparHTML(opcionesPagoActual.politica_cancelacion||'El anticipo no es reembolsable si se cancela la cita.')}</span>`;
 }
 
 function mostrarAdminVista(vista) {
@@ -2373,9 +2409,10 @@ async function descargarReporte(event,seccion){event.preventDefault();try{const 
 function renderAdminPagos(){
   document.getElementById('adminContenido').innerHTML=`<h5 class="admin-section-title">Registrar pago o abono</h5><div class="admin-form-grid">
     <select class="admin-select" id="pagoCita"><option value="">Selecciona cita</option>${adminCitas.filter(c=>c.estado!=='cancelada').map(c=>`<option value="${c.id}">${escaparHTML(c.cliente)} · ${escaparHTML(c.servicio||'Servicio')} · ${formatFecha(c.fecha)}</option>`).join('')}</select>
-    <input id="pagoMonto" type="number" min="1" placeholder="Monto COP"><select class="admin-select" id="pagoMetodo"><option>efectivo</option><option>transferencia</option><option>tarjeta</option><option>otro</option></select>
+    <input id="pagoMonto" type="number" min="1" placeholder="Monto COP"><select class="admin-select" id="pagoMetodo"><option value="efectivo">Efectivo</option><option value="transferencia">Transferencia</option><option value="tarjeta_debito">Tarjeta débito</option><option value="tarjeta_credito">Tarjeta crédito</option><option value="nequi">Nequi</option><option value="daviplata">Daviplata</option><option value="otro">Otro</option></select>
     <select class="admin-select" id="pagoConcepto"><option value="anticipo">Anticipo no reembolsable</option><option value="abono">Abono</option><option value="saldo">Pago del saldo</option></select><button onclick="registrarPagoAdmin()">Registrar pago</button></div>
-    <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Fecha</th><th>Cliente</th><th>Servicio</th><th>Monto</th><th>Método</th></tr></thead><tbody>${adminPagos.map(p=>`<tr><td>${new Date(p.creado_en).toLocaleDateString('es-CO')}</td><td>${escaparHTML(p.cliente)}</td><td>${escaparHTML(p.servicio||'Servicio')}</td><td>$${Number(p.monto).toLocaleString('es-CO')}</td><td>${escaparHTML(p.metodo)}</td></tr>`).join('')}</tbody></table></div>`;
+    <p class="cita-meta payment-policy">Los anticipos son no reembolsables: al cancelar la cita quedan retenidos. Los demás pagos se registran como abono o saldo.</p>
+    <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Fecha</th><th>Cliente</th><th>Servicio</th><th>Monto</th><th>Método</th><th>Concepto</th><th>Estado</th></tr></thead><tbody>${adminPagos.map(p=>`<tr><td>${new Date(p.creado_en).toLocaleDateString('es-CO')}</td><td>${escaparHTML(p.cliente)}</td><td>${escaparHTML(p.servicio||'Servicio')}</td><td>$${Number(p.monto).toLocaleString('es-CO')}</td><td>${escaparHTML(p.metodo)}</td><td>${escaparHTML(p.concepto)}</td><td>${escaparHTML(p.estado)}</td></tr>`).join('')}</tbody></table></div>`;
 }
 
 async function registrarPagoAdmin(){try{await apiFetch('/admin/pagos',{method:'POST',body:JSON.stringify({cita_id:document.getElementById('pagoCita').value,monto:document.getElementById('pagoMonto').value,metodo:document.getElementById('pagoMetodo').value,concepto:document.getElementById('pagoConcepto').value})});mostrarToast('Pago registrado','success');await cargarAdmin();renderAdminPagos();await cargarMisPagos();}catch(e){mostrarToast('❗ '+e.message,'error');}}
@@ -2701,6 +2738,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   await cargarCatalogos();
   document.getElementById('cita-especialista').addEventListener('change', actualizarDisponibilidad);
   document.getElementById('cita-servicio').addEventListener('change', actualizarDisponibilidad);
+  document.getElementById('cita-servicio').addEventListener('change', actualizarResumenPago);
   document.getElementById('cita-fecha').addEventListener('change', actualizarDisponibilidad);
 
   const servicioPendiente = sessionStorage.getItem('sena_servicio_pendiente');

@@ -24,3 +24,11 @@ test('selección de módulo solo modifica los controles de navegación', () => {
   assert.match(html, /querySelectorAll\('#adminNavegacion \[data-admin-vista\]'\)/);
   assert.doesNotMatch(html, /querySelectorAll\('\.admin-tab'\)/);
 });
+
+test('formulario de cita informa valores, modalidad y política de anticipo', () => {
+  assert.match(html, /id="cita-modalidad-pago"/);
+  assert.match(html, /id="cita-metodo-pago"/);
+  assert.match(html, /value="nequi"/);
+  assert.match(html, /function actualizarResumenPago\(\)/);
+  assert.match(html, /anticipo no es reembolsable/i);
+});

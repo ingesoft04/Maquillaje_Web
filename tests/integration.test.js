@@ -387,6 +387,10 @@ test('administrador gestiona catálogo y genera auditoría', async () => {
 });
 
 test('flujo de cita con precio, abono administrativo y consulta del cliente', async () => {
+  const opcionesPago = await request('/api/pagos/opciones');
+  assert.equal(opcionesPago.status, 200);
+  assert.ok(opcionesPago.data.metodos.includes('nequi'));
+  assert.equal(opcionesPago.data.anticipo_reembolsable, false);
   const especialistas = (await request('/api/especialistas')).data.especialistas;
   let seleccion;
   let fecha;
@@ -400,11 +404,15 @@ test('flujo de cita con precio, abono administrativo y consulta del cliente', as
   assert.ok(seleccion);
   const cita = await request('/api/citas', {
     method: 'POST', token: clienteToken,
-    body: JSON.stringify({ ...seleccion, tipo_id: servicioPagadoId, fecha })
+    body: JSON.stringify({ ...seleccion, tipo_id: servicioPagadoId, fecha,modalidad_pago:'anticipo',metodo_pago_preferido:'nequi' })
   });
   assert.equal(cita.status, 201);
   citaPagadaId=cita.data.cita.id;
   assert.equal(Number(cita.data.cita.precio_total), 80000);
+  assert.equal(cita.data.cita.modalidad_pago, 'anticipo');
+  assert.equal(cita.data.cita.metodo_pago_preferido, 'nequi');
+  assert.equal(Number(cita.data.pago.anticipo_requerido), 16000);
+  assert.equal(cita.data.pago.anticipo_reembolsable, false);
   const pago = await request('/api/admin/pagos', {
     method: 'POST', token: adminToken,
     body: JSON.stringify({ cita_id: cita.data.cita.id, monto: 30000, metodo: 'transferencia', concepto:'anticipo', referencia: 'TEST-AUTOMATICO' })
