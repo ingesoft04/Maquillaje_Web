@@ -34,6 +34,7 @@ module.exports={
       put:{tags:['Perfil cosmético'],security:[{bearerAuth:[]}],summary:'Crear o actualizar ficha',responses:{200:{description:'Ficha guardada'}}}
     },
     '/pagos/mis':{get:{tags:['Pagos'],security:[{bearerAuth:[]}],summary:'Pagos de la cliente',responses:{200:{description:'Pagos'}}}},
+    '/pagos/opciones':{get:{tags:['Pagos'],summary:'Métodos, modalidades y política de anticipos',responses:{200:{description:'Opciones de pago'}}}},
     '/admin/pagos':{
       get:{tags:['Pagos'],security:[{bearerAuth:[]}],summary:'Todos los pagos',responses:{200:{description:'Pagos'}}},
       post:{tags:['Pagos'],security:[{bearerAuth:[]}],summary:'Registrar pago',requestBody:{content:{'application/json':{schema:{$ref:'#/components/schemas/Pago'}}}},responses:{201:{description:'Pago registrado'}}}

@@ -24,3 +24,23 @@ test('selección de módulo solo modifica los controles de navegación', () => {
   assert.match(html, /querySelectorAll\('#adminNavegacion \[data-admin-vista\]'\)/);
   assert.doesNotMatch(html, /querySelectorAll\('\.admin-tab'\)/);
 });
+
+test('formulario de cita informa valores, modalidad y política de anticipo', () => {
+  assert.match(html, /id="cita-modalidad-pago"/);
+  assert.match(html, /id="cita-metodo-pago"/);
+  assert.match(html, /value="nequi"/);
+  assert.match(html, /function actualizarResumenPago\(\)/);
+  assert.match(html, /anticipo no es reembolsable/i);
+  assert.match(html, /async function cargarOpcionesPago\(\)/);
+  assert.doesNotMatch(html, /Promise\.all\(\[\s*apiFetch\('\/tipos'\), apiFetch\('\/especialistas'\), apiFetch\('\/pagos\/opciones'\)/);
+});
+
+test('catálogo de reservas es público y muestra precio y duración antes del acceso', () => {
+  const catalogo = html.indexOf('id="catalogoPublico"');
+  const acceso = html.indexOf('id="authTabs"');
+  assert.ok(catalogo > -1 && catalogo < acceso);
+  assert.match(html, /id="catalogoPublicoServicios"/);
+  assert.match(html, /function renderCatalogoPublico\(servicios,especialistas\)/);
+  assert.match(html, /Number\(item\.precio\|\|0\).*COP/);
+  assert.match(html, /duracion_minutos/);
+});

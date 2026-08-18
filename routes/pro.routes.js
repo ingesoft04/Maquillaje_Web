@@ -5,6 +5,7 @@ const {autenticar,soloAdmin}=require('../middleware/auth');
 router.get('/perfil-cosmetico',autenticar,c.obtenerPerfil);
 router.put('/perfil-cosmetico',autenticar,c.guardarPerfil);
 router.get('/pagos/mis',autenticar,c.misPagos);
+router.get('/pagos/opciones',c.opcionesPago);
 router.get('/admin/pagos',autenticar,soloAdmin,c.listarPagos);
 router.post('/admin/pagos',autenticar,soloAdmin,c.registrarPago);
 router.get('/admin/inventario',autenticar,soloAdmin,c.listarInventario);

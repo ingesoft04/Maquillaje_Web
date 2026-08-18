@@ -52,7 +52,8 @@ async function mis_citas(req, res) {
 
   const { rows } = await query(
     `SELECT
-       c.id, c.fecha, c.hora, c.notas, c.estado, c.creado_en,
+       c.id, c.fecha, c.hora, c.notas, c.estado, c.creado_en,c.precio_total,c.modalidad_pago,c.metodo_pago_preferido,
+       COALESCE((SELECT SUM(p.monto) FROM pagos p WHERE p.cita_id=c.id AND p.estado IN ('registrado','retenido')),0) AS total_pagado,
        c.especialista_id, c.tipo_id,
        e.nombre  AS especialista,
        tm.nombre AS servicio,
@@ -72,6 +73,9 @@ async function mis_citas(req, res) {
 // ── AGENDAR CITA ─────────────────────────────────
 async function agendar(req, res) {
   const { especialista_id, tipo_id, fecha, hora, notas } = req.body;
+  const modalidadPago=['anticipo','sesion'].includes(req.body.modalidad_pago)?req.body.modalidad_pago:'sesion';
+  const metodosPago=['efectivo','transferencia','tarjeta_debito','tarjeta_credito','nequi','daviplata','otro'];
+  const metodoPago=metodosPago.includes(req.body.metodo_pago_preferido)?req.body.metodo_pago_preferido:'efectivo';
   const uid = req.usuario.id;
 
   if (!especialista_id || !fecha || !hora) {
@@ -91,10 +95,10 @@ async function agendar(req, res) {
   let rows;
   try {
     ({ rows } = await query(
-      `INSERT INTO citas (usuario_id, especialista_id, tipo_id, fecha, hora, notas, precio_total)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
-       RETURNING id, fecha, hora, estado, notas, precio_total, creado_en`,
-      [uid, especialista_id, tipo_id || null, fecha, hora, notas || null, validacion.precio]
+      `INSERT INTO citas (usuario_id, especialista_id, tipo_id, fecha, hora, notas, precio_total,modalidad_pago,metodo_pago_preferido)
+       VALUES ($1, $2, $3, $4, $5, $6, $7,$8,$9)
+       RETURNING id, fecha, hora, estado, notas, precio_total,modalidad_pago,metodo_pago_preferido, creado_en`,
+      [uid, especialista_id, tipo_id || null, fecha, hora, notas || null, validacion.precio,modalidadPago,metodoPago]
     ));
   } catch (error) {
     if (error.code === '23505') {
@@ -104,6 +108,8 @@ async function agendar(req, res) {
   }
 
   const cita = rows[0];
+  const politica=await politicaReservas();
+  const anticipoRequerido=modalidadPago==='anticipo'?Math.round(validacion.precio*Number(politica.anticipo_porcentaje||0)/100):0;
 
   await query(`INSERT INTO notificaciones(usuario_id,cita_id,canal,tipo,destino,programada_para)
     SELECT u.id,$1,'email','confirmacion',u.email,NOW() FROM usuarios u WHERE u.id=$2`,[cita.id,uid]);
@@ -118,7 +124,9 @@ async function agendar(req, res) {
 
   return res.status(201).json({
     mensaje: '¡Cita agendada exitosamente!',
-    cita: { ...cita, especialista_id, tipo_id }
+    cita: { ...cita, especialista_id, tipo_id },
+    pago:{valor_total:validacion.precio,anticipo_requerido:anticipoRequerido,saldo_sesion:validacion.precio-anticipoRequerido,
+      metodo_preferido:metodoPago,anticipo_reembolsable:false}
   });
 }
 
