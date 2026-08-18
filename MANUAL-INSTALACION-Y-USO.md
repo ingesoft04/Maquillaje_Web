@@ -210,6 +210,8 @@ El anticipo es no reembolsable y queda retenido al cancelar.
 
 ### Valores y modalidades de pago
 
+El catálogo de servicios es público en `/citas`: cualquier visitante puede consultar nombre, descripción, precio, duración y especialistas antes de crear una cuenta. La autenticación se solicita únicamente cuando la persona decide completar la reserva.
+
 El valor se configura en cada servicio desde **Administración → Catálogo**. Al reservar, la cliente ve el valor total y elige una modalidad:
 
 - **Anticipo:** se calcula el porcentaje configurado (20 % por defecto); el saldo se paga durante la sesión.
