@@ -26,7 +26,8 @@ CREATE TABLE IF NOT EXISTS especialistas (
   foto_url  TEXT,
   bio       TEXT,
   activo    BOOLEAN DEFAULT TRUE,
-  usuario_id UUID UNIQUE REFERENCES usuarios(id) ON DELETE SET NULL
+  usuario_id UUID UNIQUE REFERENCES usuarios(id) ON DELETE SET NULL,
+  es_prueba BOOLEAN DEFAULT FALSE
 );
 
 INSERT INTO especialistas (nombre, bio) VALUES
@@ -46,7 +47,8 @@ CREATE TABLE IF NOT EXISTS tipos_maquillaje (
   categoria   VARCHAR(60),     -- social, artistico, especial, natural
   precio      NUMERIC(12,2) DEFAULT 0 CHECK (precio >= 0),
   duracion_minutos INT DEFAULT 60 CHECK (duracion_minutos > 0),
-  activo      BOOLEAN DEFAULT TRUE
+  activo      BOOLEAN DEFAULT TRUE,
+  es_prueba   BOOLEAN DEFAULT FALSE
 );
 
 INSERT INTO tipos_maquillaje (nombre, slug, descripcion, icon, categoria, precio) VALUES
