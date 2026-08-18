@@ -208,6 +208,23 @@ Prueba:
 
 El anticipo es no reembolsable y queda retenido al cancelar.
 
+### Valores y modalidades de pago
+
+El catálogo de servicios es público en `/citas`: cualquier visitante puede consultar nombre, descripción, precio, duración y especialistas antes de crear una cuenta. La autenticación se solicita únicamente cuando la persona decide completar la reserva.
+
+Los registros creados por las pruebas automáticas se identifican como datos técnicos y no aparecen en los catálogos públicos ni en los listados administrativos de operación. Esto evita duplicados sin borrar información de pruebas necesaria para la validación.
+
+El valor se configura en cada servicio desde **Administración → Catálogo**. Al reservar, la cliente ve el valor total y elige una modalidad:
+
+La instalación incluye precios demostrativos entre $60.000 y $250.000 COP. Son datos de muestra y la administradora puede sustituirlos por los valores reales del negocio desde el catálogo.
+
+- **Anticipo:** se calcula el porcentaje configurado (20 % por defecto); el saldo se paga durante la sesión.
+- **Pago en la sesión:** se paga el valor completo al recibir el servicio.
+
+Los métodos disponibles son efectivo, transferencia, tarjeta débito, tarjeta crédito, Nequi, Daviplata y otro. Esta selección registra la preferencia; no realiza todavía un débito bancario automático. Para cobrar en línea se deberá integrar posteriormente una pasarela como Wompi o Mercado Pago con las credenciales comerciales del negocio.
+
+Si la cliente cancela una cita que ya tiene un anticipo registrado, el pago cambia a estado **retenido**. El anticipo no se devuelve, incluso si la cancelación se hizo con anticipación, conforme a la política definida para el proyecto. Los abonos o pagos de saldo no se convierten automáticamente en anticipos.
+
 ### Especialista
 
 1. Administración crea su especialista y acceso.
@@ -232,6 +249,16 @@ Puede gestionar:
 
 Una fotografía pública exige consentimiento vigente. Al retirarlo, se despublica.
 
+### Uso del panel administrativo
+
+El menú se divide en tres grupos para facilitar la explicación durante la presentación:
+
+- **Operación:** citas, calendario, agenda y lista de espera.
+- **Negocio:** caja, inventario y catálogo.
+- **Gestión:** usuarios, reseñas, fotografías, analítica, reportes, auditoría, privacidad, configuración y Google Calendar.
+
+En computador se muestran los botones agrupados. En celular se reemplazan automáticamente por una lista desplegable. El campo **Buscar en este módulo** filtra las filas de la tabla que está abierta y muestra cuántas coinciden. El botón **Actualizar** vuelve a consultar la información del servidor sin cerrar la sesión.
+
 ## 9. Operación diaria
 
 ```powershell
@@ -248,13 +275,14 @@ docker compose down
 
 ```powershell
 docker compose exec -T api node --test --test-concurrency=1 tests/comparacion.service.test.js
+docker compose exec -T api node --test --test-concurrency=1 tests/admin-ui.test.js tests/google-calendar.unit.test.js
 docker compose exec -T -e TEST_BASE_URL=http://localhost:4000 api node --test --test-concurrency=1 tests/integration.test.js
 ```
 
 Referencia actual:
 
-- 4 pruebas unitarias SOLID.
-- 24 pruebas integrales.
+- 10 pruebas unitarias, SOLID y de interfaz administrativa.
+- 25 pruebas integrales.
 - 0 fallos.
 
 ## 11. Servidor casero

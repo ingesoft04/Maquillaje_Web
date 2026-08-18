@@ -9,6 +9,7 @@ async function prepararBaseDeDatos() {
   await query(`ALTER TABLE usuarios DROP CONSTRAINT IF EXISTS usuarios_rol_check`);
   await query(`ALTER TABLE usuarios ADD CONSTRAINT usuarios_rol_check CHECK (rol IN ('cliente','especialista','admin'))`);
   await query(`ALTER TABLE especialistas ADD COLUMN IF NOT EXISTS usuario_id UUID UNIQUE REFERENCES usuarios(id) ON DELETE SET NULL`);
+  await query(`ALTER TABLE especialistas ADD COLUMN IF NOT EXISTS es_prueba BOOLEAN NOT NULL DEFAULT FALSE`);
   await query(`ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS intentos_fallidos INT NOT NULL DEFAULT 0`);
   await query(`ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS bloqueado_hasta TIMESTAMPTZ`);
   await query(`ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS password_actualizado_en TIMESTAMPTZ DEFAULT NOW()`);
@@ -22,6 +23,16 @@ async function prepararBaseDeDatos() {
   )`);
   await query(`ALTER TABLE tipos_maquillaje ADD COLUMN IF NOT EXISTS precio NUMERIC(12,2) DEFAULT 0`);
   await query(`ALTER TABLE tipos_maquillaje ADD COLUMN IF NOT EXISTS duracion_minutos INT DEFAULT 60`);
+  await query(`ALTER TABLE tipos_maquillaje ADD COLUMN IF NOT EXISTS es_prueba BOOLEAN NOT NULL DEFAULT FALSE`);
+  await query(`UPDATE tipos_maquillaje SET es_prueba=TRUE
+    WHERE slug LIKE 'servicio-%' OR slug LIKE 'pago-%' OR nombre LIKE 'Servicio Automatizado %' OR nombre LIKE 'Maquillaje pago %'`);
+  await query(`UPDATE especialistas SET es_prueba=TRUE
+    WHERE nombre LIKE 'Especialista Automatizada %' OR nombre LIKE 'Profesional Portal %'`);
+  await query(`UPDATE tipos_maquillaje SET precio=CASE slug
+    WHEN 'social' THEN 80000 WHEN 'nupcial' THEN 250000 WHEN 'artistico' THEN 150000
+    WHEN 'fantasia' THEN 180000 WHEN 'natural' THEN 60000 WHEN 'pasarela' THEN 140000
+    WHEN 'efectos' THEN 220000 WHEN 'airbrush' THEN 120000 ELSE precio END
+    WHERE precio=0 AND slug IN ('social','nupcial','artistico','fantasia','natural','pasarela','efectos','airbrush')`);
   await query(`ALTER TABLE citas DROP CONSTRAINT IF EXISTS uq_especialista_horario`);
   await query(`CREATE UNIQUE INDEX IF NOT EXISTS uq_especialista_horario_activo
                ON citas(especialista_id, fecha, hora) WHERE estado != 'cancelada'`);
@@ -36,6 +47,10 @@ async function prepararBaseDeDatos() {
     creado_en TIMESTAMPTZ DEFAULT NOW()
   )`);
   await query(`ALTER TABLE citas ADD COLUMN IF NOT EXISTS precio_total NUMERIC(12,2) DEFAULT 0`);
+  await query(`ALTER TABLE citas ADD COLUMN IF NOT EXISTS modalidad_pago VARCHAR(20) NOT NULL DEFAULT 'sesion'`);
+  await query(`ALTER TABLE citas ADD COLUMN IF NOT EXISTS metodo_pago_preferido VARCHAR(30) NOT NULL DEFAULT 'efectivo'`);
+  await query(`ALTER TABLE citas DROP CONSTRAINT IF EXISTS citas_modalidad_pago_check`);
+  await query(`ALTER TABLE citas ADD CONSTRAINT citas_modalidad_pago_check CHECK(modalidad_pago IN ('anticipo','sesion'))`);
   await query(`ALTER TABLE citas ADD COLUMN IF NOT EXISTS asistencia VARCHAR(20) DEFAULT 'pendiente'`);
   await query(`ALTER TABLE citas ADD COLUMN IF NOT EXISTS google_event_id TEXT`);
   await query(`ALTER TABLE citas ADD COLUMN IF NOT EXISTS google_event_url TEXT`);
@@ -103,13 +118,16 @@ async function prepararBaseDeDatos() {
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     cita_id UUID NOT NULL REFERENCES citas(id) ON DELETE CASCADE,
     monto NUMERIC(12,2) NOT NULL CHECK (monto > 0),
-    metodo VARCHAR(30) NOT NULL CHECK (metodo IN ('efectivo','transferencia','tarjeta','otro')),
+    metodo VARCHAR(30) NOT NULL CHECK (metodo IN ('efectivo','transferencia','tarjeta_debito','tarjeta_credito','nequi','daviplata','otro')),
     estado VARCHAR(30) NOT NULL DEFAULT 'registrado' CHECK (estado IN ('registrado','devuelto','anulado')),
     referencia VARCHAR(120),
     registrado_por UUID REFERENCES usuarios(id) ON DELETE SET NULL,
     creado_en TIMESTAMPTZ DEFAULT NOW()
   )`);
   await query(`ALTER TABLE pagos ADD COLUMN IF NOT EXISTS concepto VARCHAR(20) NOT NULL DEFAULT 'abono'`);
+  await query(`ALTER TABLE pagos DROP CONSTRAINT IF EXISTS pagos_metodo_check`);
+  await query(`UPDATE pagos SET metodo='tarjeta_credito' WHERE metodo='tarjeta'`);
+  await query(`ALTER TABLE pagos ADD CONSTRAINT pagos_metodo_check CHECK(metodo IN ('efectivo','transferencia','tarjeta_debito','tarjeta_credito','nequi','daviplata','otro'))`);
   await query(`ALTER TABLE pagos DROP CONSTRAINT IF EXISTS pagos_concepto_check`);
   await query(`ALTER TABLE pagos ADD CONSTRAINT pagos_concepto_check CHECK(concepto IN ('anticipo','abono','saldo'))`);
   await query(`ALTER TABLE pagos DROP CONSTRAINT IF EXISTS pagos_estado_check`);
@@ -203,6 +221,9 @@ async function prepararBaseDeDatos() {
   await query(`UPDATE configuracion_negocio SET valor=valor||
     '{"anticipo_porcentaje":20,"anticipo_reembolsable":false,"cancelacion_horas":12,"tolerancia_minutos":15,"intervalo_minutos":10,"bloquear_con_deuda":false}'::jsonb
     WHERE clave='reservas'`);
+  await query(`INSERT INTO configuracion_negocio(clave,valor,descripcion) VALUES
+    ('pagos','{"metodos":["efectivo","transferencia","tarjeta_debito","tarjeta_credito","nequi","daviplata","otro"],"modalidades":["anticipo","sesion"],"pasarela_en_linea":false}','Opciones de pago')
+    ON CONFLICT(clave) DO NOTHING`);
   await query(`UPDATE configuracion_negocio SET valor=(valor-'retencion_fotos_dias')||
     '{"gestion_fotografias":"manual","eliminacion_automatica_fotografias":false,"version_aviso":"1.0"}'::jsonb WHERE clave='privacidad'`);
   await query(`INSERT INTO configuracion_negocio(clave,valor,descripcion) VALUES

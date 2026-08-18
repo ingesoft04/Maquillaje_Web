@@ -51,6 +51,24 @@ async function misPagos(req, res) {
   return res.json({ pagos:rows });
 }
 
+async function opcionesPago(_req,res) {
+  const [pagos,reservas]=await Promise.all([
+    query(`SELECT valor FROM configuracion_negocio WHERE clave='pagos'`),
+    query(`SELECT valor FROM configuracion_negocio WHERE clave='reservas'`)
+  ]);
+  const opciones=pagos.rows[0]?.valor||{};
+  const politica=reservas.rows[0]?.valor||{};
+  return res.json({
+    moneda:'COP',
+    metodos:opciones.metodos||['efectivo','transferencia'],
+    modalidades:opciones.modalidades||['anticipo','sesion'],
+    anticipo_porcentaje:Number(politica.anticipo_porcentaje||0),
+    anticipo_reembolsable:false,
+    pasarela_en_linea:Boolean(opciones.pasarela_en_linea),
+    politica_cancelacion:'El anticipo no es reembolsable y queda retenido si la cita se cancela.'
+  });
+}
+
 async function listarPagos(_req,res) {
   const { rows } = await query(`SELECT p.*,u.nombre AS cliente,u.email,tm.nombre AS servicio,c.fecha
     FROM pagos p JOIN citas c ON c.id=p.cita_id JOIN usuarios u ON u.id=c.usuario_id
@@ -61,7 +79,7 @@ async function listarPagos(_req,res) {
 async function registrarPago(req,res) {
   const { cita_id,monto,metodo,referencia }=req.body;
   const concepto=['anticipo','abono','saldo'].includes(req.body.concepto)?req.body.concepto:'abono';
-  const valor=Number(monto); const metodos=['efectivo','transferencia','tarjeta','otro'];
+  const valor=Number(monto); const metodos=['efectivo','transferencia','tarjeta_debito','tarjeta_credito','nequi','daviplata','otro'];
   if(!cita_id||!Number.isFinite(valor)||valor<=0||!metodos.includes(metodo)) return res.status(400).json({error:'Datos de pago inválidos.'});
   const cita=await query('SELECT id,precio_total FROM citas WHERE id=$1',[cita_id]);
   if(!cita.rows.length) return res.status(404).json({error:'Cita no encontrada.'});
@@ -136,5 +154,5 @@ async function eliminarReceta(req,res){const {rows}=await query('DELETE FROM inv
 async function proveedores(_req,res){const {rows}=await query('SELECT * FROM proveedores ORDER BY activo DESC,nombre');return res.json({proveedores:rows});}
 async function crearProveedor(req,res){if(!String(req.body.nombre||'').trim())return res.status(400).json({error:'Nombre obligatorio.'});const b=req.body,{rows}=await query(`INSERT INTO proveedores(nombre,contacto,telefono,email) VALUES($1,$2,$3,$4) RETURNING *`,[b.nombre.trim(),b.contacto||null,b.telefono||null,b.email||null]);return res.status(201).json({proveedor:rows[0]});}
 
-module.exports={obtenerPerfil,guardarPerfil,misPagos,listarPagos,registrarPago,listarInventario,crearProducto,movimientoInventario,
+module.exports={obtenerPerfil,guardarPerfil,misPagos,opcionesPago,listarPagos,registrarPago,listarInventario,crearProducto,movimientoInventario,
   horarios,guardarHorario,eliminarHorario,bloqueos,crearBloqueo,eliminarBloqueo,analitica,recetas,guardarReceta,eliminarReceta,proveedores,crearProveedor};

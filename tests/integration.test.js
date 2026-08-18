@@ -43,6 +43,8 @@ test('catálogos públicos contienen servicios y especialistas', async () => {
   assert.equal(tipos.status, 200);
   assert.equal(especialistas.status, 200);
   assert.ok(tipos.data.tipos.length >= 1);
+  const social = tipos.data.tipos.find(item => item.slug === 'social');
+  assert.ok(Number(social?.precio) > 0);
   assert.ok(especialistas.data.especialistas.length >= 1);
 });
 
@@ -202,7 +204,7 @@ test('administrador actualiza estado de cita', async () => {
 
 test('administrador crea cuenta profesional y la especialista accede solo a su agenda', async () => {
   const nueva=await request('/api/admin/especialistas',{
-    method:'POST',token:adminToken,body:JSON.stringify({nombre:`Profesional Portal ${Date.now()}`,bio:'Cuenta de prueba del portal'})
+    method:'POST',token:adminToken,body:JSON.stringify({nombre:`Profesional Portal ${Date.now()}`,bio:'Cuenta de prueba del portal',es_prueba:true})
   });
   assert.equal(nueva.status,201);
   const email=`especialista.${Date.now()}@example.com`;
@@ -349,7 +351,7 @@ test('administrador gestiona catálogo y genera auditoría', async () => {
   const sello = Date.now();
   const especialista = await request('/api/admin/especialistas', {
     method: 'POST', token: adminToken,
-    body: JSON.stringify({ nombre: `Especialista Automatizada ${sello}`, bio: 'Registro de prueba' })
+    body: JSON.stringify({ nombre: `Especialista Automatizada ${sello}`, bio: 'Registro de prueba',es_prueba:true })
   });
   assert.equal(especialista.status, 201);
 
@@ -358,7 +360,7 @@ test('administrador gestiona catálogo y genera auditoría', async () => {
     body: JSON.stringify({
       nombre: `Servicio Automatizado ${sello}`, slug: `servicio-${sello}`,
       descripcion: 'Registro de prueba', categoria: 'social', icon: '💄',
-      precio: 50000, duracion_minutos: 60
+      precio: 50000, duracion_minutos: 60,es_prueba:true
     })
   });
   assert.equal(servicio.status, 201);
@@ -375,11 +377,14 @@ test('administrador gestiona catálogo y genera auditoría', async () => {
     body: JSON.stringify({
       nombre: `Maquillaje pago ${sello}`, slug: `pago-${sello}`,
       descripcion: 'Servicio para validar caja', categoria: 'social', icon: '✨',
-      precio: 80000, duracion_minutos: 60
+      precio: 80000, duracion_minutos: 60,es_prueba:true
     })
   });
   assert.equal(servicioPagado.status, 201);
   servicioPagadoId = servicioPagado.data.servicio.id;
+
+  const catalogoPublico = await request('/api/tipos');
+  assert.ok(!catalogoPublico.data.tipos.some(item => item.id === servicioPagadoId));
 
   const auditoria = await request('/api/admin/auditoria', { token: adminToken });
   assert.equal(auditoria.status, 200);
@@ -387,6 +392,10 @@ test('administrador gestiona catálogo y genera auditoría', async () => {
 });
 
 test('flujo de cita con precio, abono administrativo y consulta del cliente', async () => {
+  const opcionesPago = await request('/api/pagos/opciones');
+  assert.equal(opcionesPago.status, 200);
+  assert.ok(opcionesPago.data.metodos.includes('nequi'));
+  assert.equal(opcionesPago.data.anticipo_reembolsable, false);
   const especialistas = (await request('/api/especialistas')).data.especialistas;
   let seleccion;
   let fecha;
@@ -400,11 +409,15 @@ test('flujo de cita con precio, abono administrativo y consulta del cliente', as
   assert.ok(seleccion);
   const cita = await request('/api/citas', {
     method: 'POST', token: clienteToken,
-    body: JSON.stringify({ ...seleccion, tipo_id: servicioPagadoId, fecha })
+    body: JSON.stringify({ ...seleccion, tipo_id: servicioPagadoId, fecha,modalidad_pago:'anticipo',metodo_pago_preferido:'nequi' })
   });
   assert.equal(cita.status, 201);
   citaPagadaId=cita.data.cita.id;
   assert.equal(Number(cita.data.cita.precio_total), 80000);
+  assert.equal(cita.data.cita.modalidad_pago, 'anticipo');
+  assert.equal(cita.data.cita.metodo_pago_preferido, 'nequi');
+  assert.equal(Number(cita.data.pago.anticipo_requerido), 16000);
+  assert.equal(cita.data.pago.anticipo_reembolsable, false);
   const pago = await request('/api/admin/pagos', {
     method: 'POST', token: adminToken,
     body: JSON.stringify({ cita_id: cita.data.cita.id, monto: 30000, metodo: 'transferencia', concepto:'anticipo', referencia: 'TEST-AUTOMATICO' })

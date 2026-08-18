@@ -91,7 +91,7 @@ async function cambiarEstado(req, res) {
 }
 
 async function listarEspecialistasAdmin(_req, res) {
-  const { rows } = await query('SELECT id, nombre, bio, foto_url, activo,google_calendar_id,usuario_id FROM especialistas ORDER BY id');
+  const { rows } = await query('SELECT id, nombre, bio, foto_url, activo,google_calendar_id,usuario_id FROM especialistas WHERE es_prueba=FALSE ORDER BY id');
   return res.json({ especialistas: rows });
 }
 
@@ -99,12 +99,12 @@ async function crearEspecialista(req, res) {
   const { nombre, bio, foto_url } = req.body;
   if (!nombre || nombre.trim().length < 3) return res.status(400).json({ error: 'Nombre de especialista inválido.' });
   const { rows } = await query(
-    `INSERT INTO especialistas(nombre,bio,foto_url) VALUES($1,$2,$3) RETURNING *`,
-    [nombre.trim(), bio || null, foto_url || null]
+    `INSERT INTO especialistas(nombre,bio,foto_url,es_prueba) VALUES($1,$2,$3,$4) RETURNING *`,
+    [nombre.trim(), bio || null, foto_url || null, req.body.es_prueba === true]
   );
   await query(`INSERT INTO horarios_especialista(especialista_id,dia_semana,hora_inicio,hora_fin)
     SELECT $1,dia,'08:00','18:00' FROM (VALUES(1),(2),(3),(4),(5),(6)) d(dia) ON CONFLICT DO NOTHING`,[rows[0].id]);
-  await delCache('catalogo:especialistas');
+  await delCache('catalogo:v2:especialistas');
   await auditar(req, 'crear', 'especialista', rows[0].id, rows[0]);
   return res.status(201).json({ especialista: rows[0] });
 }
@@ -117,14 +117,14 @@ async function editarEspecialista(req, res) {
     [nombre.trim(), bio || null, foto_url || null, activo !== false, req.params.id]
   );
   if (!rows.length) return res.status(404).json({ error: 'Especialista no encontrada.' });
-  await delCache('catalogo:especialistas');
+  await delCache('catalogo:v2:especialistas');
   await auditar(req, 'editar', 'especialista', rows[0].id, rows[0]);
   return res.json({ especialista: rows[0] });
 }
 
 async function listarServiciosAdmin(_req, res) {
   const { rows } = await query(`SELECT id,nombre,slug,descripcion,icon,categoria,precio,duracion_minutos,activo
-                                FROM tipos_maquillaje ORDER BY id`);
+                                FROM tipos_maquillaje WHERE es_prueba=FALSE ORDER BY id`);
   return res.json({ servicios: rows });
 }
 
@@ -144,11 +144,11 @@ async function crearServicio(req, res) {
   const b = req.body;
   try {
     const { rows } = await query(
-      `INSERT INTO tipos_maquillaje(nombre,slug,descripcion,icon,categoria,precio,duracion_minutos)
-       VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
-      [b.nombre.trim(), b.slug, b.descripcion || null, b.icon || '💄', b.categoria || 'social', Number(b.precio), Number(b.duracion_minutos)]
+      `INSERT INTO tipos_maquillaje(nombre,slug,descripcion,icon,categoria,precio,duracion_minutos,es_prueba)
+       VALUES($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
+      [b.nombre.trim(), b.slug, b.descripcion || null, b.icon || '💄', b.categoria || 'social', Number(b.precio), Number(b.duracion_minutos),b.es_prueba === true]
     );
-    await delPattern('catalogo:tipos:*');
+    await delPattern('catalogo:*tipos:*');
     await auditar(req, 'crear', 'servicio', rows[0].id, rows[0]);
     return res.status(201).json({ servicio: rows[0] });
   } catch (e) {
@@ -169,7 +169,7 @@ async function editarServicio(req, res) {
        Number(b.precio), Number(b.duracion_minutos), b.activo !== false, req.params.id]
     );
     if (!rows.length) return res.status(404).json({ error: 'Servicio no encontrado.' });
-    await delPattern('catalogo:tipos:*');
+    await delPattern('catalogo:*tipos:*');
     await auditar(req, 'editar', 'servicio', rows[0].id, rows[0]);
     return res.json({ servicio: rows[0] });
   } catch (e) {
