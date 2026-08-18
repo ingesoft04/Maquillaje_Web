@@ -212,7 +212,11 @@ El anticipo es no reembolsable y queda retenido al cancelar.
 
 El catálogo de servicios es público en `/citas`: cualquier visitante puede consultar nombre, descripción, precio, duración y especialistas antes de crear una cuenta. La autenticación se solicita únicamente cuando la persona decide completar la reserva.
 
+Los registros creados por las pruebas automáticas se identifican como datos técnicos y no aparecen en los catálogos públicos ni en los listados administrativos de operación. Esto evita duplicados sin borrar información de pruebas necesaria para la validación.
+
 El valor se configura en cada servicio desde **Administración → Catálogo**. Al reservar, la cliente ve el valor total y elige una modalidad:
+
+La instalación incluye precios demostrativos entre $60.000 y $250.000 COP. Son datos de muestra y la administradora puede sustituirlos por los valores reales del negocio desde el catálogo.
 
 - **Anticipo:** se calcula el porcentaje configurado (20 % por defecto); el saldo se paga durante la sesión.
 - **Pago en la sesión:** se paga el valor completo al recibir el servicio.
