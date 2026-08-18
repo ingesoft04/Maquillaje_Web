@@ -4,6 +4,17 @@ const { query } = require('./db');
 const { setCache, delCache, TTL } = require('./redis');
 const crypto=require('node:crypto');
 
+function establecerCookieSesion(res, token) {
+  const secure = String(process.env.FRONTEND_URL || '').startsWith('https://');
+  res.cookie('sena_session', token, {
+    httpOnly: true,
+    secure,
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 7 * 24 * 60 * 60 * 1000
+  });
+}
+
 // ── REGISTRO ────────────────────────────────────
 async function registro(req, res) {
   const { nombre, email, telefono, password } = req.body;
@@ -35,6 +46,7 @@ async function registro(req, res) {
 
   // Guardar sesión en Redis
   await setCache(`session:${usuario.id}`, { id: usuario.id, email: usuario.email }, TTL.SESSION);
+  establecerCookieSesion(res, token);
 
   return res.status(201).json({
     mensaje: '¡Cuenta creada exitosamente!',
@@ -73,6 +85,7 @@ async function login(req, res) {
 
   const token = generarToken(usuario);
   await setCache(`session:${usuario.id}`, { id: usuario.id, email: usuario.email }, TTL.SESSION);
+  establecerCookieSesion(res, token);
 
   return res.json({
     mensaje: '¡Bienvenida!',
@@ -89,9 +102,10 @@ async function login(req, res) {
 
 // ── LOGOUT ───────────────────────────────────────
 async function logout(req, res) {
-  // Revocar token actual en Redis hasta que expire (1h)
-  await setCache(`revoked:${req.token}`, 1, 60 * 60);
+  const segundosRestantes = Math.max(1, Number(req.usuario.exp || 0) - Math.floor(Date.now() / 1000));
+  await setCache(`revoked:${req.token}`, 1, segundosRestantes);
   await delCache(`session:${req.usuario.id}`);
+  res.clearCookie('sena_session', { httpOnly:true, sameSite:'lax', path:'/' });
   return res.json({ mensaje: 'Sesión cerrada correctamente.' });
 }
 
@@ -143,4 +157,4 @@ async function withTransactionPassword(registro,hash){
   return withTransaction(async client=>{await client.query(`UPDATE usuarios SET password_hash=$1,password_actualizado_en=NOW(),intentos_fallidos=0,bloqueado_hasta=NULL WHERE id=$2`,[hash,registro.usuario_id]);await client.query('UPDATE recuperacion_password SET usado_en=NOW() WHERE id=$1',[registro.id]);});
 }
 
-module.exports = { registro, login, logout, perfil,solicitarRecuperacion,restablecerPassword };
+module.exports = { registro, login, logout, perfil,solicitarRecuperacion,restablecerPassword, establecerCookieSesion };

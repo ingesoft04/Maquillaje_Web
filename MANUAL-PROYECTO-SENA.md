@@ -362,7 +362,7 @@ La primera versión guardaba usuarios y citas en `localStorage`. Ese mecanismo s
 
 ### Solución implementada
 
-- El navegador conserva únicamente el JWT en `localStorage`.
+- La sesión web se conserva en una cookie `HttpOnly`, `SameSite=Lax` y con atributo `Secure` cuando se usa HTTPS. JavaScript no puede leerla. El encabezado Bearer se mantiene únicamente para clientes API y pruebas automatizadas.
 - Registro y login se envían a la API.
 - Servicios y especialistas se cargan desde PostgreSQL.
 - Las citas se crean, consultan y cancelan mediante endpoints protegidos.
