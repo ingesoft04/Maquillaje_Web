@@ -40,6 +40,7 @@
     }
     button, input, select, textarea, a { -webkit-tap-highlight-color: transparent; }
     button { min-height: 42px; }
+    .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
 
     .citas-topbar { display: none; }
     body:not(.citas-view) #citas-wrapper { display: none; }
@@ -645,14 +646,32 @@
     .admin-stat { padding:1rem; border:1px solid #5C2A3A; background:#2A1020; text-align:center; }
     .admin-stat strong { display:block; color:var(--blush); font:400 1.7rem 'Cormorant Garamond',serif; }
     .admin-stat span { color:#A08080; font-size:.6rem; letter-spacing:1px; text-transform:uppercase; }
-    .admin-tabs { display:flex; gap:.5rem; margin-bottom:1rem; }
+    .admin-navigation { margin-bottom:1rem; padding:1rem; border:1px solid #4A2438; background:#21101B; }
+    .admin-nav-group { display:flex; flex-wrap:wrap; gap:.45rem; align-items:center; margin-bottom:.7rem; }
+    .admin-nav-group:last-child { margin-bottom:0; }
+    .admin-nav-label { width:6.5rem; color:var(--gold); font-size:.58rem; letter-spacing:1.5px; text-transform:uppercase; }
+    .admin-nav-button { border:1px solid #5C2A3A; background:transparent; color:#C8ABA5; padding:.55rem .8rem; cursor:pointer; }
+    .admin-nav-button:hover, .admin-nav-button:focus-visible { border-color:var(--blush); color:white; outline:2px solid transparent; }
+    .admin-nav-button.active { background:var(--rose); color:white; border-color:var(--rose); }
+    .admin-mobile-select { display:none; width:100%; background:#2A1020; color:var(--cream); border:1px solid #6A4055; padding:.7rem; }
+    .admin-toolbar { display:flex; gap:.65rem; align-items:center; margin-bottom:1rem; }
+    .admin-search { flex:1; min-width:0; background:#2A1020; color:var(--cream); border:1px solid #6A4055; padding:.7rem; }
+    .admin-search:focus, .admin-mobile-select:focus { border-color:var(--gold); outline:2px solid var(--gold); outline-offset:2px; }
+    .admin-filter-result { min-width:5rem; color:#A08080; font-size:.66rem; }
+    .admin-refresh { border:1px solid var(--gold); background:transparent; color:var(--gold); padding:.65rem .9rem; cursor:pointer; }
+    .admin-refresh:disabled { opacity:.55; cursor:wait; }
     .admin-tab { border:1px solid #5C2A3A; background:transparent; color:#C8ABA5; padding:.55rem 1rem; cursor:pointer; }
     .admin-tab.active { background:var(--rose); color:white; border-color:var(--rose); }
     .admin-table-wrap { overflow:auto; max-height:430px; }
     .admin-table { width:100%; border-collapse:collapse; min-width:680px; font-size:.72rem; }
-    .admin-table th { color:var(--gold); text-align:left; letter-spacing:1px; text-transform:uppercase; font-size:.58rem; }
+    .admin-table th { position:sticky; top:0; z-index:2; background:#180C14; color:var(--gold); text-align:left; letter-spacing:1px; text-transform:uppercase; font-size:.58rem; }
     .admin-table th, .admin-table td { padding:.75rem; border-bottom:1px solid #4A2438; }
     .admin-table td { color:#D8C2C0; }
+    .admin-table tbody tr:nth-child(even) { background:rgba(255,255,255,.018); }
+    .admin-table tbody tr:hover { background:#321729; }
+    .admin-loading { display:grid; grid-template-columns:repeat(3,1fr); gap:.75rem; padding:.5rem 0; }
+    .admin-skeleton { height:95px; border:1px solid #4A2438; background:linear-gradient(100deg,#25121f 30%,#3a1b31 50%,#25121f 70%); background-size:200% 100%; animation:admin-pulse 1.4s ease-in-out infinite; }
+    @keyframes admin-pulse { to { background-position-x:-200%; } }
     .admin-select { background:#2A1020; color:var(--cream); border:1px solid #6A4055; padding:.35rem; }
     .admin-form-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:.6rem; margin-bottom:1rem; }
     .admin-form-grid input { min-width:0; background:#2A1020; color:var(--cream); border:1px solid #5C2A3A; padding:.65rem; }
@@ -771,6 +790,12 @@
       .admin-panel { padding:1rem; }
       .admin-form-grid { grid-template-columns:1fr 1fr; }
       .profile-grid { grid-template-columns:1fr; }
+      .admin-navigation { padding:.75rem; }
+      .admin-nav-group { display:none; }
+      .admin-mobile-select { display:block; }
+      .admin-toolbar { flex-wrap:wrap; }
+      .admin-search { flex-basis:100%; }
+      .admin-loading { grid-template-columns:1fr; }
     }
 
     @media (max-width: 480px) {
@@ -783,7 +808,6 @@
       .stats-row { display:grid; grid-template-columns:1fr 1fr; }
       .cita-card { align-items:flex-start; flex-wrap:wrap; gap:.65rem; }
       .btn-cancelar { margin-left:0; }
-      .admin-tabs { overflow-x:auto; flex-wrap:nowrap; padding-bottom:.5rem; }
       .admin-tab { flex:0 0 auto; }
     }
 
@@ -1534,25 +1558,30 @@
           <div class="admin-stat"><strong id="adminProximas">0</strong><span>Próximas</span></div>
           <div class="admin-stat"><strong id="adminEspecialistas">0</strong><span>Especialistas</span></div>
         </div>
-        <div class="admin-tabs">
-          <button class="admin-tab active" onclick="mostrarAdminVista('citas', this)">Citas</button>
-          <button class="admin-tab" onclick="mostrarAdminVista('usuarios', this)">Usuarios</button>
-          <button class="admin-tab" onclick="mostrarAdminVista('catalogo', this)">Catálogo</button>
-          <button class="admin-tab" onclick="mostrarAdminVista('auditoria', this)">Auditoría</button>
-          <button class="admin-tab" onclick="mostrarAdminVista('analitica', this)">Analítica</button>
-          <button class="admin-tab" onclick="mostrarAdminVista('reportes', this)">Reportes</button>
-          <button class="admin-tab" onclick="mostrarAdminVista('pagos', this)">Caja</button>
-          <button class="admin-tab" onclick="mostrarAdminVista('inventario', this)">Inventario</button>
-          <button class="admin-tab" onclick="mostrarAdminVista('agenda', this)">Agenda</button>
-          <button class="admin-tab" onclick="mostrarAdminVista('calendario', this)">Calendario</button>
-          <button class="admin-tab" onclick="mostrarAdminVista('espera', this)">Lista de espera</button>
-          <button class="admin-tab" onclick="mostrarAdminVista('resenas', this)">Reseñas</button>
-          <button class="admin-tab" onclick="mostrarAdminVista('configuracion', this)">Configuración</button>
-          <button class="admin-tab" onclick="mostrarAdminVista('privacidad', this)">Privacidad</button>
-          <button class="admin-tab" onclick="mostrarAdminVista('fotografias', this)">Fotografías</button>
-          <button class="admin-tab" onclick="mostrarAdminVista('google', this)">Google Calendar</button>
+        <div class="admin-navigation" id="adminNavegacion" aria-label="Módulos administrativos">
+          <label for="adminVistaSelect" class="sr-only">Módulo administrativo</label>
+          <select id="adminVistaSelect" class="admin-mobile-select" onchange="mostrarAdminVista(this.value)">
+            <optgroup label="Operación"><option value="citas">Citas</option><option value="calendario">Calendario</option><option value="agenda">Agenda</option><option value="espera">Lista de espera</option></optgroup>
+            <optgroup label="Negocio"><option value="pagos">Caja</option><option value="inventario">Inventario</option><option value="catalogo">Catálogo</option></optgroup>
+            <optgroup label="Gestión"><option value="usuarios">Usuarios</option><option value="resenas">Reseñas</option><option value="fotografias">Fotografías</option><option value="analitica">Analítica</option><option value="reportes">Reportes</option><option value="auditoria">Auditoría</option><option value="privacidad">Privacidad</option><option value="configuracion">Configuración</option><option value="google">Google Calendar</option></optgroup>
+          </select>
+          <div class="admin-nav-group" role="tablist" aria-label="Operación"><span class="admin-nav-label">Operación</span>
+            <button type="button" role="tab" aria-selected="true" class="admin-nav-button active" data-admin-vista="citas" onclick="mostrarAdminVista('citas')">Citas</button><button type="button" role="tab" aria-selected="false" class="admin-nav-button" data-admin-vista="calendario" onclick="mostrarAdminVista('calendario')">Calendario</button><button type="button" role="tab" aria-selected="false" class="admin-nav-button" data-admin-vista="agenda" onclick="mostrarAdminVista('agenda')">Agenda</button><button type="button" role="tab" aria-selected="false" class="admin-nav-button" data-admin-vista="espera" onclick="mostrarAdminVista('espera')">Lista de espera</button>
+          </div>
+          <div class="admin-nav-group" role="tablist" aria-label="Negocio"><span class="admin-nav-label">Negocio</span>
+            <button type="button" role="tab" aria-selected="false" class="admin-nav-button" data-admin-vista="pagos" onclick="mostrarAdminVista('pagos')">Caja</button><button type="button" role="tab" aria-selected="false" class="admin-nav-button" data-admin-vista="inventario" onclick="mostrarAdminVista('inventario')">Inventario</button><button type="button" role="tab" aria-selected="false" class="admin-nav-button" data-admin-vista="catalogo" onclick="mostrarAdminVista('catalogo')">Catálogo</button>
+          </div>
+          <div class="admin-nav-group" role="tablist" aria-label="Gestión"><span class="admin-nav-label">Gestión</span>
+            <button type="button" role="tab" aria-selected="false" class="admin-nav-button" data-admin-vista="usuarios" onclick="mostrarAdminVista('usuarios')">Usuarios</button><button type="button" role="tab" aria-selected="false" class="admin-nav-button" data-admin-vista="resenas" onclick="mostrarAdminVista('resenas')">Reseñas</button><button type="button" role="tab" aria-selected="false" class="admin-nav-button" data-admin-vista="fotografias" onclick="mostrarAdminVista('fotografias')">Fotografías</button><button type="button" role="tab" aria-selected="false" class="admin-nav-button" data-admin-vista="analitica" onclick="mostrarAdminVista('analitica')">Analítica</button><button type="button" role="tab" aria-selected="false" class="admin-nav-button" data-admin-vista="reportes" onclick="mostrarAdminVista('reportes')">Reportes</button><button type="button" role="tab" aria-selected="false" class="admin-nav-button" data-admin-vista="auditoria" onclick="mostrarAdminVista('auditoria')">Auditoría</button><button type="button" role="tab" aria-selected="false" class="admin-nav-button" data-admin-vista="privacidad" onclick="mostrarAdminVista('privacidad')">Privacidad</button><button type="button" role="tab" aria-selected="false" class="admin-nav-button" data-admin-vista="configuracion" onclick="mostrarAdminVista('configuracion')">Configuración</button><button type="button" role="tab" aria-selected="false" class="admin-nav-button" data-admin-vista="google" onclick="mostrarAdminVista('google')">Google Calendar</button>
+          </div>
         </div>
-        <div class="admin-table-wrap" id="adminContenido"></div>
+        <div class="admin-toolbar">
+          <label for="adminFiltro" class="sr-only">Buscar en el módulo actual</label>
+          <input id="adminFiltro" class="admin-search" type="search" placeholder="Buscar en este módulo…" oninput="filtrarAdminContenido()">
+          <span id="adminFiltroResultado" class="admin-filter-result" aria-live="polite"></span>
+          <button type="button" id="adminRecargar" class="admin-refresh" onclick="recargarAdmin()" aria-label="Actualizar datos administrativos">↻ Actualizar</button>
+        </div>
+        <div class="admin-table-wrap" id="adminContenido" role="tabpanel" tabindex="0" aria-live="polite" aria-busy="false"></div>
       </div>
 
     </div><!-- /#dashboard -->
@@ -1727,6 +1756,7 @@ let adminProveedores=[];
 let adminReportes=null;
 let adminPrivacidad=[];
 let adminFotografias=[];
+let adminVistaActual='citas';
 
 function escaparHTML(valor) {
   return String(valor ?? '').replace(/[&<>'"]/g, caracter => ({
@@ -2168,6 +2198,9 @@ async function renderCitas() {
 
 // ── PANEL ADMINISTRATIVO ──
 async function cargarAdmin() {
+  const contenido = document.getElementById('adminContenido');
+  contenido.setAttribute('aria-busy', 'true');
+  contenido.innerHTML = '<div class="admin-loading" aria-label="Cargando datos"><div class="admin-skeleton"></div><div class="admin-skeleton"></div><div class="admin-skeleton"></div></div>';
   try {
     const [resumen, citasData, usuariosData, especialistasData, serviciosData, auditoriaData,
       analiticaData,pagosData,inventarioData,horariosData,bloqueosData,googleData,esperaData,resenasData,configData,
@@ -2196,31 +2229,52 @@ async function cargarAdmin() {
     document.getElementById('adminCitas').textContent = resumen.citas_total;
     document.getElementById('adminProximas').textContent = resumen.citas_proximas;
     document.getElementById('adminEspecialistas').textContent = resumen.especialistas;
-    renderAdminCitas();
+    mostrarAdminVista(adminVistaActual);
   } catch (error) {
-    document.getElementById('adminContenido').innerHTML = `<p class="empty-citas">${escaparHTML(error.message)}</p>`;
+    contenido.innerHTML = `<p class="empty-citas">${escaparHTML(error.message)}</p>`;
+  } finally {
+    contenido.setAttribute('aria-busy', 'false');
   }
 }
 
-function mostrarAdminVista(vista, boton) {
-  document.querySelectorAll('.admin-tab').forEach(item => item.classList.remove('active'));
-  boton.classList.add('active');
-  if (vista === 'usuarios') renderAdminUsuarios();
-  else if (vista === 'catalogo') renderAdminCatalogo();
-  else if (vista === 'auditoria') renderAdminAuditoria();
-  else if (vista === 'analitica') renderAdminAnalitica();
-  else if (vista === 'reportes') renderAdminReportes();
-  else if (vista === 'pagos') renderAdminPagos();
-  else if (vista === 'inventario') renderAdminInventario();
-  else if (vista === 'agenda') renderAdminAgenda();
-  else if (vista === 'calendario') renderAdminCalendario();
-  else if (vista === 'espera') renderAdminEspera();
-  else if (vista === 'resenas') renderAdminResenas();
-  else if (vista === 'configuracion') renderAdminConfiguracion();
-  else if (vista === 'privacidad') renderAdminPrivacidad();
-  else if (vista === 'fotografias') renderAdminFotografias();
-  else if (vista === 'google') renderAdminGoogle();
-  else renderAdminCitas();
+function mostrarAdminVista(vista) {
+  const vistas = { citas:renderAdminCitas, usuarios:renderAdminUsuarios, catalogo:renderAdminCatalogo,
+    auditoria:renderAdminAuditoria, analitica:renderAdminAnalitica, reportes:renderAdminReportes,
+    pagos:renderAdminPagos, inventario:renderAdminInventario, agenda:renderAdminAgenda,
+    calendario:renderAdminCalendario, espera:renderAdminEspera, resenas:renderAdminResenas,
+    configuracion:renderAdminConfiguracion, privacidad:renderAdminPrivacidad,
+    fotografias:renderAdminFotografias, google:renderAdminGoogle };
+  adminVistaActual = vistas[vista] ? vista : 'citas';
+  document.querySelectorAll('#adminNavegacion [data-admin-vista]').forEach(item => {
+    const activo = item.dataset.adminVista === adminVistaActual;
+    item.classList.toggle('active', activo);
+    item.setAttribute('aria-selected', String(activo));
+  });
+  document.getElementById('adminVistaSelect').value = adminVistaActual;
+  vistas[adminVistaActual]();
+  filtrarAdminContenido();
+}
+
+function filtrarAdminContenido() {
+  const filtro = document.getElementById('adminFiltro');
+  const resultado = document.getElementById('adminFiltroResultado');
+  if (!filtro || !resultado) return;
+  const consulta = filtro.value.trim().toLocaleLowerCase('es');
+  const filas = [...document.querySelectorAll('#adminContenido tbody tr')];
+  let visibles = 0;
+  filas.forEach(fila => {
+    const coincide = !consulta || fila.textContent.toLocaleLowerCase('es').includes(consulta);
+    fila.hidden = !coincide;
+    if (coincide) visibles += 1;
+  });
+  resultado.textContent = filas.length ? `${visibles} de ${filas.length}` : '';
+}
+
+async function recargarAdmin() {
+  const boton = document.getElementById('adminRecargar');
+  boton.disabled = true;
+  try { await cargarAdmin(); mostrarToast('Datos administrativos actualizados', 'success'); }
+  finally { boton.disabled = false; }
 }
 
 function renderAdminCitas() {

@@ -232,6 +232,16 @@ Puede gestionar:
 
 Una fotografía pública exige consentimiento vigente. Al retirarlo, se despublica.
 
+### Uso del panel administrativo
+
+El menú se divide en tres grupos para facilitar la explicación durante la presentación:
+
+- **Operación:** citas, calendario, agenda y lista de espera.
+- **Negocio:** caja, inventario y catálogo.
+- **Gestión:** usuarios, reseñas, fotografías, analítica, reportes, auditoría, privacidad, configuración y Google Calendar.
+
+En computador se muestran los botones agrupados. En celular se reemplazan automáticamente por una lista desplegable. El campo **Buscar en este módulo** filtra las filas de la tabla que está abierta y muestra cuántas coinciden. El botón **Actualizar** vuelve a consultar la información del servidor sin cerrar la sesión.
+
 ## 9. Operación diaria
 
 ```powershell
@@ -248,13 +258,14 @@ docker compose down
 
 ```powershell
 docker compose exec -T api node --test --test-concurrency=1 tests/comparacion.service.test.js
+docker compose exec -T api node --test --test-concurrency=1 tests/admin-ui.test.js tests/google-calendar.unit.test.js
 docker compose exec -T -e TEST_BASE_URL=http://localhost:4000 api node --test --test-concurrency=1 tests/integration.test.js
 ```
 
 Referencia actual:
 
-- 4 pruebas unitarias SOLID.
-- 24 pruebas integrales.
+- 10 pruebas unitarias, SOLID y de interfaz administrativa.
+- 25 pruebas integrales.
 - 0 fallos.
 
 ## 11. Servidor casero
