@@ -268,6 +268,81 @@
       margin-bottom: 2rem;
     }
 
+    .historia-more {
+      border-top: 1px solid #DFC6A770;
+      padding-top: 1rem;
+    }
+    .historia-more summary {
+      width: fit-content;
+      color: var(--deep);
+      cursor: pointer;
+      font-size: .75rem;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      list-style: none;
+      text-transform: uppercase;
+    }
+    .historia-more summary::-webkit-details-marker { display: none; }
+    .historia-more summary::after { content: ' +'; color: var(--rose); }
+    .historia-more[open] summary::after { content: ' −'; }
+    .historia-more .lead:first-of-type { margin-top: 1.5rem; }
+
+    .learning-collapsible {
+      position: relative;
+      padding-top: 2rem !important;
+      padding-bottom: 2rem !important;
+    }
+    .learning-toggle {
+      width: min(1100px, 100%);
+      margin: 0 auto;
+      padding: 1.25rem 1.5rem;
+      border: 1px solid #DFC6A790;
+      background: var(--ivory);
+      color: var(--plum);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      text-align: left;
+      transition: border-color .25s, background .25s;
+    }
+    .learning-toggle:hover { border-color: var(--rose); background: #F6EBDD; }
+    .learning-toggle-label {
+      display: block;
+      margin-bottom: .25rem;
+      color: var(--rose);
+      font-size: .62rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    .learning-toggle-title {
+      font: 400 clamp(1.45rem, 3vw, 2rem) 'Cormorant Garamond', serif;
+    }
+    .learning-toggle-action {
+      flex: 0 0 auto;
+      color: var(--deep);
+      font-size: .68rem;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+    .learning-toggle-action::after { content: ' +'; color: var(--rose); font-size: 1rem; }
+    .learning-toggle[aria-expanded="true"] .learning-toggle-action::after { content: ' −'; }
+    .learning-content[hidden] { display: none !important; }
+    #tipos.learning-collapsible .learning-toggle,
+    #tecnicas.learning-collapsible .learning-toggle {
+      border-color: #684735;
+      background: #3C291F;
+      color: var(--cream);
+    }
+    #tipos.learning-collapsible .learning-toggle:hover,
+    #tecnicas.learning-collapsible .learning-toggle:hover { background: #583B2D; }
+    #tipos.learning-collapsible .learning-toggle-action,
+    #tecnicas.learning-collapsible .learning-toggle-action { color: var(--blush); }
+    .learning-collapsible:not(.is-collapsed) { padding-top: 3rem !important; padding-bottom: 5rem !important; }
+    .learning-collapsible:not(.is-collapsed) .learning-content { margin-top: 3rem; }
+
     /* ── HISTORIA ── */
     #historia { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center; }
     .historia-visual {
@@ -1117,13 +1192,10 @@
 <!-- NAV -->
 <nav aria-label="Navegación principal">
   <a href="#historia">Historia</a>
-  <a href="#tipos">Tipos</a>
   <a href="#catalogo">Catálogo</a>
-  <a href="#productos">Productos</a>
-  <a href="#tecnicas">Técnicas</a>
-  <a href="#cuidado">Cuidado</a>
-  <a href="#tendencias">Tendencias</a>
-  <a href="#galeria">🖼 Galería</a><a href="./citas" style="color:var(--rose); font-weight:500;">📅 Citas</a>
+  <a href="#tipos">Aprende</a>
+  <a href="#galeria">🖼 Galería</a>
+  <a href="./citas" style="color:var(--rose); font-weight:500;">📅 Citas</a>
 </nav>
 
 <!-- HISTORIA -->
@@ -1139,12 +1211,27 @@
     <p class="lead">
       El maquillaje existe desde hace más de 6,000 años. Las civilizaciones antiguas como Egipto, Mesopotamia y China ya utilizaban pigmentos naturales para realzar su belleza y expresar su identidad cultural y espiritual.
     </p>
-    <p class="lead">
-      Los egipcios usaban kohl para delinear los ojos, el ocre rojo para las mejillas y el agua con cobre para dar color a los párpados. En la antigua Roma, las mujeres aplicaban yeso en polvo para blanquear la piel. A lo largo de la historia, el maquillaje ha sido símbolo de estatus, poder, arte y autoexpresión.
-    </p>
-    <p class="lead">
-      En el siglo XX, la industria cosmética revolucionó el mundo con fórmulas dermatológicamente probadas, colores más seguros y una democratización del acceso a la belleza. Hoy, el maquillaje es una poderosa herramienta de arte y comunicación personal.
-    </p>
+    <details class="historia-more">
+      <summary>Conocer más de la historia</summary>
+      <p class="lead">
+        Los egipcios usaban kohl para delinear los ojos, el ocre rojo para las mejillas y el agua con cobre para dar color a los párpados. En la antigua Roma, las mujeres aplicaban yeso en polvo para blanquear la piel. A lo largo de la historia, el maquillaje ha sido símbolo de estatus, poder, arte y autoexpresión.
+      </p>
+      <p class="lead">
+        En el siglo XX, la industria cosmética revolucionó el mundo con fórmulas dermatológicamente probadas, colores más seguros y una democratización del acceso a la belleza. Hoy, el maquillaje es una poderosa herramienta de arte y comunicación personal.
+      </p>
+    </details>
+  </div>
+</section>
+
+<!-- CATÁLOGO PRINCIPAL -->
+<section class="home-catalog" id="catalogo" aria-labelledby="catalogoInicioTitulo">
+  <div class="home-catalog-inner">
+    <div class="home-catalog-intro">
+      <div><p class="section-label">Servicios profesionales</p><h2 id="catalogoInicioTitulo">Elige tu <em>experiencia</em></h2></div>
+      <p class="lead">Consulta precios y duración desde la página principal. Al elegir un servicio pasarás directamente a crear tu cita con la opción seleccionada.</p>
+    </div>
+    <div id="catalogoInicioServicios" class="catalog-loading" aria-live="polite">Cargando servicios…</div>
+    <div id="catalogoInicioEspecialistas" class="public-specialists" aria-label="Especialistas disponibles"></div>
   </div>
 </section>
 
@@ -1188,18 +1275,6 @@
     </div>
   </div>
 </div>
-
-<!-- CATÁLOGO PRINCIPAL -->
-<section class="home-catalog" id="catalogo" aria-labelledby="catalogoInicioTitulo">
-  <div class="home-catalog-inner">
-    <div class="home-catalog-intro">
-      <div><p class="section-label">Servicios profesionales</p><h2 id="catalogoInicioTitulo">Elige tu <em>experiencia</em></h2></div>
-      <p class="lead">Consulta precios y duración desde la página principal. Al elegir un servicio pasarás directamente a crear tu cita con la opción seleccionada.</p>
-    </div>
-    <div id="catalogoInicioServicios" class="catalog-loading" aria-live="polite">Cargando servicios…</div>
-    <div id="catalogoInicioEspecialistas" class="public-specialists" aria-label="Especialistas disponibles"></div>
-  </div>
-</section>
 
 <!-- PRODUCTOS -->
 <section id="productos">
@@ -1763,6 +1838,49 @@
 // ══════════════════════════════════════════════
 //  MAQUILLAJE SENA v3 — JS LIMPIO Y SIN BUGS
 // ══════════════════════════════════════════════
+
+// ── GUÍAS FORMATIVAS DESPLEGABLES ──
+const learningSections = [
+  ['tipos', 'Tipos de maquillaje', 'Estilos y ocasiones'],
+  ['productos', 'Productos esenciales', 'Herramientas y funciones'],
+  ['tecnicas', 'Técnicas fundamentales', 'Proceso paso a paso'],
+  ['cuidado', 'Cuidado de la piel', 'Rutinas y recomendaciones'],
+  ['tendencias', 'Tendencias', 'Inspiración actual']
+];
+
+function setLearningSection(section, expanded) {
+  const button = section.querySelector(':scope > .learning-toggle');
+  const content = section.querySelector(':scope > .learning-content');
+  if (!button || !content) return;
+  button.setAttribute('aria-expanded', String(expanded));
+  content.hidden = !expanded;
+  section.classList.toggle('is-collapsed', !expanded);
+  button.querySelector('.learning-toggle-action').firstChild.textContent = expanded ? 'Cerrar guía' : 'Ver guía';
+}
+
+learningSections.forEach(([id, title, label]) => {
+  const section = document.getElementById(id);
+  if (!section) return;
+
+  const content = document.createElement('div');
+  content.className = 'learning-content';
+  content.id = `${id}-contenido`;
+  [...section.children].forEach(child => content.appendChild(child));
+
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'learning-toggle';
+  button.setAttribute('aria-controls', content.id);
+  button.innerHTML = `<span><span class="learning-toggle-label">${label}</span><span class="learning-toggle-title">${title}</span></span><span class="learning-toggle-action">Ver guía</span>`;
+  button.addEventListener('click', () => setLearningSection(section, button.getAttribute('aria-expanded') !== 'true'));
+
+  section.classList.add('learning-collapsible');
+  section.append(button, content);
+  setLearningSection(section, false);
+});
+
+const requestedSection = document.getElementById(location.hash.slice(1));
+if (requestedSection?.classList.contains('learning-collapsible')) setLearningSection(requestedSection, true);
 
 // ── SCROLL ANIMATIONS ──
 const observer = new IntersectionObserver((entries) => {
