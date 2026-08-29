@@ -55,8 +55,9 @@ test('frontend conserva rutas locales y admite publicación bajo /maquillaje', (
 
 test('catálogo se muestra en inicio y conserva el servicio al abrir citas', () => {
   const catalogoInicio = html.indexOf('id="catalogoInicioServicios"');
-  const historia = html.indexOf('id="historia"');
-  assert.ok(catalogoInicio > -1 && catalogoInicio < historia);
+  const tipos = html.indexOf('id="tipos"');
+  const productos = html.indexOf('id="productos"');
+  assert.ok(catalogoInicio > tipos && catalogoInicio < productos);
   assert.match(html, /\['catalogoInicioServicios','catalogoInicioEspecialistas'\]/);
   assert.match(html, /sena_servicio_pendiente_id/);
   assert.match(html, /new URL\('\.\/citas',location\.href\)\.pathname/);
