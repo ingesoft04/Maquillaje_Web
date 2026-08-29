@@ -4,30 +4,33 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>El Arte del Maquillaje | Proyecto SENA</title>
-  <meta name="theme-color" content="#3D1C2E"/>
+  <meta name="theme-color" content="#3C291F"/>
   <link rel="manifest" href="/manifest.webmanifest"/>
   <link rel="icon" href="/icon.svg" type="image/svg+xml"/>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --cream: #FAF6F1;
-      --blush: #E8C4B8;
-      --rose:  #C17A6F;
-      --deep:  #7A3B3B;
-      --plum:  #3D1C2E;
-      --gold:  #C9A96E;
-      --text:  #2A1A1A;
-      --muted: #7A6060;
+      --cream: #FBF5E9;
+      --blush: #DFC6A7;
+      --rose:  #B88963;
+      --deep:  #704A35;
+      --plum:  #3C291F;
+      --gold:  #B99A62;
+      --text:  #30251F;
+      --muted: #79685D;
+      --sena:  #39A900;
+      --sena-dark: #276E00;
+      --ivory: #FFF9F0;
       color-scheme: light;
     }
 
     html { scroll-behavior: smooth; }
 
     body {
-      font-family: 'Jost', sans-serif;
+      font-family: 'Work Sans', sans-serif;
       background: var(--cream);
       color: var(--text);
       overflow-x: hidden;
@@ -35,7 +38,7 @@
     }
 
     :focus-visible {
-      outline: 3px solid var(--gold);
+      outline: 3px solid var(--sena);
       outline-offset: 3px;
     }
     button, input, select, textarea, a { -webkit-tap-highlight-color: transparent; }
@@ -56,14 +59,14 @@
       display: flex; position: sticky; top: 0; z-index: 200;
       align-items: center; justify-content: space-between; gap: 1rem;
       padding: 1rem max(1.25rem, calc((100vw - 1100px) / 2));
-      background: rgba(42,16,32,.96); border-bottom: 1px solid #5C2A3A;
+      background: rgba(47,33,26,.96); border-bottom: 1px solid #684735;
       backdrop-filter: blur(12px);
     }
     .citas-brand { color: var(--cream); text-decoration: none; font: 400 1.35rem 'Cormorant Garamond',serif; }
     .citas-brand em { color: var(--blush); font-style: italic; }
     .citas-back { color: var(--gold); text-decoration: none; font-size: .67rem; letter-spacing: 2px; text-transform: uppercase; }
     body.citas-view #citas-wrapper { min-height: calc(100vh - 72px); padding-top: 4.5rem; }
-    body.citas-view footer { border-top: 1px solid #5C2A3A; }
+    body.citas-view footer { border-top: 1px solid #684735; }
 
     .skip-link {
       position: fixed; top: 1rem; left: 1rem; z-index: 10001;
@@ -88,10 +91,10 @@
     .header-bg {
       position: absolute; inset: 0;
       background:
-        radial-gradient(ellipse 80% 60% at 50% 110%, #C17A6F55 0%, transparent 65%),
-        radial-gradient(ellipse 50% 50% at 80% 20%, #E8C4B840 0%, transparent 60%),
-        radial-gradient(ellipse 40% 40% at 10% 80%, #C9A96E30 0%, transparent 55%),
-        linear-gradient(160deg, #3D1C2E 0%, #5C2A3A 50%, #3D1C2E 100%);
+        radial-gradient(ellipse 80% 60% at 50% 110%, #B8896355 0%, transparent 65%),
+        radial-gradient(ellipse 50% 50% at 80% 20%, #DFC6A740 0%, transparent 60%),
+        radial-gradient(ellipse 40% 40% at 10% 80%, #B99A6230 0%, transparent 55%),
+        linear-gradient(160deg, #3C291F 0%, #684735 50%, #3C291F 100%);
     }
 
     .petal {
@@ -117,7 +120,7 @@
     }
 
     .hero-kicker {
-      max-width: 650px; margin: 1.5rem auto 0; color: #EAD7D1;
+      max-width: 650px; margin: 1.5rem auto 0; color: #EADBC8;
       font-family: 'Cormorant Garamond', serif; font-size: clamp(1.1rem, 2vw, 1.45rem);
       font-weight: 300; line-height: 1.55;
     }
@@ -128,28 +131,30 @@
     }
     .hero-btn {
       display: inline-flex; align-items: center; justify-content: center; min-width: 170px;
-      padding: .9rem 1.35rem; border: 1px solid var(--gold); color: var(--plum);
-      background: var(--gold); text-decoration: none; text-transform: uppercase;
+      padding: .9rem 1.35rem; border: 1px solid var(--sena-dark); color: #14200D;
+      background: var(--sena); text-decoration: none; text-transform: uppercase;
       font-size: .68rem; font-weight: 500; letter-spacing: 2px;
       transition: transform .25s, background .25s, color .25s, box-shadow .25s;
     }
-    .hero-btn.secondary { background: transparent; color: var(--cream); border-color: #E8C4B880; }
+    .hero-btn.secondary { background: transparent; color: var(--cream); border-color: #DFC6A780; }
     .hero-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 30px #160A1240; }
-    .hero-btn.secondary:hover { background: #FAF6F112; border-color: var(--cream); }
+    .hero-btn.secondary:hover { background: #FBF5E912; border-color: var(--cream); }
 
     .hero-proof {
       display: flex; justify-content: center; gap: 0; margin: 2.4rem auto 0;
-      color: #E1C2BC;
+      color: #D9C3AA;
     }
     .hero-proof span { padding: 0 1rem; font-size: .64rem; letter-spacing: 1.5px; text-transform: uppercase; }
-    .hero-proof span + span { border-left: 1px solid #C9A96E55; }
+    .hero-proof span + span { border-left: 1px solid #B99A6255; }
 
     .sena-badge {
       display: inline-block;
-      border: 1px solid var(--gold);
-      color: var(--gold);
-      font-family: 'Jost', sans-serif;
-      font-weight: 300;
+      color: #14200D;
+      background: var(--sena);
+      border: 1px solid var(--sena-dark);
+      border-radius: 999px;
+      font-family: 'Work Sans', sans-serif;
+      font-weight: 500;
       font-size: 0.7rem;
       letter-spacing: 4px;
       text-transform: uppercase;
@@ -176,7 +181,7 @@
 
     header p.subtitle {
       margin-top: 1.5rem;
-      color: #E1C2BC;
+      color: #D9C3AA;
       font-weight: 200;
       font-size: 1rem;
       letter-spacing: 2px;
@@ -206,15 +211,15 @@
     /* ── NAV ── */
     nav {
       position: sticky; top: 0; z-index: 100;
-      background: rgba(250,246,241,0.92);
+      background: rgba(251,245,233,0.94);
       backdrop-filter: blur(12px);
-      border-bottom: 1px solid #E8C4B860;
+      border-bottom: 1px solid #DFC6A760;
       display: flex; justify-content: center; gap: 0;
-      box-shadow: 0 8px 30px rgba(61,28,46,.04);
+      box-shadow: 0 8px 30px rgba(60,41,31,.08);
     }
 
     nav a {
-      font-family: 'Jost', sans-serif;
+      font-family: 'Work Sans', sans-serif;
       font-size: 0.72rem;
       font-weight: 400;
       letter-spacing: 2px;
@@ -227,7 +232,7 @@
     }
     nav a:hover { color: var(--deep); border-bottom-color: var(--rose); }
     nav a.active { color: var(--deep); border-bottom-color: var(--rose); }
-    nav a[aria-current="location"] { background: #E8C4B825; }
+    nav a[aria-current="location"] { background: #DFC6A725; }
 
     /* ── SECTIONS ── */
     section { padding: 6rem 2rem; max-width: 1100px; margin: 0 auto; }
@@ -293,7 +298,7 @@
       border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
       font-size: 2rem;
-      box-shadow: 0 10px 40px #C9A96E60;
+      box-shadow: 0 10px 40px #B99A6260;
       z-index: 3;
     }
 
@@ -302,23 +307,23 @@
     #tipos .inner { max-width: 1100px; margin: 0 auto; }
     #tipos h2 { color: var(--cream); }
     #tipos .section-label { color: var(--blush); }
-    #tipos .lead { color: #C8ABA5; }
+    #tipos .lead { color: #CDBAA4; }
 
     .tipos-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 1.5px;
       margin-top: 3rem;
-      background: #5C2A3A;
+      background: #684735;
     }
 
     .tipo-card {
-      background: #3D1C2E;
+      background: #3C291F;
       padding: 2.5rem;
       transition: background 0.3s;
       cursor: default;
     }
-    .tipo-card:hover { background: #4E2438; }
+    .tipo-card:hover { background: #583B2D; }
 
     .tipo-icon { font-size: 2.5rem; margin-bottom: 1.2rem; display: block; }
 
@@ -332,7 +337,7 @@
 
     .tipo-card p {
       font-size: 0.88rem;
-      color: #A08888;
+      color: #9B8877;
       line-height: 1.75;
     }
 
@@ -345,17 +350,17 @@
     }
 
     .producto {
-      border: 1px solid #E8C4B870;
+      border: 1px solid #DFC6A770;
       padding: 2rem;
       position: relative;
       transition: transform 0.3s, box-shadow 0.3s;
     }
-    .producto:hover { transform: translateY(-6px); box-shadow: 0 20px 50px #C17A6F20; }
+    .producto:hover { transform: translateY(-6px); box-shadow: 0 20px 50px #B8896320; }
 
     .producto-num {
       font-family: 'Cormorant Garamond', serif;
       font-size: 3rem;
-      color: #E8C4B840;
+      color: #DFC6A740;
       line-height: 1;
       margin-bottom: 0.5rem;
     }
@@ -381,7 +386,7 @@
     }
 
     /* ── TÉCNICAS ── */
-    #tecnicas { background: #FDF9F6; max-width: 100%; padding: 6rem 2rem; }
+    #tecnicas { background: #FFF9F0; max-width: 100%; padding: 6rem 2rem; }
     #tecnicas .inner { max-width: 1100px; margin: 0 auto; }
 
     .tecnicas-list { margin-top: 3rem; }
@@ -391,7 +396,7 @@
       grid-template-columns: 80px 1fr;
       gap: 2rem;
       padding: 2rem 0;
-      border-bottom: 1px solid #E8C4B850;
+      border-bottom: 1px solid #DFC6A750;
       align-items: start;
       transition: padding-left 0.3s;
     }
@@ -437,9 +442,9 @@
     .skin-box ul { list-style: none; }
     .skin-box li {
       padding: 0.6rem 0;
-      border-bottom: 1px solid #5C2A3A;
+      border-bottom: 1px solid #684735;
       font-size: 0.9rem;
-      color: #C8ABA5;
+      color: #CDBAA4;
       display: flex; gap: 0.75rem;
     }
     .skin-box li::before { content: '◆'; color: var(--gold); font-size: 0.5rem; margin-top: 0.35rem; }
@@ -453,7 +458,7 @@
     .tip {
       display: flex; gap: 1rem; margin-bottom: 1.2rem;
       padding: 1.2rem;
-      background: #FDF9F6;
+      background: #FFF9F0;
       border-left: 3px solid var(--rose);
     }
     .tip-icon { font-size: 1.4rem; flex-shrink: 0; }
@@ -474,7 +479,7 @@
       text-align: center;
       transition: background 0.3s;
     }
-    .tendencia:hover { background: #F5EDE8; }
+    .tendencia:hover { background: #F4E8D8; }
     .tendencia-emoji { font-size: 2.5rem; margin-bottom: 1rem; display: block; }
     .tendencia h4 {
       font-family: 'Cormorant Garamond', serif;
@@ -486,7 +491,7 @@
     /* ── FOOTER ── */
     footer {
       background: var(--plum);
-      color: #A08080;
+      color: #9B8877;
       text-align: center;
       padding: 4rem 2rem;
     }
@@ -503,33 +508,33 @@
 
     /* ── CITAS / AUTH ── */
     #citas-wrapper {
-      background: linear-gradient(160deg, #2A1020 0%, #3D1C2E 50%, #2A1020 100%);
+      background: linear-gradient(160deg, #2F211A 0%, #3C291F 50%, #2F211A 100%);
       padding: 6rem 2rem;
     }
     #citas-wrapper .inner { max-width: 1000px; margin: 0 auto; }
     #citas-wrapper .section-label { color: var(--blush); }
     #citas-wrapper h2 { color: var(--cream); }
-    #citas-wrapper .lead { color: #C8ABA5; }
+    #citas-wrapper .lead { color: #CDBAA4; }
     .public-catalog { max-width:none; margin:2.5rem 0 3rem; padding:0; }
     .public-catalog-heading { display:flex; justify-content:space-between; align-items:end; gap:1rem; margin-bottom:1rem; }
     .public-catalog-heading h3 { color:var(--blush); font:400 1.6rem 'Cormorant Garamond',serif; }
-    .public-catalog-heading p { color:#A08080; font-size:.72rem; }
+    .public-catalog-heading p { color:#9B8877; font-size:.72rem; }
     .public-service-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:.8rem; }
-    .public-service-card { display:flex; flex-direction:column; min-height:210px; padding:1.2rem; background:#2A1020; border:1px solid #5C2A3A; transition:transform .2s,border-color .2s; }
+    .public-service-card { display:flex; flex-direction:column; min-height:210px; padding:1.2rem; background:#2F211A; border:1px solid #684735; transition:transform .2s,border-color .2s; }
     .public-service-card:hover { transform:translateY(-3px); border-color:var(--rose); }
     .public-service-icon { font-size:1.7rem; }
     .public-service-card h4 { margin:.5rem 0; color:var(--cream); font:400 1.15rem 'Cormorant Garamond',serif; }
-    .public-service-card p { flex:1; color:#A08080; font-size:.7rem; line-height:1.55; }
+    .public-service-card p { flex:1; color:#9B8877; font-size:.7rem; line-height:1.55; }
     .public-service-meta { display:flex; justify-content:space-between; gap:.5rem; margin:.8rem 0; color:var(--gold); font-size:.7rem; }
     .public-service-card button { border:1px solid var(--rose); background:transparent; color:var(--blush); padding:.55rem; cursor:pointer; }
     .public-specialists { display:flex; flex-wrap:wrap; gap:.55rem; margin-top:1rem; }
-    .public-specialist { padding:.5rem .75rem; border:1px solid #5C2A3A; color:#D8C2C0; font-size:.7rem; background:#321729; }
-    .catalog-loading { color:#A08080; padding:1.5rem; border:1px dashed #5C2A3A; text-align:center; }
+    .public-specialist { padding:.5rem .75rem; border:1px solid #684735; color:#E0D1BF; font-size:.7rem; background:#38261D; }
+    .catalog-loading { color:#9B8877; padding:1.5rem; border:1px dashed #684735; text-align:center; }
 
     /* Auth tabs */
     .auth-tabs {
       display: flex; gap: 0;
-      border: 1px solid #5C2A3A;
+      border: 1px solid #684735;
       width: fit-content;
       margin: 2.5rem auto 0;
       border-radius: 2px;
@@ -537,12 +542,12 @@
     }
     .auth-tab {
       padding: 0.75rem 2.5rem;
-      font-family: 'Jost', sans-serif;
+      font-family: 'Work Sans', sans-serif;
       font-size: 0.72rem;
       letter-spacing: 3px;
       text-transform: uppercase;
       background: transparent;
-      color: #A08080;
+      color: #9B8877;
       border: none;
       cursor: pointer;
       transition: background 0.3s, color 0.3s;
@@ -553,8 +558,8 @@
     .auth-panel {
       max-width: 460px;
       margin: 2rem auto 0;
-      background: #2A1020;
-      border: 1px solid #5C2A3A;
+      background: #2F211A;
+      border: 1px solid #684735;
       padding: 2.5rem;
       display: none;
     }
@@ -572,23 +577,23 @@
       font-size: 0.65rem;
       letter-spacing: 2px;
       text-transform: uppercase;
-      color: #A08080;
+      color: #9B8877;
       margin-bottom: 0.4rem;
     }
     .field input, .field select {
       width: 100%;
       padding: 0.75rem 1rem;
-      background: #3D1C2E;
-      border: 1px solid #5C2A3A;
+      background: #3C291F;
+      border: 1px solid #684735;
       color: var(--cream);
-      font-family: 'Jost', sans-serif;
+      font-family: 'Work Sans', sans-serif;
       font-size: 0.9rem;
       outline: none;
       transition: border-color 0.3s;
       appearance: none;
     }
     .field input:focus, .field select:focus { border-color: var(--rose); }
-    .field input::placeholder { color: #6A4A55; }
+    .field input::placeholder { color: #806C5D; }
 
     .btn-auth {
       width: 100%;
@@ -596,7 +601,7 @@
       background: var(--rose);
       color: var(--cream);
       border: none;
-      font-family: 'Jost', sans-serif;
+      font-family: 'Work Sans', sans-serif;
       font-size: 0.75rem;
       letter-spacing: 3px;
       text-transform: uppercase;
@@ -627,8 +632,8 @@
 
     .dash-header {
       display: flex; justify-content: space-between; align-items: center;
-      background: #2A1020;
-      border: 1px solid #5C2A3A;
+      background: #2F211A;
+      border: 1px solid #684735;
       padding: 1.5rem 2rem;
       margin-bottom: 1.5px;
     }
@@ -638,8 +643,8 @@
     }
     .btn-logout {
       background: transparent;
-      border: 1px solid #5C2A3A;
-      color: #A08080;
+      border: 1px solid #684735;
+      color: #9B8877;
       padding: 0.4rem 1.2rem;
       font-size: 0.65rem;
       letter-spacing: 2px;
@@ -651,69 +656,69 @@
 
     .admin-panel {
       display: none; margin-top: 1.5rem; padding: 2rem;
-      background: #180C14; border: 1px solid var(--gold);
+      background: #241812; border: 1px solid var(--gold);
     }
     .admin-panel.visible { display: block; }
     .admin-title-row { display:flex; justify-content:space-between; gap:1rem; align-items:center; margin-bottom:1.5rem; }
     .admin-title-row h4 { font-family:'Cormorant Garamond',serif; color:var(--gold); font-size:1.5rem; }
     .admin-badge { color:var(--plum); background:var(--gold); padding:.3rem .7rem; font-size:.6rem; letter-spacing:2px; text-transform:uppercase; }
     .admin-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:.75rem; margin-bottom:1.5rem; }
-    .admin-stat { padding:1rem; border:1px solid #5C2A3A; background:#2A1020; text-align:center; }
+    .admin-stat { padding:1rem; border:1px solid #684735; background:#2F211A; text-align:center; }
     .admin-stat strong { display:block; color:var(--blush); font:400 1.7rem 'Cormorant Garamond',serif; }
-    .admin-stat span { color:#A08080; font-size:.6rem; letter-spacing:1px; text-transform:uppercase; }
-    .admin-navigation { margin-bottom:1rem; padding:1rem; border:1px solid #4A2438; background:#21101B; }
+    .admin-stat span { color:#9B8877; font-size:.6rem; letter-spacing:1px; text-transform:uppercase; }
+    .admin-navigation { margin-bottom:1rem; padding:1rem; border:1px solid #513728; background:#2B1D17; }
     .admin-nav-group { display:flex; flex-wrap:wrap; gap:.45rem; align-items:center; margin-bottom:.7rem; }
     .admin-nav-group:last-child { margin-bottom:0; }
     .admin-nav-label { width:6.5rem; color:var(--gold); font-size:.58rem; letter-spacing:1.5px; text-transform:uppercase; }
-    .admin-nav-button { border:1px solid #5C2A3A; background:transparent; color:#C8ABA5; padding:.55rem .8rem; cursor:pointer; }
+    .admin-nav-button { border:1px solid #684735; background:transparent; color:#CDBAA4; padding:.55rem .8rem; cursor:pointer; }
     .admin-nav-button:hover, .admin-nav-button:focus-visible { border-color:var(--blush); color:white; outline:2px solid transparent; }
     .admin-nav-button.active { background:var(--rose); color:white; border-color:var(--rose); }
-    .admin-mobile-select { display:none; width:100%; background:#2A1020; color:var(--cream); border:1px solid #6A4055; padding:.7rem; }
+    .admin-mobile-select { display:none; width:100%; background:#2F211A; color:var(--cream); border:1px solid #80634F; padding:.7rem; }
     .admin-toolbar { display:flex; gap:.65rem; align-items:center; margin-bottom:1rem; }
-    .admin-search { flex:1; min-width:0; background:#2A1020; color:var(--cream); border:1px solid #6A4055; padding:.7rem; }
+    .admin-search { flex:1; min-width:0; background:#2F211A; color:var(--cream); border:1px solid #80634F; padding:.7rem; }
     .admin-search:focus, .admin-mobile-select:focus { border-color:var(--gold); outline:2px solid var(--gold); outline-offset:2px; }
-    .admin-filter-result { min-width:5rem; color:#A08080; font-size:.66rem; }
+    .admin-filter-result { min-width:5rem; color:#9B8877; font-size:.66rem; }
     .admin-refresh { border:1px solid var(--gold); background:transparent; color:var(--gold); padding:.65rem .9rem; cursor:pointer; }
     .admin-refresh:disabled { opacity:.55; cursor:wait; }
-    .admin-tab { border:1px solid #5C2A3A; background:transparent; color:#C8ABA5; padding:.55rem 1rem; cursor:pointer; }
+    .admin-tab { border:1px solid #684735; background:transparent; color:#CDBAA4; padding:.55rem 1rem; cursor:pointer; }
     .admin-tab.active { background:var(--rose); color:white; border-color:var(--rose); }
     .admin-table-wrap { overflow:auto; max-height:430px; }
     .admin-table { width:100%; border-collapse:collapse; min-width:680px; font-size:.72rem; }
-    .admin-table th { position:sticky; top:0; z-index:2; background:#180C14; color:var(--gold); text-align:left; letter-spacing:1px; text-transform:uppercase; font-size:.58rem; }
-    .admin-table th, .admin-table td { padding:.75rem; border-bottom:1px solid #4A2438; }
-    .admin-table td { color:#D8C2C0; }
+    .admin-table th { position:sticky; top:0; z-index:2; background:#241812; color:var(--gold); text-align:left; letter-spacing:1px; text-transform:uppercase; font-size:.58rem; }
+    .admin-table th, .admin-table td { padding:.75rem; border-bottom:1px solid #513728; }
+    .admin-table td { color:#E0D1BF; }
     .admin-table tbody tr:nth-child(even) { background:rgba(255,255,255,.018); }
-    .admin-table tbody tr:hover { background:#321729; }
+    .admin-table tbody tr:hover { background:#38261D; }
     .admin-loading { display:grid; grid-template-columns:repeat(3,1fr); gap:.75rem; padding:.5rem 0; }
-    .admin-skeleton { height:95px; border:1px solid #4A2438; background:linear-gradient(100deg,#25121f 30%,#3a1b31 50%,#25121f 70%); background-size:200% 100%; animation:admin-pulse 1.4s ease-in-out infinite; }
+    .admin-skeleton { height:95px; border:1px solid #513728; background:linear-gradient(100deg,#2D2019 30%,#4A3327 50%,#2D2019 70%); background-size:200% 100%; animation:admin-pulse 1.4s ease-in-out infinite; }
     @keyframes admin-pulse { to { background-position-x:-200%; } }
-    .admin-select { background:#2A1020; color:var(--cream); border:1px solid #6A4055; padding:.35rem; }
+    .admin-select { background:#2F211A; color:var(--cream); border:1px solid #80634F; padding:.35rem; }
     .admin-form-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:.6rem; margin-bottom:1rem; }
-    .admin-form-grid input { min-width:0; background:#2A1020; color:var(--cream); border:1px solid #5C2A3A; padding:.65rem; }
+    .admin-form-grid input { min-width:0; background:#2F211A; color:var(--cream); border:1px solid #684735; padding:.65rem; }
     .admin-form-grid button { background:var(--gold); color:var(--plum); border:0; padding:.65rem; cursor:pointer; font-weight:600; }
     .admin-section-title { color:var(--blush); font:400 1.15rem 'Cormorant Garamond',serif; margin:1rem 0 .7rem; }
-    .payment-choice { margin:1rem 0; padding:1rem; border:1px solid #5C2A3A; background:#321729; }
+    .payment-choice { margin:1rem 0; padding:1rem; border:1px solid #684735; background:#38261D; }
     .payment-choice-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
-    .payment-summary { margin-top:.8rem; color:#D8C2C0; font-size:.75rem; line-height:1.7; }
+    .payment-summary { margin-top:.8rem; color:#E0D1BF; font-size:.75rem; line-height:1.7; }
     .payment-policy { color:var(--blush); }
     .calendar-toolbar { display:flex; flex-wrap:wrap; gap:.6rem; align-items:center; justify-content:space-between; margin-bottom:1rem; }
     .calendar-week { display:grid; grid-template-columns:repeat(7,minmax(145px,1fr)); gap:.55rem; min-width:1050px; }
-    .calendar-day { background:#2A1020; border:1px solid #51243B; min-height:260px; padding:.6rem; }
+    .calendar-day { background:#2F211A; border:1px solid #5D3F30; min-height:260px; padding:.6rem; }
     .calendar-day h6 { color:var(--gold); font-size:.66rem; letter-spacing:1px; margin-bottom:.65rem; text-transform:uppercase; }
-    .calendar-event { padding:.55rem; margin-bottom:.45rem; border-left:4px solid var(--blush); background:#3C1930; color:#F4E9E5; font-size:.66rem; line-height:1.45; }
+    .calendar-event { padding:.55rem; margin-bottom:.45rem; border-left:4px solid var(--blush); background:#493126; color:#FBF5E9; font-size:.66rem; line-height:1.45; }
     .calendar-event.completada { border-color:#62B987; }.calendar-event.cancelada { border-color:#C65D67;opacity:.65}.calendar-event.en_servicio { border-color:#E7B75D; }
-    .profile-panel { margin-top:1.5rem; padding:2rem; background:#2A1020; border:1px solid #5C2A3A; }
+    .profile-panel { margin-top:1.5rem; padding:2rem; background:#2F211A; border:1px solid #684735; }
     .profile-panel h4 { color:var(--blush); font:400 1.35rem 'Cormorant Garamond',serif; margin-bottom:1rem; }
     .profile-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:.8rem; }
-    .profile-grid input,.profile-grid select,.profile-grid textarea { width:100%; background:#3D1C2E; color:var(--cream); border:1px solid #5C2A3A; padding:.7rem; font-family:inherit; }
+    .profile-grid input,.profile-grid select,.profile-grid textarea { width:100%; background:#3C291F; color:var(--cream); border:1px solid #684735; padding:.7rem; font-family:inherit; }
     .profile-grid textarea { min-height:75px; resize:vertical; }
-    .profile-consent { color:#C8ABA5; font-size:.72rem; display:flex; gap:.5rem; align-items:center; }
+    .profile-consent { color:#CDBAA4; font-size:.72rem; display:flex; gap:.5rem; align-items:center; }
     .pro-summary { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:.7rem; margin:1rem 0; }
 
     /* Agendar form */
     .agendar-box {
-      background: #2A1020;
-      border: 1px solid #5C2A3A;
+      background: #2F211A;
+      border: 1px solid #684735;
       padding: 2rem;
       margin-bottom: 1.5px;
     }
@@ -734,7 +739,7 @@
       background: var(--gold);
       color: var(--plum);
       border: none;
-      font-family: 'Jost', sans-serif;
+      font-family: 'Work Sans', sans-serif;
       font-size: 0.7rem;
       letter-spacing: 3px;
       text-transform: uppercase;
@@ -746,8 +751,8 @@
 
     /* Citas list */
     .citas-box {
-      background: #2A1020;
-      border: 1px solid #5C2A3A;
+      background: #2F211A;
+      border: 1px solid #684735;
       padding: 2rem;
     }
     .citas-box h4 {
@@ -758,9 +763,9 @@
     .cita-card {
       display: flex; justify-content: space-between; align-items: center;
       padding: 1rem 1.2rem;
-      border: 1px solid #5C2A3A;
+      border: 1px solid #684735;
       margin-bottom: 0.8rem;
-      background: #3D1C2E;
+      background: #3C291F;
       transition: border-color 0.3s;
     }
     .cita-card:hover { border-color: var(--rose); }
@@ -770,7 +775,7 @@
       font-size: 1.1rem; color: var(--cream);
     }
     .cita-meta {
-      font-size: 0.75rem; color: #A08080; margin-top: 0.2rem;
+      font-size: 0.75rem; color: #9B8877; margin-top: 0.2rem;
       letter-spacing: 1px;
     }
     .cita-estado {
@@ -779,14 +784,14 @@
       background: #2A4A2A; color: #8ACA8A;
     }
     .btn-cancelar {
-      background: transparent; border: 1px solid #5C2A3A;
-      color: #A08080; padding: 4px 12px; font-size: 0.6rem;
+      background: transparent; border: 1px solid #684735;
+      color: #9B8877; padding: 4px 12px; font-size: 0.6rem;
       letter-spacing: 1px; text-transform: uppercase; cursor: pointer;
       margin-left: 1rem; transition: all 0.3s;
     }
     .btn-cancelar:hover { border-color: #CA4A4A; color: #CA4A4A; }
     .empty-citas {
-      text-align: center; color: #6A4A55;
+      text-align: center; color: #806C5D;
       padding: 2rem; font-style: italic;
       font-family: 'Cormorant Garamond', serif;
       font-size: 1.1rem;
@@ -842,7 +847,7 @@
     /* ── TOAST NOTIFICATIONS ── */
 .toast {
   position: fixed; top: 20px; right: 20px; z-index: 10000;
-  padding: 1rem 1.5rem; border-radius: 8px; font-family: 'Jost', sans-serif;
+  padding: 1rem 1.5rem; border-radius: 8px; font-family: 'Work Sans', sans-serif;
   font-size: 0.85rem; font-weight: 500; letter-spacing: 1px;
   transform: translateX(400px); opacity: 0;
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -860,7 +865,7 @@
   font-size: 0.75rem; letter-spacing: 2px; color: var(--rose);
 }
 .spinner {
-  width: 16px; height: 16px; border: 2px solid #E8C4B840;
+  width: 16px; height: 16px; border: 2px solid #DFC6A740;
   border-top: 2px solid var(--rose); border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -871,7 +876,7 @@
   transition: all 0.3s ease;
 }
 .field input:focus, .field select:focus {
-  border-color: var(--rose); box-shadow: 0 0 0 3px #C17A6F20;
+  border-color: var(--rose); box-shadow: 0 0 0 3px #B8896320;
   transform: translateY(-1px);
 }
 .field input.error, .field select.error {
@@ -899,14 +904,14 @@
   display: flex; gap: 1rem; margin-bottom: 1.5rem;
 }
 .stat-card {
-  flex: 1; background: #3D1C2E; padding: 1rem; text-align: center;
-  border: 1px solid #5C2A3A; border-radius: 4px;
+  flex: 1; background: #3C291F; padding: 1rem; text-align: center;
+  border: 1px solid #684735; border-radius: 4px;
 }
 .stat-num { 
   font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; 
   color: var(--blush); font-weight: 400; display: block;
 }
-.stat-label { font-size: 0.7rem; color: #A08080; letter-spacing: 2px; }
+.stat-label { font-size: 0.7rem; color: #9B8877; letter-spacing: 2px; }
 
 /* ── MOBILE TOAST ── */
 @media (max-width: 768px) {
@@ -918,15 +923,15 @@
   display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1.5rem 0;
 }
 .calendar {
-  background: #3D1C2E; border: 1px solid #5C2A3A; border-radius: 8px;
+  background: #3C291F; border: 1px solid #684735; border-radius: 8px;
   padding: 1.5rem; height: 340px; overflow-y: auto;
 }
 .calendar-header {
   display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #5C2A3A;
+  margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #684735;
 }
 .calendar-nav {
-  background: transparent; border: 1px solid #A08080; color: #A08080;
+  background: transparent; border: 1px solid #9B8877; color: #9B8877;
   padding: 0.4rem 0.8rem; font-size: 0.7rem; cursor: pointer; transition: all 0.3s;
 }
 .calendar-nav:hover { background: var(--rose); color: var(--cream); }
@@ -946,7 +951,7 @@
   font-weight: 400; border: 1px solid transparent;
 }
 .calendar-day:hover:not(.pasado):not(.ocupado) { 
-  transform: scale(1.08); background: #4A2438; z-index: 10; 
+  transform: scale(1.08); background: #513728; z-index: 10;
 }
 .calendar-day.pasado { opacity: 0.4; cursor: not-allowed; }
 .calendar-day.ocupado { 
@@ -959,11 +964,11 @@
 .calendar-day.disponible { background: #2A4A2A33; color: #8ACA8A; }
 .calendar-day.seleccionado { 
   background: linear-gradient(135deg, var(--rose), var(--deep)) !important;
-  color: var(--cream) !important; font-weight: 600; box-shadow: 0 4px 16px #C17A6F40;
+  color: var(--cream) !important; font-weight: 600; box-shadow: 0 4px 16px #B8896340;
 }
 
 .horarios-container {
-  background: #3D1C2E; border: 1px solid #5C2A3A; border-radius: 8px; padding: 1.5rem;
+  background: #3C291F; border: 1px solid #684735; border-radius: 8px; padding: 1.5rem;
 }
 .horarios-title {
   font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; color: var(--blush);
@@ -988,7 +993,7 @@
   background: var(--rose) !important; color: var(--cream) !important;
   animation: pulse 2s infinite;
 }
-@keyframes pulse { 0%,100%{ box-shadow: 0 0 0 0 #C17A6F40; } 50%{ box-shadow: 0 0 0 8px transparent; } }
+@keyframes pulse { 0%,100%{ box-shadow: 0 0 0 0 #B8896340; } 50%{ box-shadow: 0 0 0 8px transparent; } }
 
 @media (max-width: 768px) {
   .calendar-container { grid-template-columns: 1fr; }
@@ -999,27 +1004,27 @@
 .btn-pdf {
   background: linear-gradient(135deg, var(--gold), #B8943A);
   color: var(--plum); border: none; padding: 0.8rem 1.5rem;
-  font-family: 'Jost', sans-serif; font-size: 0.75rem; font-weight: 500;
+  font-family: 'Work Sans', sans-serif; font-size: 0.75rem; font-weight: 500;
   letter-spacing: 3px; text-transform: uppercase; cursor: pointer;
   border-radius: 25px; transition: all 0.3s; margin: 1rem 0;
-  box-shadow: 0 4px 20px #C9A96E40;
+  box-shadow: 0 4px 20px #B99A6240;
 }
-.btn-pdf:hover { transform: translateY(-2px); box-shadow: 0 8px 30px #C9A96E60; }
+.btn-pdf:hover { transform: translateY(-2px); box-shadow: 0 8px 30px #B99A6260; }
 .btn-pdf:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
 .pdf-preview {
-  background: #2A1020; border: 1px solid #5C2A3A; border-radius: 8px;
+  background: #2F211A; border: 1px solid #684735; border-radius: 8px;
   padding: 1.5rem; margin-top: 1rem; max-height: 300px; overflow-y: auto;
 }
 
 /* ── GALERÍA DE LOOKS ── */
 .galeria-card {
   cursor: pointer;
-  border: 1px solid #E8C4B860;
+  border: 1px solid #DFC6A760;
   overflow: hidden;
   transition: transform 0.3s, box-shadow 0.3s;
 }
-.galeria-card:hover { transform: translateY(-6px); box-shadow: 0 20px 50px #C17A6F25; }
+.galeria-card:hover { transform: translateY(-6px); box-shadow: 0 20px 50px #B8896325; }
 .galeria-preview {
   height: 200px;
   display: flex; align-items: center; justify-content: center;
@@ -1027,7 +1032,7 @@
 }
 .galeria-overlay {
   position: absolute; inset: 0;
-  background: rgba(61,28,46,0.75);
+  background: rgba(60,41,31,0.78);
   display: flex; align-items: center; justify-content: center;
   color: var(--gold); font-size: 0.72rem; letter-spacing: 3px;
   text-transform: uppercase; opacity: 0;
@@ -1037,7 +1042,7 @@
 .galeria-info {
   padding: 1.2rem;
   background: white;
-  border-top: 1px solid #E8C4B860;
+  border-top: 1px solid #DFC6A760;
   display: flex; justify-content: space-between; align-items: center;
 }
 .galeria-info h4 {
@@ -1345,7 +1350,7 @@
 <!-- TENDENCIAS -->
 <section id="tendencias" style="max-width:100%; padding:6rem 2rem; background:var(--cream);">
   <div style="max-width:1100px; margin:0 auto;">
-    <p class="section-label">06 — Tendencias 2024–2025</p>
+    <p class="section-label">06 — Tendencias 2025–2026</p>
     <h2>Lo que marca<em>la moda</em></h2>
     <p class="lead">El mundo de la belleza evoluciona constantemente. Estas son las tendencias que dominan las pasarelas, redes sociales y el día a día de las amantes del maquillaje.</p>
   </div>
@@ -1632,8 +1637,8 @@
 
     <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:1.5rem; margin-top:3rem;">
 
-      <div class="galeria-card" onclick="abrirLook('Smoky Eye Clásico','💋','Profundidad y drama con sombras oscuras difuminadas. Perfecto para eventos nocturnos y ocasiones especiales.','Maquillaje de Noche','#3D1C2E','#C17A6F')">
-        <div class="galeria-preview" style="background:linear-gradient(135deg,#3D1C2E,#7A3B3B);">
+      <div class="galeria-card" onclick="abrirLook('Smoky Eye Clásico','💋','Profundidad y drama con sombras oscuras difuminadas. Perfecto para eventos nocturnos y ocasiones especiales.','Maquillaje de Noche','#3C291F','#B88963')">
+        <div class="galeria-preview" style="background:linear-gradient(135deg,#3C291F,#704A35);">
           <span style="font-size:4rem;">💋</span>
           <div class="galeria-overlay">Ver detalles</div>
         </div>
@@ -1643,8 +1648,8 @@
         </div>
       </div>
 
-      <div class="galeria-card" onclick="abrirLook('Glam Nupcial','👰','Elegancia atemporal con iluminación natural y labios rosados. Diseñado para durar todo el día.','Maquillaje Nupcial','#F5E6DC','#C9A96E')">
-        <div class="galeria-preview" style="background:linear-gradient(135deg,#E8C4B8,#C9A96E);">
+      <div class="galeria-card" onclick="abrirLook('Glam Nupcial','👰','Elegancia atemporal con iluminación natural y labios rosados. Diseñado para durar todo el día.','Maquillaje Nupcial','#F5E6DC','#B99A62')">
+        <div class="galeria-preview" style="background:linear-gradient(135deg,#DFC6A7,#B99A62);">
           <span style="font-size:4rem;">👰</span>
           <div class="galeria-overlay">Ver detalles</div>
         </div>
@@ -1654,8 +1659,8 @@
         </div>
       </div>
 
-      <div class="galeria-card" onclick="abrirLook('Glowing Skin','✨','Piel luminosa y saludable con efecto glass skin. La tendencia del momento en belleza coreana.','Maquillaje Natural','#FAF6F1','#E8C4B8')">
-        <div class="galeria-preview" style="background:linear-gradient(135deg,#FAF6F1,#E8C4B8);">
+      <div class="galeria-card" onclick="abrirLook('Glowing Skin','✨','Piel luminosa y saludable con efecto glass skin. La tendencia del momento en belleza coreana.','Maquillaje Natural','#FBF5E9','#DFC6A7')">
+        <div class="galeria-preview" style="background:linear-gradient(135deg,#FBF5E9,#DFC6A7);">
           <span style="font-size:4rem;">✨</span>
           <div class="galeria-overlay">Ver detalles</div>
         </div>
@@ -1665,8 +1670,8 @@
         </div>
       </div>
 
-      <div class="galeria-card" onclick="abrirLook('Cherry Girl','🍒','Labios rojos intensos con mejillas rosadas. Un look retro-moderno atemporal lleno de energía.','Maquillaje Natural','#4A0A1A','#C17A6F')">
-        <div class="galeria-preview" style="background:linear-gradient(135deg,#7A1A1A,#C17A6F);">
+      <div class="galeria-card" onclick="abrirLook('Cherry Girl','🍒','Labios rojos intensos con mejillas rosadas. Un look retro-moderno atemporal lleno de energía.','Maquillaje Natural','#4A0A1A','#B88963')">
+        <div class="galeria-preview" style="background:linear-gradient(135deg,#7A1A1A,#B88963);">
           <span style="font-size:4rem;">🍒</span>
           <div class="galeria-overlay">Ver detalles</div>
         </div>
@@ -1687,7 +1692,7 @@
         </div>
       </div>
 
-      <div class="galeria-card" onclick="abrirLook('Contour Pro','⚡','Esculpido facial con técnicas de luz y sombra. Define pómulos, nariz y mandíbula a la perfección.','Contouring Profesional','#2A1A0A','#C9A96E')">
+      <div class="galeria-card" onclick="abrirLook('Contour Pro','⚡','Esculpido facial con técnicas de luz y sombra. Define pómulos, nariz y mandíbula a la perfección.','Contouring Profesional','#2A1A0A','#B99A62')">
         <div class="galeria-preview" style="background:linear-gradient(135deg,#2A1A0A,#7A5A2A);">
           <span style="font-size:4rem;">⚡</span>
           <div class="galeria-overlay">Ver detalles</div>
@@ -1704,8 +1709,8 @@
 
 <!-- MODAL GALERÍA -->
 <div id="lookModal" style="display:none; position:fixed; inset:0; background:rgba(30,10,20,0.92); z-index:9000; align-items:center; justify-content:center; padding:2rem;">
-  <div id="lookModalContent" style="background:var(--plum); border:1px solid #5C2A3A; max-width:480px; width:100%; padding:3rem; position:relative; animation:fadeUp 0.4s ease;">
-    <button onclick="cerrarLook()" style="position:absolute;top:1rem;right:1rem;background:transparent;border:none;color:#A08080;font-size:1.5rem;cursor:pointer;">✕</button>
+  <div id="lookModalContent" style="background:var(--plum); border:1px solid #684735; max-width:480px; width:100%; padding:3rem; position:relative; animation:fadeUp 0.4s ease;">
+    <button onclick="cerrarLook()" style="position:absolute;top:1rem;right:1rem;background:transparent;border:none;color:#9B8877;font-size:1.5rem;cursor:pointer;">✕</button>
     <div id="lookEmoji" style="font-size:4rem; margin-bottom:1rem;"></div>
     <p class="section-label" id="lookServicio"></p>
     <h2 id="lookTitulo" style="font-size:2rem; margin-bottom:1rem;"></h2>
@@ -1720,7 +1725,7 @@
   <div class="divider"></div>
   <p>Proyecto presentado al Servicio Nacional de Aprendizaje<br/>Programa de Cosmetología y Estética Integral</p>
   <br/>
-  <p class="gold">SENA · Colombia · 2025</p>
+  <p class="gold">SENA · Colombia · 2026</p>
 </footer>
 
 <script>
@@ -2548,7 +2553,7 @@ function renderAdminCalendario(){
     <strong>${dias[0].toLocaleDateString('es-CO')} – ${dias[6].toLocaleDateString('es-CO')}</strong>
     <select class="admin-select" id="calFiltroEsp" onchange="renderAdminCalendario()"><option value="0">Todas las especialistas</option>${adminEspecialistas.map(e=>`<option value="${e.id}" ${filtro===e.id?'selected':''}>${escaparHTML(e.nombre)}</option>`).join('')}</select></div>
     <div class="admin-table-wrap"><div class="calendar-week">${dias.map(d=>{const iso=d.toISOString().slice(0,10),eventos=adminCitas.filter(c=>String(c.fecha).slice(0,10)===iso&&(!filtro||c.especialista_id===filtro));
-      return `<section class="calendar-day"><h6>${d.toLocaleDateString('es-CO',{weekday:'short',day:'2-digit',month:'short'})}</h6>${eventos.sort((a,b)=>String(a.hora).localeCompare(String(b.hora))).map(c=>`<div class="calendar-event ${escaparHTML(c.estado)}"><strong>${String(c.hora).slice(0,5)} · ${escaparHTML(c.cliente)}</strong><br>${escaparHTML(c.servicio||'Servicio')}<br>${escaparHTML(c.especialista)}<br><small>${escaparHTML(c.estado)}</small></div>`).join('')||'<small style="color:#8F7481">Sin citas</small>'}</section>`;}).join('')}</div></div>`;
+      return `<section class="calendar-day"><h6>${d.toLocaleDateString('es-CO',{weekday:'short',day:'2-digit',month:'short'})}</h6>${eventos.sort((a,b)=>String(a.hora).localeCompare(String(b.hora))).map(c=>`<div class="calendar-event ${escaparHTML(c.estado)}"><strong>${String(c.hora).slice(0,5)} · ${escaparHTML(c.cliente)}</strong><br>${escaparHTML(c.servicio||'Servicio')}<br>${escaparHTML(c.especialista)}<br><small>${escaparHTML(c.estado)}</small></div>`).join('')||'<small style="color:#9B8877">Sin citas</small>'}</section>`;}).join('')}</div></div>`;
 }
 function moverSemana(delta,hoy=false){agendaSemanaOffset=hoy?0:agendaSemanaOffset+delta;renderAdminCalendario();}
 function renderAdminPrivacidad(){document.getElementById('adminContenido').innerHTML=`<h5 class="admin-section-title">Solicitudes de datos personales</h5>

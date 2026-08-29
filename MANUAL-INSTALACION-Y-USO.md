@@ -159,6 +159,16 @@ CORS_ORIGINS=https://citas.sudominio.com
 TRUST_PROXY=1
 ```
 
+La instalación productiva vigente utiliza:
+
+```env
+FRONTEND_URL=https://maquillaje.dev-fmv.duckdns.org
+CORS_ORIGINS=https://maquillaje.dev-fmv.duckdns.org
+TRUST_PROXY=1
+```
+
+No publique esta aplicación dentro de un subdirectorio sin adaptar también las rutas absolutas `/api`, `/manifest.webmanifest`, `/icon.svg` y `/sw.js`. En el servidor FMV, la ruta histórica `/maquillaje/` redirige al subdominio para mantener un único origen y evitar fallos del catálogo.
+
 ## 7. Configuración de SMTP
 
 SMTP envía confirmaciones, recordatorios, cancelaciones y recuperación de contraseña:
@@ -335,6 +345,14 @@ No exponga PostgreSQL 5432, Redis 6379, API 4000, Grafana ni Prometheus.
 HTTP mediante IP pública debe limitarse a demostraciones sin datos reales.
 
 ## 13. Dominio y HTTPS
+
+La dirección productiva validada es `https://maquillaje.dev-fmv.duckdns.org`. Compruebe después de cada despliegue:
+
+```bash
+curl -fsS https://maquillaje.dev-fmv.duckdns.org/health
+curl -fsS https://maquillaje.dev-fmv.duckdns.org/api/tipos
+curl -fsS https://maquillaje.dev-fmv.duckdns.org/api/especialistas
+```
 
 Al comprar el dominio, cree en el proveedor DNS:
 
