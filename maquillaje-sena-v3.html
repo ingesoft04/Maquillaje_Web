@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>El Arte del Maquillaje | Proyecto SENA</title>
   <meta name="theme-color" content="#3C291F"/>
-  <link rel="manifest" href="/manifest.webmanifest"/>
-  <link rel="icon" href="/icon.svg" type="image/svg+xml"/>
+  <link rel="manifest" href="./manifest.webmanifest"/>
+  <link rel="icon" href="./icon.svg" type="image/svg+xml"/>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
@@ -1067,8 +1067,8 @@
 <a class="skip-link" href="#historia">Saltar al contenido</a>
 
 <div class="citas-topbar">
-  <a class="citas-brand" href="/">Arte & <em>Belleza</em></a>
-  <a class="citas-back" href="/">← Volver a la página principal</a>
+  <a class="citas-brand" href="./">Arte & <em>Belleza</em></a>
+  <a class="citas-back" href="./">← Volver a la página principal</a>
 </div>
 
 <!-- HEADER -->
@@ -1085,7 +1085,7 @@
     <p class="hero-kicker">Descubre técnicas profesionales, encuentra inspiración y agenda una experiencia pensada para realzar tu estilo.</p>
     <div class="hero-actions">
       <a class="hero-btn" href="#galeria">Explorar looks</a>
-      <a class="hero-btn secondary" href="/citas">Agendar una cita</a>
+      <a class="hero-btn secondary" href="./citas">Agendar una cita</a>
     </div>
     <div class="hero-proof" aria-label="Características del servicio">
       <span>Técnicas profesionales</span>
@@ -1104,7 +1104,7 @@
   <a href="#tecnicas">Técnicas</a>
   <a href="#cuidado">Cuidado</a>
   <a href="#tendencias">Tendencias</a>
-  <a href="#galeria">🖼 Galería</a><a href="/citas" style="color:var(--rose); font-weight:500;">📅 Citas</a>
+  <a href="#galeria">🖼 Galería</a><a href="./citas" style="color:var(--rose); font-weight:500;">📅 Citas</a>
 </nav>
 
 <!-- HISTORIA -->
@@ -1771,7 +1771,7 @@ const navObserver = new IntersectionObserver((entries) => {
 navSections.forEach(section => navObserver.observe(section));
 
 // ── API Y ESTADO GLOBAL ──
-const API = '/api';
+const API = new URL('./api', location.href).pathname.replace(/\/$/, '');
 let token = '';
 let usuarioActual = null;
 let todasLasCitas = [];
@@ -2461,7 +2461,7 @@ function renderAdminAnalitica(){
 }
 function renderAdminReportes(){const r=adminReportes||{finanzas:[],especialistas:[],horas:[]};document.getElementById('adminContenido').innerHTML=`
   <div class="calendar-toolbar"><h5 class="admin-section-title">Reportes gerenciales</h5><div>
-  ${['finanzas','servicios','especialistas','clientes','inventario'].map(x=>`<a class="admin-tab" href="/api/admin/reportes/${x}.csv" onclick="descargarReporte(event,'${x}')">CSV ${x}</a>`).join(' ')}</div></div>
+  ${['finanzas','servicios','especialistas','clientes','inventario'].map(x=>`<a class="admin-tab" href="./api/admin/reportes/${x}.csv" onclick="descargarReporte(event,'${x}')">CSV ${x}</a>`).join(' ')}</div></div>
   <h5 class="admin-section-title">Finanzas mensuales</h5><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Mes</th><th>Citas</th><th>Agendado</th><th>Cobrado</th><th>Pendiente</th><th>Canceladas</th><th>Inasistencias</th></tr></thead>
   <tbody>${r.finanzas.map(x=>`<tr><td>${x.mes}</td><td>${x.citas}</td><td>$${Number(x.agendado).toLocaleString('es-CO')}</td><td>$${Number(x.cobrado).toLocaleString('es-CO')}</td><td>$${Number(x.pendiente).toLocaleString('es-CO')}</td><td>${x.canceladas}</td><td>${x.inasistencias}</td></tr>`).join('')}</tbody></table></div>
   <h5 class="admin-section-title">Productividad y satisfacción</h5><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Especialista</th><th>Citas</th><th>Completadas</th><th>Valor</th><th>Satisfacción</th></tr></thead>
@@ -2825,7 +2825,11 @@ document.addEventListener('DOMContentLoaded', async function() {
 });
 
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
+  window.addEventListener('load', () => {
+    const rutaServiceWorker = new URL('./sw.js', location.href).pathname;
+    const alcance = new URL('./', location.href).pathname;
+    navigator.serviceWorker.register(rutaServiceWorker, { scope: alcance }).catch(() => {});
+  });
 }
 </script>
 </body>

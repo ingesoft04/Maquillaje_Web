@@ -4,7 +4,7 @@
 
 > Documentación académica: consulta el [Manual técnico del proyecto](MANUAL-PROYECTO-SENA.md) para entender la arquitectura, Docker, base de datos, seguridad, endpoints y el guion de sustentación.
 
-**Producción:** [https://maquillaje.dev-fmv.duckdns.org](https://maquillaje.dev-fmv.duckdns.org). La dirección histórica `https://dev-fmv.duckdns.org/maquillaje/` redirige al dominio principal para conservar las rutas de la API, el manifiesto y el service worker bajo el mismo origen.
+**Producción:** [https://dev-fmv.duckdns.org/maquillaje/](https://dev-fmv.duckdns.org/maquillaje/). La aplicación conserva este dominio y funciona bajo el prefijo `/maquillaje`, incluidas la API, el manifiesto y el service worker.
 
 Backend completo para el proyecto **Arte & Belleza SENA**, construido con:
 

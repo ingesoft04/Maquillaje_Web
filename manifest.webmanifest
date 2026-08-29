@@ -2,13 +2,13 @@
   "name": "Arte & Belleza SENA",
   "short_name": "Arte & Belleza",
   "description": "Agenda y gestión profesional de servicios de maquillaje",
-  "start_url": "/",
-  "scope": "/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#FBF5E9",
   "theme_color": "#3C291F",
   "lang": "es-CO",
   "icons": [
-    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
   ]
 }

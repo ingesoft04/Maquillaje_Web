@@ -159,15 +159,15 @@ CORS_ORIGINS=https://citas.sudominio.com
 TRUST_PROXY=1
 ```
 
-La instalación productiva vigente utiliza:
+La instalación productiva vigente utiliza la dirección `https://dev-fmv.duckdns.org/maquillaje/`. En el contenedor de la API, el origen autorizado corresponde al dominio externo completo configurado por el servidor.
 
 ```env
-FRONTEND_URL=https://maquillaje.dev-fmv.duckdns.org
-CORS_ORIGINS=https://maquillaje.dev-fmv.duckdns.org
+FRONTEND_URL=https://dev-fmv.duckdns.org/maquillaje
+CORS_ORIGINS=https://dev-fmv.duckdns.org
 TRUST_PROXY=1
 ```
 
-No publique esta aplicación dentro de un subdirectorio sin adaptar también las rutas absolutas `/api`, `/manifest.webmanifest`, `/icon.svg` y `/sw.js`. En el servidor FMV, la ruta histórica `/maquillaje/` redirige al subdominio para mantener un único origen y evitar fallos del catálogo.
+El frontend resuelve automáticamente `/maquillaje/api`, manifiesto, icono, navegación y service worker cuando se publica bajo ese prefijo. En una instalación local continúa utilizando `/api` desde la raíz.
 
 ## 7. Configuración de SMTP
 
@@ -346,12 +346,12 @@ HTTP mediante IP pública debe limitarse a demostraciones sin datos reales.
 
 ## 13. Dominio y HTTPS
 
-La dirección productiva validada es `https://maquillaje.dev-fmv.duckdns.org`. Compruebe después de cada despliegue:
+La dirección productiva validada es `https://dev-fmv.duckdns.org/maquillaje/`. Compruebe después de cada despliegue:
 
 ```bash
-curl -fsS https://maquillaje.dev-fmv.duckdns.org/health
-curl -fsS https://maquillaje.dev-fmv.duckdns.org/api/tipos
-curl -fsS https://maquillaje.dev-fmv.duckdns.org/api/especialistas
+curl -fsS https://dev-fmv.duckdns.org/maquillaje/health
+curl -fsS https://dev-fmv.duckdns.org/maquillaje/api/tipos
+curl -fsS https://dev-fmv.duckdns.org/maquillaje/api/especialistas
 ```
 
 Al comprar el dominio, cree en el proveedor DNS:

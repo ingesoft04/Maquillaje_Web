@@ -44,3 +44,11 @@ test('catálogo de reservas es público y muestra precio y duración antes del a
   assert.match(html, /Number\(item\.precio\|\|0\).*COP/);
   assert.match(html, /duracion_minutos/);
 });
+
+test('frontend conserva rutas locales y admite publicación bajo /maquillaje', () => {
+  assert.match(html, /const API = new URL\('\.\/api', location\.href\)/);
+  assert.match(html, /href="\.\/manifest\.webmanifest"/);
+  assert.match(html, /href="\.\/citas"/);
+  assert.match(html, /new URL\('\.\/sw\.js', location\.href\)/);
+  assert.doesNotMatch(html, /const API = '\/api'/);
+});
