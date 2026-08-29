@@ -61,9 +61,9 @@ test('archivo abierto directamente redirige al dominio productivo y conserva la 
 
 test('catálogo se muestra en inicio y conserva el servicio al abrir citas', () => {
   const catalogoInicio = html.indexOf('id="catalogoInicioServicios"');
+  const historia = html.indexOf('id="historia"');
   const tipos = html.indexOf('id="tipos"');
-  const productos = html.indexOf('id="productos"');
-  assert.ok(catalogoInicio > tipos && catalogoInicio < productos);
+  assert.ok(catalogoInicio > historia && catalogoInicio < tipos);
   assert.match(html, /\['catalogoInicioServicios','catalogoInicioEspecialistas'\]/);
   assert.match(html, /sena_servicio_pendiente_id/);
   assert.match(html, /new URL\('\.\/citas',location\.href\)\.pathname/);
