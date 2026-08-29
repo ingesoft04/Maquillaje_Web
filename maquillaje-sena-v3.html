@@ -4,6 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>El Arte del Maquillaje | Proyecto SENA</title>
+  <script>
+    if (window.location.protocol === 'file:') {
+      window.location.replace(`https://dev-fmv.duckdns.org/maquillaje/${window.location.hash}`);
+    }
+  </script>
   <meta name="theme-color" content="#3C291F"/>
   <link rel="manifest" href="./manifest.webmanifest"/>
   <link rel="icon" href="./icon.svg" type="image/svg+xml"/>

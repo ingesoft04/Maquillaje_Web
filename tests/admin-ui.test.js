@@ -53,6 +53,12 @@ test('frontend conserva rutas locales y admite publicación bajo /maquillaje', (
   assert.doesNotMatch(html, /const API = '\/api'/);
 });
 
+test('archivo abierto directamente redirige al dominio productivo y conserva la sección', () => {
+  assert.match(html, /window\.location\.protocol === 'file:'/);
+  assert.match(html, /https:\/\/dev-fmv\.duckdns\.org\/maquillaje\/\$\{window\.location\.hash\}/);
+  assert.ok(html.indexOf("window.location.protocol === 'file:'") < html.indexOf('<link rel="manifest"'));
+});
+
 test('catálogo se muestra en inicio y conserva el servicio al abrir citas', () => {
   const catalogoInicio = html.indexOf('id="catalogoInicioServicios"');
   const tipos = html.indexOf('id="tipos"');

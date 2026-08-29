@@ -161,6 +161,8 @@ TRUST_PROXY=1
 
 La instalación productiva vigente utiliza la dirección `https://dev-fmv.duckdns.org/maquillaje/`. En el contenedor de la API, el origen autorizado corresponde al dominio externo completo configurado por el servidor.
 
+No use el archivo HTML con una dirección `file://` para operar el sistema: necesita la API, PostgreSQL y Redis. Si alguien abre `maquillaje-sena-v3.html` directamente, la página lo redirige automáticamente al dominio productivo y conserva la sección solicitada, por ejemplo `#catalogo`.
+
 ```env
 FRONTEND_URL=https://dev-fmv.duckdns.org/maquillaje
 CORS_ORIGINS=https://dev-fmv.duckdns.org
