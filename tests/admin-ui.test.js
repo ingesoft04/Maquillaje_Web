@@ -52,3 +52,17 @@ test('frontend conserva rutas locales y admite publicación bajo /maquillaje', (
   assert.match(html, /new URL\('\.\/sw\.js', location\.href\)/);
   assert.doesNotMatch(html, /const API = '\/api'/);
 });
+
+test('catálogo se muestra en inicio y conserva el servicio al abrir citas', () => {
+  const catalogoInicio = html.indexOf('id="catalogoInicioServicios"');
+  const historia = html.indexOf('id="historia"');
+  assert.ok(catalogoInicio > -1 && catalogoInicio < historia);
+  assert.match(html, /\['catalogoInicioServicios','catalogoInicioEspecialistas'\]/);
+  assert.match(html, /sena_servicio_pendiente_id/);
+  assert.match(html, /new URL\('\.\/citas',location\.href\)\.pathname/);
+  assert.match(html, /endsWith\('\/citas'\)/);
+});
+
+test('identidad visual no utiliza verde institucional', () => {
+  assert.doesNotMatch(html, /#39A900|#276E00|var\(--sena/);
+});

@@ -21,8 +21,6 @@
       --gold:  #B99A62;
       --text:  #30251F;
       --muted: #79685D;
-      --sena:  #39A900;
-      --sena-dark: #276E00;
       --ivory: #FFF9F0;
       color-scheme: light;
     }
@@ -38,7 +36,7 @@
     }
 
     :focus-visible {
-      outline: 3px solid var(--sena);
+      outline: 3px solid var(--gold);
       outline-offset: 3px;
     }
     button, input, select, textarea, a { -webkit-tap-highlight-color: transparent; }
@@ -131,8 +129,8 @@
     }
     .hero-btn {
       display: inline-flex; align-items: center; justify-content: center; min-width: 170px;
-      padding: .9rem 1.35rem; border: 1px solid var(--sena-dark); color: #14200D;
-      background: var(--sena); text-decoration: none; text-transform: uppercase;
+      padding: .9rem 1.35rem; border: 1px solid var(--gold); color: var(--plum);
+      background: var(--gold); text-decoration: none; text-transform: uppercase;
       font-size: .68rem; font-weight: 500; letter-spacing: 2px;
       transition: transform .25s, background .25s, color .25s, box-shadow .25s;
     }
@@ -149,9 +147,9 @@
 
     .sena-badge {
       display: inline-block;
-      color: #14200D;
-      background: var(--sena);
-      border: 1px solid var(--sena-dark);
+      color: var(--gold);
+      background: rgba(185,154,98,.08);
+      border: 1px solid var(--gold);
       border-radius: 999px;
       font-family: 'Work Sans', sans-serif;
       font-weight: 500;
@@ -531,6 +529,20 @@
     .public-specialist { padding:.5rem .75rem; border:1px solid #684735; color:#E0D1BF; font-size:.7rem; background:#38261D; }
     .catalog-loading { color:#9B8877; padding:1.5rem; border:1px dashed #684735; text-align:center; }
 
+    .home-catalog { max-width:100%; padding:5.5rem 2rem; background:var(--ivory); }
+    .home-catalog-inner { max-width:1100px; margin:0 auto; }
+    .home-catalog-intro { display:flex; justify-content:space-between; align-items:end; gap:2rem; margin-bottom:2.2rem; }
+    .home-catalog-intro .lead { max-width:560px; margin:0; }
+    .home-catalog .public-service-grid { grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:1rem; }
+    .home-catalog .public-service-card { min-height:260px; padding:1.5rem; background:var(--cream); border-color:#DFC6A7; box-shadow:0 14px 35px rgba(60,41,31,.07); }
+    .home-catalog .public-service-card:hover { border-color:var(--rose); box-shadow:0 18px 45px rgba(60,41,31,.13); }
+    .home-catalog .public-service-card h4 { color:var(--plum); font-size:1.35rem; }
+    .home-catalog .public-service-card p { color:var(--muted); font-size:.78rem; }
+    .home-catalog .public-service-meta { color:var(--deep); }
+    .home-catalog .public-service-card button { background:var(--plum); border-color:var(--plum); color:var(--cream); font-weight:600; }
+    .home-catalog .public-service-card button:hover { background:var(--deep); }
+    .home-catalog .public-specialist { background:var(--cream); color:var(--deep); border-color:#DFC6A7; }
+
     /* Auth tabs */
     .auth-tabs {
       display: flex; gap: 0;
@@ -816,6 +828,7 @@
       .profile-grid { grid-template-columns:1fr; }
       .payment-choice-grid { grid-template-columns:1fr; }
       .public-catalog-heading { align-items:start; flex-direction:column; }
+      .home-catalog-intro { align-items:start; flex-direction:column; }
       .admin-navigation { padding:.75rem; }
       .admin-nav-group { display:none; }
       .admin-mobile-select { display:block; }
@@ -1058,7 +1071,7 @@
 </head>
 <body>
 <script>
-  if (window.location.pathname.replace(/\/$/, '') === '/citas') {
+  if (window.location.pathname.replace(/\/$/, '').endsWith('/citas')) {
     document.body.classList.add('citas-view');
     document.title = 'Agenda y administración | Arte & Belleza SENA';
   }
@@ -1099,6 +1112,7 @@
 <!-- NAV -->
 <nav aria-label="Navegación principal">
   <a href="#historia">Historia</a>
+  <a href="#catalogo">Catálogo</a>
   <a href="#tipos">Tipos</a>
   <a href="#productos">Productos</a>
   <a href="#tecnicas">Técnicas</a>
@@ -1106,6 +1120,18 @@
   <a href="#tendencias">Tendencias</a>
   <a href="#galeria">🖼 Galería</a><a href="./citas" style="color:var(--rose); font-weight:500;">📅 Citas</a>
 </nav>
+
+<!-- CATÁLOGO PRINCIPAL -->
+<section class="home-catalog" id="catalogo" aria-labelledby="catalogoInicioTitulo">
+  <div class="home-catalog-inner">
+    <div class="home-catalog-intro">
+      <div><p class="section-label">Servicios profesionales</p><h2 id="catalogoInicioTitulo">Elige tu <em>experiencia</em></h2></div>
+      <p class="lead">Consulta precios y duración desde la página principal. Al elegir un servicio pasarás directamente a crear tu cita con la opción seleccionada.</p>
+    </div>
+    <div id="catalogoInicioServicios" class="catalog-loading" aria-live="polite">Cargando servicios…</div>
+    <div id="catalogoInicioEspecialistas" class="public-specialists" aria-label="Especialistas disponibles"></div>
+  </div>
+</section>
 
 <!-- HISTORIA -->
 <section id="historia">
@@ -1849,22 +1875,35 @@ async function cargarCatalogos() {
 }
 
 function renderCatalogoPublico(servicios,especialistas){
-  const cont=document.getElementById('catalogoPublicoServicios');
-  const equipo=document.getElementById('catalogoPublicoEspecialistas');
-  if(!cont||!equipo)return;
-  cont.className='public-service-grid';
-  cont.innerHTML=servicios.length?servicios.map(item=>`<article class="public-service-card">
+  const tarjetas=servicios.length?servicios.map(item=>`<article class="public-service-card">
     <span class="public-service-icon" aria-hidden="true">${escaparHTML(item.icon||'💄')}</span>
     <h4>${escaparHTML(item.nombre)}</h4><p>${escaparHTML(item.descripcion||'Servicio profesional de maquillaje.')}</p>
     <div class="public-service-meta"><strong>$${Number(item.precio||0).toLocaleString('es-CO')} COP</strong><span>${Number(item.duracion_minutos||60)} min</span></div>
-    <button type="button" onclick="seleccionarServicioPublico('${item.id}')">Elegir para reservar</button></article>`).join(''):'<p class="catalog-loading">No hay servicios publicados.</p>';
-  equipo.innerHTML=especialistas.length?'<span class="admin-nav-label">Especialistas</span>'+especialistas.map(item=>`<span class="public-specialist">👩‍🎨 ${escaparHTML(item.nombre)}</span>`).join(''):'';
+    <button type="button" onclick="seleccionarServicioPublico('${item.id}')">Elegir y reservar</button></article>`).join(''):'<p class="catalog-loading">No hay servicios publicados.</p>';
+  const profesionales=especialistas.length?'<span class="admin-nav-label">Especialistas</span>'+especialistas.map(item=>`<span class="public-specialist">👩‍🎨 ${escaparHTML(item.nombre)}</span>`).join(''):'';
+  [
+    ['catalogoInicioServicios','catalogoInicioEspecialistas'],
+    ['catalogoPublicoServicios','catalogoPublicoEspecialistas']
+  ].forEach(([serviciosId,equipoId])=>{
+    const cont=document.getElementById(serviciosId);
+    const equipo=document.getElementById(equipoId);
+    if(!cont||!equipo)return;
+    cont.className='public-service-grid';
+    cont.innerHTML=tarjetas;
+    equipo.innerHTML=profesionales;
+  });
 }
 
 function seleccionarServicioPublico(id){
+  sessionStorage.setItem('sena_servicio_pendiente_id',String(id));
+  if(!document.body.classList.contains('citas-view')){
+    window.location.href=new URL('./citas',location.href).pathname;
+    return;
+  }
   const selector=document.getElementById('cita-servicio');
   selector.value=String(id);
   actualizarResumenPago();
+  sessionStorage.removeItem('sena_servicio_pendiente_id');
   document.getElementById('authTabs').scrollIntoView({behavior:'smooth',block:'center'});
   mostrarToast('Servicio seleccionado. Regístrate o inicia sesión para reservar.','info');
 }
@@ -2775,8 +2814,10 @@ function cerrarLook() {
 
 function reservarDesdeGaleria() {
   cerrarLook();
-  sessionStorage.setItem('sena_servicio_pendiente', lookServicioActual);
-  window.location.href = '/citas';
+  const servicio=catalogoServicios.find(item=>item.nombre===lookServicioActual);
+  if(servicio){seleccionarServicioPublico(servicio.id);return;}
+  sessionStorage.setItem('sena_servicio_pendiente',lookServicioActual);
+  window.location.href=new URL('./citas',location.href).pathname;
 }
 
 // Cerrar modal al hacer click afuera
@@ -2803,8 +2844,14 @@ document.addEventListener('DOMContentLoaded', async function() {
   document.getElementById('cita-servicio').addEventListener('change', actualizarResumenPago);
   document.getElementById('cita-fecha').addEventListener('change', actualizarDisponibilidad);
 
-  const servicioPendiente = sessionStorage.getItem('sena_servicio_pendiente');
-  if (servicioPendiente) {
+  const servicioPendienteId=sessionStorage.getItem('sena_servicio_pendiente_id');
+  const servicioPendiente=sessionStorage.getItem('sena_servicio_pendiente');
+  if(servicioPendienteId){
+    const selector=document.getElementById('cita-servicio');
+    selector.value=servicioPendienteId;
+    actualizarResumenPago();
+    sessionStorage.removeItem('sena_servicio_pendiente_id');
+  }else if (servicioPendiente) {
     const selector = document.getElementById('cita-servicio');
     for (let i = 0; i < selector.options.length; i++) {
       if (selector.options[i].text === servicioPendiente) {

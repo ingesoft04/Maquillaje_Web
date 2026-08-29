@@ -220,7 +220,7 @@ El anticipo es no reembolsable y queda retenido al cancelar.
 
 ### Valores y modalidades de pago
 
-El catálogo de servicios es público en `/citas`: cualquier visitante puede consultar nombre, descripción, precio, duración y especialistas antes de crear una cuenta. La autenticación se solicita únicamente cuando la persona decide completar la reserva.
+El catálogo de servicios aparece de forma destacada en la página principal: cualquier visitante puede consultar nombre, descripción, precio, duración y especialistas antes de crear una cuenta. Al pulsar **Elegir y reservar**, la plataforma abre `/citas` y conserva el servicio seleccionado para continuar con el registro o inicio de sesión. El catálogo también permanece visible en la pantalla de citas.
 
 Los registros creados por las pruebas automáticas se identifican como datos técnicos y no aparecen en los catálogos públicos ni en los listados administrativos de operación. Esto evita duplicados sin borrar información de pruebas necesaria para la validación.
 
