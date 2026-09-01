@@ -81,7 +81,7 @@
     /* ── HEADER ── */
     header {
       position: relative;
-      min-height: 72svh;
+      min-height: 64svh;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -609,7 +609,7 @@
     .public-specialist { padding:.5rem .75rem; border:1px solid #684735; color:#E0D1BF; font-size:.7rem; background:#38261D; }
     .catalog-loading { color:#9B8877; padding:1.5rem; border:1px dashed #684735; text-align:center; }
 
-    .home-catalog { max-width:100%; padding:5.5rem 2rem; background:var(--ivory); }
+    .home-catalog { max-width:100%; padding:4rem 2rem; background:var(--ivory); }
     .home-catalog-inner { max-width:1100px; margin:0 auto; }
     .home-catalog-intro { display:flex; justify-content:space-between; align-items:end; gap:2rem; margin-bottom:2.2rem; }
     .home-catalog-intro .lead { max-width:560px; margin:0; }
@@ -655,12 +655,12 @@
 
     .learning-hub {
       max-width: 100%;
-      padding: 3.5rem 2rem;
+      padding: 2.75rem 2rem;
       background: var(--plum);
     }
     .learning-hub-inner { max-width: 1100px; margin: 0 auto; }
     .learning-hub-heading { text-align: center; }
-    .learning-hub-heading h2 { color: var(--cream); margin-bottom: .75rem; }
+    .learning-hub-heading h2 { color: var(--cream); margin-bottom: .5rem; font-size: clamp(1.8rem, 4vw, 2.6rem); }
     .learning-hub-heading .lead { margin: 0 auto 1.5rem; color: #CDBAA4; }
     .learning-hub .progressive-action { border-color: var(--blush); color: var(--blush); }
     .learning-hub .progressive-action:hover { background: var(--blush); color: var(--plum); }
@@ -941,7 +941,7 @@
       #historia { grid-template-columns: 1fr; }
       .historia-visual { height: 300px; order: -1; }
       .cuidado-split { grid-template-columns: 1fr; }
-      header { min-height: 78svh; }
+      header { min-height: 68svh; }
       header .content { padding: 1.5rem; }
       .hero-proof { flex-wrap: wrap; row-gap: .7rem; }
       .hero-proof span { padding: 0 .65rem; }
@@ -1241,9 +1241,8 @@
 
 <!-- NAV -->
 <nav aria-label="Navegación principal">
-  <a href="#presentacion">Inicio</a>
-  <a href="#catalogo">Catálogo</a>
-  <a href="#galeria">🖼 Galería</a>
+  <a href="#catalogo">Servicios</a>
+  <a href="#aprende">Ver más</a>
   <a href="./citas" style="color:var(--rose); font-weight:500;">📅 Citas</a>
 </nav>
 
@@ -1297,10 +1296,10 @@
 <section class="learning-hub" id="aprende" aria-labelledby="aprendeTitulo">
   <div class="learning-hub-inner">
     <div class="learning-hub-heading">
-      <p class="section-label">Detrás del proyecto</p>
-      <h2 id="aprendeTitulo">Conoce un poco <em>más</em></h2>
-      <p class="lead">La historia del proyecto y el contenido de aprendizaje están guardados aquí para quien quiera profundizar.</p>
-      <button class="progressive-action" id="learningHubToggle" type="button" aria-expanded="false" aria-controls="learningHubContent">Ver historia y contenido</button>
+      <p class="section-label">Contenido opcional</p>
+      <h2 id="aprendeTitulo">Solo si quieres <em>ver más</em></h2>
+      <p class="lead">Aquí puedes abrir la historia, las ideas de looks y las guías.</p>
+      <button class="progressive-action" id="learningHubToggle" type="button" aria-expanded="false" aria-controls="learningHubContent">Ver más</button>
     </div>
     <div class="learning-hub-content" id="learningHubContent" hidden></div>
   </div>
@@ -1952,12 +1951,16 @@ learningSections.forEach(([id, title, label]) => {
 });
 
 const learningHubContent = document.getElementById('learningHubContent');
+const presentationSection = document.getElementById('presentacion');
 const historySection = document.getElementById('historia');
+if (presentationSection && learningHubContent) learningHubContent.appendChild(presentationSection);
 if (historySection && learningHubContent) learningHubContent.appendChild(historySection);
 learningSections.forEach(([id]) => {
   const section = document.getElementById(id);
   if (section && learningHubContent) learningHubContent.appendChild(section);
 });
+const gallerySection = document.getElementById('galeria');
+if (gallerySection && learningHubContent) learningHubContent.appendChild(gallerySection);
 
 function configureProgressiveToggle(buttonId, target, collapsedClass, closedLabel, openLabel) {
   const button = document.getElementById(buttonId);
@@ -1990,7 +1993,7 @@ function setLearningHub(expanded) {
   if (!learningHubToggle || !learningHubContent) return;
   learningHubToggle.setAttribute('aria-expanded', String(expanded));
   learningHubContent.hidden = !expanded;
-  learningHubToggle.textContent = expanded ? 'Ocultar historia y contenido' : 'Ver historia y contenido';
+  learningHubToggle.textContent = expanded ? 'Mostrar menos' : 'Ver más';
 }
 learningHubToggle?.addEventListener('click', () => setLearningHub(learningHubToggle.getAttribute('aria-expanded') !== 'true'));
 
