@@ -81,7 +81,7 @@
     /* ── HEADER ── */
     header {
       position: relative;
-      min-height: 100vh;
+      min-height: 78svh;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -622,6 +622,43 @@
     .home-catalog .public-service-card button { background:var(--plum); border-color:var(--plum); color:var(--cream); font-weight:600; }
     .home-catalog .public-service-card button:hover { background:var(--deep); }
     .home-catalog .public-specialist { background:var(--cream); color:var(--deep); border-color:#DFC6A7; }
+    .progressive-action {
+      display: flex;
+      width: fit-content;
+      min-width: 190px;
+      margin: 1.75rem auto 0;
+      padding: .8rem 1.2rem;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--deep);
+      background: transparent;
+      color: var(--deep);
+      cursor: pointer;
+      font-size: .68rem;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      transition: background .25s, color .25s;
+    }
+    .progressive-action:hover { background: var(--deep); color: var(--cream); }
+    .home-catalog.is-contained .public-service-card:nth-child(n+5) { display: none; }
+
+    .learning-hub {
+      max-width: 100%;
+      padding: 3.5rem 2rem;
+      background: var(--plum);
+    }
+    .learning-hub-inner { max-width: 1100px; margin: 0 auto; }
+    .learning-hub-heading { text-align: center; }
+    .learning-hub-heading h2 { color: var(--cream); margin-bottom: .75rem; }
+    .learning-hub-heading .lead { margin: 0 auto 1.5rem; color: #CDBAA4; }
+    .learning-hub .progressive-action { border-color: var(--blush); color: var(--blush); }
+    .learning-hub .progressive-action:hover { background: var(--blush); color: var(--plum); }
+    .learning-hub-content { margin-top: 2rem; }
+    .learning-hub-content[hidden] { display: none !important; }
+    .learning-hub-content .learning-collapsible { margin-top: 1px; }
+
+    .gallery-grid.is-contained .galeria-card:nth-child(n+4) { display: none; }
 
     /* Auth tabs */
     .auth-tabs {
@@ -894,7 +931,7 @@
       #historia { grid-template-columns: 1fr; }
       .historia-visual { height: 300px; order: -1; }
       .cuidado-split { grid-template-columns: 1fr; }
-      header { min-height: 92svh; }
+      header { min-height: 82svh; }
       header .content { padding: 1.5rem; }
       .hero-proof { flex-wrap: wrap; row-gap: .7rem; }
       .hero-proof span { padding: 0 .65rem; }
@@ -909,6 +946,7 @@
       .payment-choice-grid { grid-template-columns:1fr; }
       .public-catalog-heading { align-items:start; flex-direction:column; }
       .home-catalog-intro { align-items:start; flex-direction:column; }
+      .home-catalog.is-contained .public-service-card:nth-child(n+4) { display: none; }
       .admin-navigation { padding:.75rem; }
       .admin-nav-group { display:none; }
       .admin-mobile-select { display:block; }
@@ -923,6 +961,9 @@
       .hero-btn { width: 100%; }
       .hero-proof span { font-size: .57rem; }
       section { padding: 4rem 1.15rem; }
+      #historia { gap: 2rem; }
+      .historia-visual { height: 240px; }
+      .learning-hub { padding: 3rem 1.15rem; }
       .agendar-grid, .admin-form-grid, .admin-stats { grid-template-columns: 1fr; }
       .stats-row { display:grid; grid-template-columns:1fr 1fr; }
       .cita-card { align-items:flex-start; flex-wrap:wrap; gap:.65rem; }
@@ -1193,7 +1234,7 @@
 <nav aria-label="Navegación principal">
   <a href="#historia">Historia</a>
   <a href="#catalogo">Catálogo</a>
-  <a href="#tipos">Aprende</a>
+  <a href="#aprende">Aprende</a>
   <a href="#galeria">🖼 Galería</a>
   <a href="./citas" style="color:var(--rose); font-weight:500;">📅 Citas</a>
 </nav>
@@ -1224,7 +1265,7 @@
 </section>
 
 <!-- CATÁLOGO PRINCIPAL -->
-<section class="home-catalog" id="catalogo" aria-labelledby="catalogoInicioTitulo">
+<section class="home-catalog is-contained" id="catalogo" aria-labelledby="catalogoInicioTitulo">
   <div class="home-catalog-inner">
     <div class="home-catalog-intro">
       <div><p class="section-label">Servicios profesionales</p><h2 id="catalogoInicioTitulo">Elige tu <em>experiencia</em></h2></div>
@@ -1232,6 +1273,20 @@
     </div>
     <div id="catalogoInicioServicios" class="catalog-loading" aria-live="polite">Cargando servicios…</div>
     <div id="catalogoInicioEspecialistas" class="public-specialists" aria-label="Especialistas disponibles"></div>
+    <button class="progressive-action" id="catalogoToggle" type="button" aria-expanded="false" aria-controls="catalogoInicioServicios">Ver catálogo completo</button>
+  </div>
+</section>
+
+<!-- CONTENIDO FORMATIVO PROGRESIVO -->
+<section class="learning-hub" id="aprende" aria-labelledby="aprendeTitulo">
+  <div class="learning-hub-inner">
+    <div class="learning-hub-heading">
+      <p class="section-label">Aprende a tu ritmo</p>
+      <h2 id="aprendeTitulo">Explora el <em>arte del maquillaje</em></h2>
+      <p class="lead">Tipos, productos, técnicas, cuidado y tendencias permanecen disponibles cuando quieras profundizar.</p>
+      <button class="progressive-action" id="learningHubToggle" type="button" aria-expanded="false" aria-controls="learningHubContent">Explorar contenido educativo</button>
+    </div>
+    <div class="learning-hub-content" id="learningHubContent" hidden></div>
   </div>
 </section>
 
@@ -1741,7 +1796,7 @@
     <h2>Inspírate con <em>nuestros estilos</em></h2>
     <p class="lead">Explora los looks más solicitados por nuestras clientas. Cada uno fue creado por nuestras especialistas con técnicas profesionales y productos de alta calidad.</p>
 
-    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:1.5rem; margin-top:3rem;">
+    <div class="gallery-grid is-contained" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:1.5rem; margin-top:3rem;">
 
       <div class="galeria-card" onclick="abrirLook('Smoky Eye Clásico','💋','Profundidad y drama con sombras oscuras difuminadas. Perfecto para eventos nocturnos y ocasiones especiales.','Maquillaje de Noche','#3C291F','#B88963')">
         <div class="galeria-preview" style="background:linear-gradient(135deg,#3C291F,#704A35);">
@@ -1810,6 +1865,7 @@
       </div>
 
     </div>
+    <button class="progressive-action" id="galleryToggle" type="button" aria-expanded="false">Ver todos los looks</button>
   </div>
 </div>
 
@@ -1879,8 +1935,52 @@ learningSections.forEach(([id, title, label]) => {
   setLearningSection(section, false);
 });
 
+const learningHubContent = document.getElementById('learningHubContent');
+learningSections.forEach(([id]) => {
+  const section = document.getElementById(id);
+  if (section && learningHubContent) learningHubContent.appendChild(section);
+});
+
+function configureProgressiveToggle(buttonId, target, collapsedClass, closedLabel, openLabel) {
+  const button = document.getElementById(buttonId);
+  if (!button || !target) return;
+  button.addEventListener('click', () => {
+    const willExpand = button.getAttribute('aria-expanded') !== 'true';
+    button.setAttribute('aria-expanded', String(willExpand));
+    target.classList.toggle(collapsedClass, !willExpand);
+    button.textContent = willExpand ? openLabel : closedLabel;
+  });
+}
+
+configureProgressiveToggle(
+  'catalogoToggle',
+  document.getElementById('catalogo'),
+  'is-contained',
+  'Ver catálogo completo',
+  'Mostrar menos servicios'
+);
+configureProgressiveToggle(
+  'galleryToggle',
+  document.querySelector('.gallery-grid'),
+  'is-contained',
+  'Ver todos los looks',
+  'Mostrar menos looks'
+);
+
+const learningHubToggle = document.getElementById('learningHubToggle');
+function setLearningHub(expanded) {
+  if (!learningHubToggle || !learningHubContent) return;
+  learningHubToggle.setAttribute('aria-expanded', String(expanded));
+  learningHubContent.hidden = !expanded;
+  learningHubToggle.textContent = expanded ? 'Ocultar contenido educativo' : 'Explorar contenido educativo';
+}
+learningHubToggle?.addEventListener('click', () => setLearningHub(learningHubToggle.getAttribute('aria-expanded') !== 'true'));
+
 const requestedSection = document.getElementById(location.hash.slice(1));
-if (requestedSection?.classList.contains('learning-collapsible')) setLearningSection(requestedSection, true);
+if (requestedSection?.classList.contains('learning-collapsible')) {
+  setLearningHub(true);
+  setLearningSection(requestedSection, true);
+}
 
 // ── SCROLL ANIMATIONS ──
 const observer = new IntersectionObserver((entries) => {

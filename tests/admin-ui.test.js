@@ -70,6 +70,17 @@ test('catálogo se muestra en inicio y conserva el servicio al abrir citas', () 
   assert.match(html, /endsWith\('\/citas'\)/);
 });
 
+test('portada contiene el contenido avanzado y permite expandirlo progresivamente', () => {
+  assert.match(html, /class="home-catalog is-contained"/);
+  assert.match(html, /id="catalogoToggle"[^>]*aria-expanded="false"/);
+  assert.match(html, /id="learningHubContent" hidden/);
+  assert.match(html, /id="learningHubToggle"[^>]*aria-expanded="false"/);
+  assert.match(html, /class="gallery-grid is-contained"/);
+  assert.match(html, /id="galleryToggle"[^>]*aria-expanded="false"/);
+  assert.match(html, /configureProgressiveToggle/);
+  assert.match(html, /setLearningHub/);
+});
+
 test('identidad visual no utiliza verde institucional', () => {
   assert.doesNotMatch(html, /#39A900|#276E00|var\(--sena/);
 });
