@@ -81,7 +81,7 @@
     /* ── HEADER ── */
     header {
       position: relative;
-      min-height: 78svh;
+      min-height: 72svh;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -622,6 +622,7 @@
     .home-catalog .public-service-card button { background:var(--plum); border-color:var(--plum); color:var(--cream); font-weight:600; }
     .home-catalog .public-service-card button:hover { background:var(--deep); }
     .home-catalog .public-specialist { background:var(--cream); color:var(--deep); border-color:#DFC6A7; }
+    .home-catalog .public-specialists { display: none; }
     .progressive-action {
       display: flex;
       width: fit-content;
@@ -641,7 +642,16 @@
       transition: background .25s, color .25s;
     }
     .progressive-action:hover { background: var(--deep); color: var(--cream); }
-    .home-catalog.is-contained .public-service-card:nth-child(n+5) { display: none; }
+    .home-catalog.is-contained .public-service-card:nth-child(n+3) { display: none; }
+
+    .micro-intro {
+      max-width: 760px;
+      padding-top: 4.5rem;
+      padding-bottom: 4.5rem;
+      text-align: center;
+    }
+    .micro-intro .lead { margin: 0 auto 1.5rem; }
+    .micro-intro .hero-btn { min-width: 210px; }
 
     .learning-hub {
       max-width: 100%;
@@ -658,7 +668,7 @@
     .learning-hub-content[hidden] { display: none !important; }
     .learning-hub-content .learning-collapsible { margin-top: 1px; }
 
-    .gallery-grid.is-contained .galeria-card:nth-child(n+4) { display: none; }
+    .gallery-grid.is-contained .galeria-card:nth-child(n+3) { display: none; }
 
     /* Auth tabs */
     .auth-tabs {
@@ -931,7 +941,7 @@
       #historia { grid-template-columns: 1fr; }
       .historia-visual { height: 300px; order: -1; }
       .cuidado-split { grid-template-columns: 1fr; }
-      header { min-height: 82svh; }
+      header { min-height: 78svh; }
       header .content { padding: 1.5rem; }
       .hero-proof { flex-wrap: wrap; row-gap: .7rem; }
       .hero-proof span { padding: 0 .65rem; }
@@ -946,7 +956,7 @@
       .payment-choice-grid { grid-template-columns:1fr; }
       .public-catalog-heading { align-items:start; flex-direction:column; }
       .home-catalog-intro { align-items:start; flex-direction:column; }
-      .home-catalog.is-contained .public-service-card:nth-child(n+4) { display: none; }
+      .home-catalog.is-contained .public-service-card:nth-child(n+3) { display: none; }
       .admin-navigation { padding:.75rem; }
       .admin-nav-group { display:none; }
       .admin-mobile-select { display:block; }
@@ -1215,16 +1225,15 @@
   <div class="content">
     <div class="sena-badge">Proyecto SENA · Arte y Belleza</div>
     <h1>El Arte del<em>Maquillaje</em></h1>
-    <p class="subtitle">Historia · Técnicas · Tendencias · Cuidado</p>
-    <p class="hero-kicker">Descubre técnicas profesionales, encuentra inspiración y agenda una experiencia pensada para realzar tu estilo.</p>
+    <p class="subtitle">Maquillaje para momentos especiales</p>
+    <p class="hero-kicker">Un espacio sencillo y cercano para encontrar tu look y reservar una cita.</p>
     <div class="hero-actions">
-      <a class="hero-btn" href="#galeria">Explorar looks</a>
-      <a class="hero-btn secondary" href="./citas">Agendar una cita</a>
+      <a class="hero-btn" href="#catalogo">Ver servicios</a>
+      <a class="hero-btn secondary" href="./citas">Reservar una cita</a>
     </div>
     <div class="hero-proof" aria-label="Características del servicio">
-      <span>Técnicas profesionales</span>
       <span>Atención personalizada</span>
-      <span>Belleza consciente</span>
+      <span>Citas con reserva</span>
     </div>
   </div>
   <div class="scroll-cue">Explorar</div>
@@ -1232,12 +1241,19 @@
 
 <!-- NAV -->
 <nav aria-label="Navegación principal">
-  <a href="#historia">Historia</a>
+  <a href="#presentacion">Inicio</a>
   <a href="#catalogo">Catálogo</a>
-  <a href="#aprende">Aprende</a>
   <a href="#galeria">🖼 Galería</a>
   <a href="./citas" style="color:var(--rose); font-weight:500;">📅 Citas</a>
 </nav>
+
+<!-- PRESENTACIÓN BREVE -->
+<section class="micro-intro" id="presentacion">
+  <p class="section-label">Un emprendimiento que empieza</p>
+  <h2>Maquillaje con atención <em>cercana</em></h2>
+  <p class="lead">Estoy construyendo este espacio paso a paso, cuidando cada cita y escuchando lo que cada persona necesita para sentirse cómoda con su look.</p>
+  <a class="hero-btn" href="./citas">Quiero reservar</a>
+</section>
 
 <!-- HISTORIA -->
 <section id="historia">
@@ -1268,8 +1284,8 @@
 <section class="home-catalog is-contained" id="catalogo" aria-labelledby="catalogoInicioTitulo">
   <div class="home-catalog-inner">
     <div class="home-catalog-intro">
-      <div><p class="section-label">Servicios profesionales</p><h2 id="catalogoInicioTitulo">Elige tu <em>experiencia</em></h2></div>
-      <p class="lead">Consulta precios y duración desde la página principal. Al elegir un servicio pasarás directamente a crear tu cita con la opción seleccionada.</p>
+      <div><p class="section-label">Servicios disponibles</p><h2 id="catalogoInicioTitulo">Elige tu <em>maquillaje</em></h2></div>
+      <p class="lead">Estas son dos opciones para comenzar. Puedes consultar el catálogo completo o elegir una para preparar tu cita.</p>
     </div>
     <div id="catalogoInicioServicios" class="catalog-loading" aria-live="polite">Cargando servicios…</div>
     <div id="catalogoInicioEspecialistas" class="public-specialists" aria-label="Especialistas disponibles"></div>
@@ -1281,10 +1297,10 @@
 <section class="learning-hub" id="aprende" aria-labelledby="aprendeTitulo">
   <div class="learning-hub-inner">
     <div class="learning-hub-heading">
-      <p class="section-label">Aprende a tu ritmo</p>
-      <h2 id="aprendeTitulo">Explora el <em>arte del maquillaje</em></h2>
-      <p class="lead">Tipos, productos, técnicas, cuidado y tendencias permanecen disponibles cuando quieras profundizar.</p>
-      <button class="progressive-action" id="learningHubToggle" type="button" aria-expanded="false" aria-controls="learningHubContent">Explorar contenido educativo</button>
+      <p class="section-label">Detrás del proyecto</p>
+      <h2 id="aprendeTitulo">Conoce un poco <em>más</em></h2>
+      <p class="lead">La historia del proyecto y el contenido de aprendizaje están guardados aquí para quien quiera profundizar.</p>
+      <button class="progressive-action" id="learningHubToggle" type="button" aria-expanded="false" aria-controls="learningHubContent">Ver historia y contenido</button>
     </div>
     <div class="learning-hub-content" id="learningHubContent" hidden></div>
   </div>
@@ -1793,8 +1809,8 @@
 <div id="galeria" style="background:var(--cream); padding:6rem 2rem;">
   <div style="max-width:1100px; margin:0 auto;">
     <p class="section-label">08 — Galería de Looks</p>
-    <h2>Inspírate con <em>nuestros estilos</em></h2>
-    <p class="lead">Explora los looks más solicitados por nuestras clientas. Cada uno fue creado por nuestras especialistas con técnicas profesionales y productos de alta calidad.</p>
+    <h2>Dos ideas para <em>inspirarte</em></h2>
+    <p class="lead">Una pequeña muestra de estilos que pueden servir como punto de partida. Cada look se adapta a tus gustos y a la ocasión.</p>
 
     <div class="gallery-grid is-contained" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:1.5rem; margin-top:3rem;">
 
@@ -1936,6 +1952,8 @@ learningSections.forEach(([id, title, label]) => {
 });
 
 const learningHubContent = document.getElementById('learningHubContent');
+const historySection = document.getElementById('historia');
+if (historySection && learningHubContent) learningHubContent.appendChild(historySection);
 learningSections.forEach(([id]) => {
   const section = document.getElementById(id);
   if (section && learningHubContent) learningHubContent.appendChild(section);
@@ -1972,7 +1990,7 @@ function setLearningHub(expanded) {
   if (!learningHubToggle || !learningHubContent) return;
   learningHubToggle.setAttribute('aria-expanded', String(expanded));
   learningHubContent.hidden = !expanded;
-  learningHubToggle.textContent = expanded ? 'Ocultar contenido educativo' : 'Explorar contenido educativo';
+  learningHubToggle.textContent = expanded ? 'Ocultar historia y contenido' : 'Ver historia y contenido';
 }
 learningHubToggle?.addEventListener('click', () => setLearningHub(learningHubToggle.getAttribute('aria-expanded') !== 'true'));
 
