@@ -105,12 +105,10 @@
     /* ── HEADER ── */
     header {
       position: relative;
-      min-height: 34svh;
+      min-height: 40svh;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      text-align: center;
       overflow: hidden;
       background: var(--cream);
     }
@@ -141,18 +139,25 @@
 
     header .content {
       position: relative; z-index: 2;
-      padding: 1.15rem;
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(220px, .85fr);
+      align-items: center;
+      gap: clamp(2rem, 7vw, 6rem);
+      width: min(1100px, calc(100% - 3rem));
+      padding: 2rem 0;
       animation: fadeUp 1.2s ease both;
     }
 
+    .hero-copy { max-width: 620px; }
+
     .hero-kicker {
-      max-width: 520px; margin: .65rem auto 0; color: var(--muted);
+      max-width: 520px; margin: .65rem 0 0; color: var(--muted);
       font-family: 'Cormorant Garamond', serif; font-size: clamp(.92rem, 1.5vw, 1.1rem);
       font-weight: 300; line-height: 1.4;
     }
 
     .hero-actions {
-      display: flex; justify-content: center; flex-wrap: wrap; gap: .8rem;
+      display: flex; justify-content: flex-start; flex-wrap: wrap; gap: .8rem;
       margin-top: .85rem;
     }
     .hero-btn {
@@ -167,7 +172,7 @@
     .hero-btn.secondary:hover { background: #DFC6A730; border-color: var(--deep); }
 
     .hero-proof {
-      display: flex; justify-content: center; gap: 0; margin: .65rem auto 0;
+      display: flex; justify-content: flex-start; gap: 0; margin: .65rem 0 0;
       color: var(--muted);
     }
     .hero-choice {
@@ -197,18 +202,19 @@
 
     header h1 {
       font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(2.4rem, 5.5vw, 4.2rem);
+      font-size: clamp(3rem, 6vw, 5.25rem);
       font-weight: 300;
       color: var(--plum);
-      line-height: 1;
-      letter-spacing: -1px;
+      line-height: .86;
+      letter-spacing: -2px;
     }
 
     header h1 em {
       display: block;
       font-style: italic;
       color: var(--rose);
-      font-size: 0.65em;
+      font-size: .82em;
+      margin-left: clamp(1.5rem, 7vw, 5rem);
     }
 
     header p.subtitle {
@@ -220,6 +226,31 @@
       text-transform: uppercase;
       animation: fadeUp 1s 0.5s both;
     }
+
+    .hero-visual {
+      position: relative;
+      display: grid;
+      place-items: center;
+      width: clamp(210px, 23vw, 270px);
+      aspect-ratio: 1;
+      justify-self: center;
+      border: 1px solid #B8896370;
+      border-radius: 50%;
+      background: radial-gradient(circle at 36% 30%, #FFFDF8 0 12%, #F4E4D2 50%, #DFC6A7 100%);
+      box-shadow: 0 24px 70px rgba(60,41,31,.12), inset 0 0 0 12px rgba(255,249,240,.5);
+    }
+    .hero-visual::before, .hero-visual::after {
+      content: '';
+      position: absolute;
+      border: 1px solid #B99A6260;
+      border-radius: 50%;
+    }
+    .hero-visual::before { inset: 18px; }
+    .hero-visual::after { width: 36%; aspect-ratio: 1; right: -8%; top: 5%; background: #FBF5E9; }
+    .hero-visual-content { position: relative; z-index: 1; text-align: center; color: var(--deep); }
+    .hero-visual-icon { display: block; margin-bottom: .35rem; font-size: clamp(2.1rem, 4vw, 3.2rem); }
+    .hero-visual-content strong { display: block; font: italic 400 clamp(1.4rem, 2.4vw, 2rem) 'Cormorant Garamond',serif; }
+    .hero-visual-content small { display: block; margin-top: .35rem; font-size: .58rem; letter-spacing: 2.5px; text-transform: uppercase; }
 
     .scroll-cue { display: none; }
     @keyframes pulse { 0%,100%{ opacity:.4; } 50%{ opacity:1; } }
@@ -966,8 +997,12 @@
       #historia { grid-template-columns: 1fr; }
       .historia-visual { height: 300px; order: -1; }
       .cuidado-split { grid-template-columns: 1fr; }
-      header { min-height: 38svh; }
-      header .content { padding: 1.15rem; }
+      header { min-height: 38svh; text-align:center; }
+      header .content { display:block; width:min(620px,calc(100% - 2rem)); padding:1.35rem 0; }
+      .hero-copy { margin:0 auto; }
+      .hero-kicker { margin-left:auto; margin-right:auto; }
+      .hero-actions, .hero-proof { justify-content:center; }
+      .hero-visual { display:none; }
       .hero-proof { flex-wrap: wrap; row-gap: .7rem; }
       .hero-proof span { padding: 0 .65rem; }
       .scroll-cue { display: none; }
@@ -994,6 +1029,8 @@
     @media (max-width: 480px) {
       .brand-kicker { letter-spacing: 2px; margin-bottom: .5rem; }
       .hero-kicker { font-size: .95rem; }
+      header h1 { font-size:clamp(2.7rem,14vw,3.6rem); letter-spacing:-1px; }
+      header h1 em { margin-left:0; }
       .hero-btn { width: 100%; }
       .hero-proof span { font-size: .57rem; }
       section { padding: 4rem 1.15rem; }
@@ -1258,17 +1295,26 @@
   <div class="petal"></div>
   <div class="petal"></div>
   <div class="content">
-    <div class="brand-kicker">Arte &amp; Belleza</div>
-    <h1>El Arte del<em>Maquillaje</em></h1>
-    <p class="subtitle">Maquillaje para momentos especiales</p>
-    <p class="hero-kicker">Un espacio sencillo y cercano para encontrar tu look y reservar una cita.</p>
-    <div class="hero-actions">
-      <a class="hero-btn" href="#catalogo">Ver servicios</a>
-      <a class="hero-btn secondary" href="./citas">Reservar una cita</a>
+    <div class="hero-copy">
+      <div class="brand-kicker">Arte &amp; Belleza</div>
+      <h1>El arte del<em>maquillaje</em></h1>
+      <p class="subtitle">Maquillaje para momentos especiales</p>
+      <p class="hero-kicker">Encuentra un look que se sienta como tú y reserva tu cita de forma sencilla.</p>
+      <div class="hero-actions">
+        <a class="hero-btn" href="#catalogo">Ver servicios</a>
+        <a class="hero-btn secondary" href="./citas">Reservar una cita</a>
+      </div>
+      <div class="hero-proof" aria-label="Explorar servicios destacados">
+        <button class="hero-choice" type="button" data-service-index="0">Evento social</button>
+        <button class="hero-choice" type="button" data-service-index="1">Día especial</button>
+      </div>
     </div>
-    <div class="hero-proof" aria-label="Explorar servicios destacados">
-      <button class="hero-choice" type="button" data-service-index="0">Evento social</button>
-      <button class="hero-choice" type="button" data-service-index="1">Día especial</button>
+    <div class="hero-visual" aria-hidden="true">
+      <div class="hero-visual-content">
+        <span class="hero-visual-icon">💄</span>
+        <strong>Tu momento</strong>
+        <small>Arte · cuidado · belleza</small>
+      </div>
     </div>
   </div>
   <div class="scroll-cue">Explorar</div>
