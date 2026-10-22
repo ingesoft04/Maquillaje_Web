@@ -35,6 +35,14 @@ test('formulario de cita informa valores, modalidad y política de anticipo', ()
   assert.doesNotMatch(html, /Promise\.all\(\[\s*apiFetch\('\/tipos'\), apiFetch\('\/especialistas'\), apiFetch\('\/pagos\/opciones'\)/);
 });
 
+test('registro muestra como solo lectura el maquillaje elegido', () => {
+  assert.match(html, /id="reg-servicio-field" hidden/);
+  assert.match(html, /id="reg-servicio-seleccionado" readonly aria-readonly="true"/);
+  assert.match(html, /actualizarServicioRegistro\(id\);[\s\S]*showTab\('registro'\)/);
+  assert.match(html, /function actualizarServicioRegistro\(id\)/);
+  assert.match(html, /actualizarServicioRegistro\(servicioPendienteId\)/);
+});
+
 test('catálogo de reservas es público y muestra precio y duración antes del acceso', () => {
   const catalogo = html.indexOf('id="catalogoPublico"');
   const acceso = html.indexOf('id="authTabs"');
