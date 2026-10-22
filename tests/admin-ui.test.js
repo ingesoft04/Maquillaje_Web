@@ -51,6 +51,7 @@ test('catálogo de reservas es público y muestra precio y duración antes del a
   assert.match(html, /function renderCatalogoPublico\(servicios,especialistas\)/);
   assert.match(html, /Number\(item\.precio\|\|0\).*COP/);
   assert.match(html, /duracion_minutos/);
+  assert.match(html, /\.public-service-card[^}]+aspect-ratio:1[^}]+border-radius:50%/);
 });
 
 test('frontend conserva rutas locales y admite publicación bajo /maquillaje', () => {
