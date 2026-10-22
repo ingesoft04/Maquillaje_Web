@@ -3,7 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>El Arte del Maquillaje | Proyecto SENA</title>
+  <title>Arte &amp; Belleza | Maquillaje y citas</title>
+  <meta name="description" content="Servicios de maquillaje con atención personalizada y reserva de citas en Arte &amp; Belleza."/>
+  <meta property="og:title" content="Arte &amp; Belleza | Maquillaje y citas"/>
+  <meta property="og:description" content="Conoce los servicios disponibles y reserva tu cita de maquillaje."/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:url" content="https://dev-fmv.duckdns.org/maquillaje/"/>
   <script>
     if (window.location.protocol === 'file:') {
       window.location.replace(`https://dev-fmv.duckdns.org/maquillaje/${window.location.hash}`);
@@ -48,7 +53,7 @@
     button { min-height: 42px; }
     .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
 
-    .citas-topbar { display: none; }
+    .citas-topbar, .learn-topbar { display: none; }
     body:not(.citas-view) #citas-wrapper { display: none; }
     body.citas-view > header,
     body.citas-view > nav,
@@ -70,34 +75,52 @@
     .citas-back { color: var(--gold); text-decoration: none; font-size: .67rem; letter-spacing: 2px; text-transform: uppercase; }
     body.citas-view #citas-wrapper { min-height: calc(100vh - 72px); padding-top: 4.5rem; }
     body.citas-view footer { border-top: 1px solid #684735; }
+    body:not(.learn-view) #aprende { display: none; }
+    body.learn-view > header,
+    body.learn-view > nav,
+    body.learn-view > #catalogo,
+    body.learn-view > #citas,
+    body.learn-view > #citas-wrapper,
+    body.learn-view > footer,
+    body.learn-view > .skip-link { display: none !important; }
+    body.learn-view { background: var(--cream); }
+    body.learn-view .learn-topbar {
+      display: flex; position: sticky; top: 0; z-index: 200;
+      align-items: center; justify-content: space-between; gap: 1rem;
+      padding: .85rem max(1.25rem, calc((100vw - 1100px) / 2));
+      background: rgba(251,245,233,.96); border-bottom: 1px solid #DFC6A760;
+      backdrop-filter: blur(12px);
+    }
+    .learn-brand { color: var(--plum); text-decoration: none; font: 400 1.35rem 'Cormorant Garamond',serif; }
+    .learn-brand em { color: var(--rose); font-style: italic; }
+    .learn-back { color: var(--deep); text-decoration: none; font-size: .67rem; letter-spacing: 2px; text-transform: uppercase; }
 
     .skip-link {
-      position: fixed; top: 1rem; left: 1rem; z-index: 10001;
+      position: fixed; top: -100px; left: 1rem; z-index: 10001;
       padding: .75rem 1rem; background: var(--cream); color: var(--plum);
-      text-decoration: none; transform: translateY(-180%); transition: transform .2s;
+      text-decoration: none; transition: top .2s;
     }
-    .skip-link:focus { transform: translateY(0); }
+    .skip-link:focus { top: 1rem; }
 
     /* ── HEADER ── */
     header {
       position: relative;
-      min-height: 100vh;
+      min-height: 48svh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       text-align: center;
       overflow: hidden;
-      background: var(--plum);
+      background: var(--cream);
     }
 
     .header-bg {
       position: absolute; inset: 0;
       background:
-        radial-gradient(ellipse 80% 60% at 50% 110%, #B8896355 0%, transparent 65%),
-        radial-gradient(ellipse 50% 50% at 80% 20%, #DFC6A740 0%, transparent 60%),
-        radial-gradient(ellipse 40% 40% at 10% 80%, #B99A6230 0%, transparent 55%),
-        linear-gradient(160deg, #3C291F 0%, #684735 50%, #3C291F 100%);
+        radial-gradient(ellipse 70% 65% at 85% 15%, #DFC6A755 0%, transparent 62%),
+        radial-gradient(ellipse 55% 55% at 8% 90%, #B8896325 0%, transparent 60%),
+        linear-gradient(150deg, #FFF9F0 0%, #FBF5E9 60%, #F4E8D8 100%);
     }
 
     .petal {
@@ -123,14 +146,14 @@
     }
 
     .hero-kicker {
-      max-width: 650px; margin: 1.5rem auto 0; color: #EADBC8;
-      font-family: 'Cormorant Garamond', serif; font-size: clamp(1.1rem, 2vw, 1.45rem);
+      max-width: 560px; margin: 1rem auto 0; color: var(--muted);
+      font-family: 'Cormorant Garamond', serif; font-size: clamp(1rem, 1.8vw, 1.25rem);
       font-weight: 300; line-height: 1.55;
     }
 
     .hero-actions {
       display: flex; justify-content: center; flex-wrap: wrap; gap: .8rem;
-      margin-top: 2rem;
+      margin-top: 1.35rem;
     }
     .hero-btn {
       display: inline-flex; align-items: center; justify-content: center; min-width: 170px;
@@ -139,18 +162,24 @@
       font-size: .68rem; font-weight: 500; letter-spacing: 2px;
       transition: transform .25s, background .25s, color .25s, box-shadow .25s;
     }
-    .hero-btn.secondary { background: transparent; color: var(--cream); border-color: #DFC6A780; }
+    .hero-btn.secondary { background: transparent; color: var(--deep); border-color: #B8896380; }
     .hero-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 30px #160A1240; }
-    .hero-btn.secondary:hover { background: #FBF5E912; border-color: var(--cream); }
+    .hero-btn.secondary:hover { background: #DFC6A730; border-color: var(--deep); }
 
     .hero-proof {
-      display: flex; justify-content: center; gap: 0; margin: 2.4rem auto 0;
-      color: #D9C3AA;
+      display: flex; justify-content: center; gap: 0; margin: 1.1rem auto 0;
+      color: var(--muted);
     }
-    .hero-proof span { padding: 0 1rem; font-size: .64rem; letter-spacing: 1.5px; text-transform: uppercase; }
-    .hero-proof span + span { border-left: 1px solid #B99A6255; }
+    .hero-choice {
+      min-height: 34px; padding: .35rem .9rem; border: 0; border-bottom: 1px solid #B99A6266;
+      background: transparent; color: var(--muted); cursor: pointer; font-size: .62rem;
+      letter-spacing: 1.4px; text-transform: uppercase; transition: color .2s, border-color .2s;
+    }
+    .hero-choice + .hero-choice { border-left: 1px solid #B99A6255; }
+    .hero-choice:hover, .hero-choice:focus-visible { color: var(--deep); border-bottom-color: var(--deep); }
+    .public-service-card.hero-highlight { border-color: var(--deep); box-shadow: 0 0 0 3px #B99A6240, 0 18px 45px rgba(60,41,31,.13); }
 
-    .sena-badge {
+    .brand-kicker {
       display: inline-block;
       color: var(--gold);
       background: rgba(185,154,98,.08);
@@ -162,15 +191,15 @@
       letter-spacing: 4px;
       text-transform: uppercase;
       padding: 6px 20px;
-      margin-bottom: 2rem;
+      margin-bottom: 1rem;
       animation: fadeUp 1s 0.2s both;
     }
 
     header h1 {
       font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(3.5rem, 9vw, 8rem);
+      font-size: clamp(2.8rem, 7vw, 5.5rem);
       font-weight: 300;
-      color: var(--cream);
+      color: var(--plum);
       line-height: 1;
       letter-spacing: -1px;
     }
@@ -178,13 +207,13 @@
     header h1 em {
       display: block;
       font-style: italic;
-      color: var(--blush);
+      color: var(--rose);
       font-size: 0.65em;
     }
 
     header p.subtitle {
-      margin-top: 1.5rem;
-      color: #D9C3AA;
+      margin-top: .9rem;
+      color: var(--deep);
       font-weight: 200;
       font-size: 1rem;
       letter-spacing: 2px;
@@ -192,18 +221,7 @@
       animation: fadeUp 1s 0.5s both;
     }
 
-    .scroll-cue {
-      position: absolute; bottom: 2.5rem; left: 50%; transform: translateX(-50%);
-      color: var(--blush); font-size: 0.65rem; letter-spacing: 3px;
-      text-transform: uppercase; display: flex; flex-direction: column; align-items: center; gap: 8px;
-      animation: fadeUp 1s 1s both;
-    }
-    .scroll-cue::after {
-      content: '';
-      width: 1px; height: 50px;
-      background: linear-gradient(to bottom, var(--blush), transparent);
-      animation: pulse 2s ease-in-out infinite;
-    }
+    .scroll-cue { display: none; }
     @keyframes pulse { 0%,100%{ opacity:.4; } 50%{ opacity:1; } }
 
     @keyframes fadeUp {
@@ -571,17 +589,17 @@
       background: var(--plum);
       color: #9B8877;
       text-align: center;
-      padding: 4rem 2rem;
+      padding: 1.5rem 2rem;
     }
     footer .logo-footer {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 2rem;
+      font-size: 1.45rem;
       color: var(--blush);
       font-style: italic;
-      margin-bottom: 1rem;
+      margin-bottom: .45rem;
     }
-    footer p { font-size: 0.8rem; line-height: 1.8; }
-    footer .divider { width: 60px; height: 1px; background: var(--rose); margin: 1.5rem auto; }
+    footer p { font-size: 0.72rem; line-height: 1.5; }
+    footer .divider { width: 40px; height: 1px; background: var(--rose); margin: .65rem auto; }
     footer .gold { color: var(--gold); font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; }
 
     /* ── CITAS / AUTH ── */
@@ -609,7 +627,7 @@
     .public-specialist { padding:.5rem .75rem; border:1px solid #684735; color:#E0D1BF; font-size:.7rem; background:#38261D; }
     .catalog-loading { color:#9B8877; padding:1.5rem; border:1px dashed #684735; text-align:center; }
 
-    .home-catalog { max-width:100%; padding:5.5rem 2rem; background:var(--ivory); }
+    .home-catalog { max-width:100%; padding:4rem 2rem; background:var(--ivory); }
     .home-catalog-inner { max-width:1100px; margin:0 auto; }
     .home-catalog-intro { display:flex; justify-content:space-between; align-items:end; gap:2rem; margin-bottom:2.2rem; }
     .home-catalog-intro .lead { max-width:560px; margin:0; }
@@ -622,6 +640,60 @@
     .home-catalog .public-service-card button { background:var(--plum); border-color:var(--plum); color:var(--cream); font-weight:600; }
     .home-catalog .public-service-card button:hover { background:var(--deep); }
     .home-catalog .public-specialist { background:var(--cream); color:var(--deep); border-color:#DFC6A7; }
+    .home-catalog .public-specialists { display: none; }
+    .progressive-action {
+      display: flex;
+      width: fit-content;
+      min-width: 190px;
+      margin: 1.75rem auto 0;
+      padding: .8rem 1.2rem;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--deep);
+      background: transparent;
+      color: var(--deep);
+      cursor: pointer;
+      font-size: .68rem;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      transition: background .25s, color .25s;
+    }
+    .progressive-action:hover { background: var(--deep); color: var(--cream); }
+    .home-catalog.is-contained .public-service-card:nth-child(n+3) { display: none; }
+
+    .micro-intro {
+      max-width: 760px;
+      padding-top: 4.5rem;
+      padding-bottom: 4.5rem;
+      text-align: center;
+    }
+    .micro-intro .lead { margin: 0 auto 1.5rem; }
+    .micro-intro .hero-btn { min-width: 210px; }
+
+    .learning-hub {
+      max-width: 100%;
+      padding: 2.75rem 2rem;
+      background: var(--plum);
+    }
+    .learning-hub-inner { max-width: 1100px; margin: 0 auto; }
+    .learning-hub-heading { text-align: center; }
+    .learning-hub-heading h2 { color: var(--cream); margin-bottom: .5rem; font-size: clamp(1.8rem, 4vw, 2.6rem); }
+    .learning-hub-heading .lead { margin: 0 auto 1.5rem; color: #CDBAA4; }
+    .learning-hub .progressive-action { border-color: var(--blush); color: var(--blush); }
+    .learning-hub .progressive-action:hover { background: var(--blush); color: var(--plum); }
+    .learning-hub-content { margin-top: 2rem; }
+    .learning-hub-content[hidden] { display: none !important; }
+    .learning-hub-content .learning-collapsible { margin-top: 1px; }
+    body.learn-view #aprende { display: block; padding: 3.5rem 1.25rem; background: var(--cream); }
+    body.learn-view .learning-hub-heading { max-width: 720px; margin: 0 auto 2.5rem; }
+    body.learn-view .learning-hub-heading h2 { color: var(--plum); }
+    body.learn-view .learning-hub-heading .lead { color: var(--muted); }
+    body.learn-view .learning-hub-heading .progressive-action { display: none; }
+    body.learn-view .learning-hub-content { margin-top: 0; }
+    body.learn-view .learning-hub-content > .micro-intro { display: none; }
+
+    .gallery-grid.is-contained .galeria-card:nth-child(n+3) { display: none; }
 
     /* Auth tabs */
     .auth-tabs {
@@ -894,7 +966,7 @@
       #historia { grid-template-columns: 1fr; }
       .historia-visual { height: 300px; order: -1; }
       .cuidado-split { grid-template-columns: 1fr; }
-      header { min-height: 92svh; }
+      header { min-height: 52svh; }
       header .content { padding: 1.5rem; }
       .hero-proof { flex-wrap: wrap; row-gap: .7rem; }
       .hero-proof span { padding: 0 .65rem; }
@@ -909,6 +981,7 @@
       .payment-choice-grid { grid-template-columns:1fr; }
       .public-catalog-heading { align-items:start; flex-direction:column; }
       .home-catalog-intro { align-items:start; flex-direction:column; }
+      .home-catalog.is-contained .public-service-card:nth-child(n+3) { display: none; }
       .admin-navigation { padding:.75rem; }
       .admin-nav-group { display:none; }
       .admin-mobile-select { display:block; }
@@ -918,11 +991,14 @@
     }
 
     @media (max-width: 480px) {
-      .sena-badge { letter-spacing: 2.5px; margin-bottom: 1.4rem; }
+      .brand-kicker { letter-spacing: 2.5px; margin-bottom: .8rem; }
       .hero-kicker { font-size: 1.05rem; }
       .hero-btn { width: 100%; }
       .hero-proof span { font-size: .57rem; }
       section { padding: 4rem 1.15rem; }
+      #historia { gap: 2rem; }
+      .historia-visual { height: 240px; }
+      .learning-hub { padding: 3rem 1.15rem; }
       .agendar-grid, .admin-form-grid, .admin-stats { grid-template-columns: 1fr; }
       .stats-row { display:grid; grid-template-columns:1fr 1fr; }
       .cita-card { align-items:flex-start; flex-wrap:wrap; gap:.65rem; }
@@ -1151,17 +1227,26 @@
 </head>
 <body>
 <script>
-  if (window.location.pathname.replace(/\/$/, '').endsWith('/citas')) {
+  const activePath = window.location.pathname.replace(/\/$/, '');
+  if (activePath.endsWith('/citas')) {
     document.body.classList.add('citas-view');
-    document.title = 'Agenda y administración | Arte & Belleza SENA';
+    document.title = 'Agenda y administración | Arte & Belleza';
+  } else if (activePath.endsWith('/aprende')) {
+    document.body.classList.add('learn-view');
+    document.title = 'Aprende sobre maquillaje | Arte & Belleza';
   }
 </script>
 
-<a class="skip-link" href="#historia">Saltar al contenido</a>
+<a class="skip-link" href="#catalogo">Saltar al contenido</a>
 
 <div class="citas-topbar">
   <a class="citas-brand" href="./">Arte & <em>Belleza</em></a>
   <a class="citas-back" href="./">← Volver a la página principal</a>
+</div>
+
+<div class="learn-topbar">
+  <a class="learn-brand" href="./">Arte & <em>Belleza</em></a>
+  <a class="learn-back" href="./">← Volver a servicios</a>
 </div>
 
 <!-- HEADER -->
@@ -1172,18 +1257,17 @@
   <div class="petal"></div>
   <div class="petal"></div>
   <div class="content">
-    <div class="sena-badge">Proyecto SENA · Arte y Belleza</div>
+    <div class="brand-kicker">Arte &amp; Belleza</div>
     <h1>El Arte del<em>Maquillaje</em></h1>
-    <p class="subtitle">Historia · Técnicas · Tendencias · Cuidado</p>
-    <p class="hero-kicker">Descubre técnicas profesionales, encuentra inspiración y agenda una experiencia pensada para realzar tu estilo.</p>
+    <p class="subtitle">Maquillaje para momentos especiales</p>
+    <p class="hero-kicker">Un espacio sencillo y cercano para encontrar tu look y reservar una cita.</p>
     <div class="hero-actions">
-      <a class="hero-btn" href="#galeria">Explorar looks</a>
-      <a class="hero-btn secondary" href="./citas">Agendar una cita</a>
+      <a class="hero-btn" href="#catalogo">Ver servicios</a>
+      <a class="hero-btn secondary" href="./citas">Reservar una cita</a>
     </div>
-    <div class="hero-proof" aria-label="Características del servicio">
-      <span>Técnicas profesionales</span>
-      <span>Atención personalizada</span>
-      <span>Belleza consciente</span>
+    <div class="hero-proof" aria-label="Explorar servicios destacados">
+      <button class="hero-choice" type="button" data-service-index="0">Evento social</button>
+      <button class="hero-choice" type="button" data-service-index="1">Día especial</button>
     </div>
   </div>
   <div class="scroll-cue">Explorar</div>
@@ -1191,12 +1275,18 @@
 
 <!-- NAV -->
 <nav aria-label="Navegación principal">
-  <a href="#historia">Historia</a>
-  <a href="#catalogo">Catálogo</a>
-  <a href="#tipos">Aprende</a>
-  <a href="#galeria">🖼 Galería</a>
+  <a href="#catalogo">Servicios</a>
+  <a href="./aprende">Aprende</a>
   <a href="./citas" style="color:var(--rose); font-weight:500;">📅 Citas</a>
 </nav>
+
+<!-- PRESENTACIÓN BREVE -->
+<section class="micro-intro" id="presentacion">
+  <p class="section-label">Un emprendimiento que empieza</p>
+  <h2>Maquillaje con atención <em>cercana</em></h2>
+  <p class="lead">Estoy construyendo este espacio paso a paso, cuidando cada cita y escuchando lo que cada persona necesita para sentirse cómoda con su look.</p>
+  <a class="hero-btn" href="./citas">Quiero reservar</a>
+</section>
 
 <!-- HISTORIA -->
 <section id="historia">
@@ -1224,14 +1314,28 @@
 </section>
 
 <!-- CATÁLOGO PRINCIPAL -->
-<section class="home-catalog" id="catalogo" aria-labelledby="catalogoInicioTitulo">
+<section class="home-catalog is-contained" id="catalogo" aria-labelledby="catalogoInicioTitulo">
   <div class="home-catalog-inner">
     <div class="home-catalog-intro">
-      <div><p class="section-label">Servicios profesionales</p><h2 id="catalogoInicioTitulo">Elige tu <em>experiencia</em></h2></div>
-      <p class="lead">Consulta precios y duración desde la página principal. Al elegir un servicio pasarás directamente a crear tu cita con la opción seleccionada.</p>
+      <div><p class="section-label">Servicios disponibles</p><h2 id="catalogoInicioTitulo">Elige tu <em>maquillaje</em></h2></div>
+      <p class="lead">Estas son dos opciones para comenzar. Puedes consultar el catálogo completo o elegir una para preparar tu cita.</p>
     </div>
     <div id="catalogoInicioServicios" class="catalog-loading" aria-live="polite">Cargando servicios…</div>
     <div id="catalogoInicioEspecialistas" class="public-specialists" aria-label="Especialistas disponibles"></div>
+    <button class="progressive-action" id="catalogoToggle" type="button" aria-expanded="false" aria-controls="catalogoInicioServicios">Ver catálogo completo</button>
+  </div>
+</section>
+
+<!-- CONTENIDO FORMATIVO PROGRESIVO -->
+<section class="learning-hub" id="aprende" aria-labelledby="aprendeTitulo">
+  <div class="learning-hub-inner">
+    <div class="learning-hub-heading">
+      <p class="section-label">Guía de maquillaje</p>
+      <h2 id="aprendeTitulo">Aprende a tu <em>ritmo</em></h2>
+      <p class="lead">Historia, estilos, productos, técnicas y cuidados reunidos en un espacio separado de los servicios.</p>
+      <button class="progressive-action" id="learningHubToggle" type="button" aria-expanded="false" aria-controls="learningHubContent">Abrir contenido</button>
+    </div>
+    <div class="learning-hub-content" id="learningHubContent" hidden></div>
   </div>
 </section>
 
@@ -1738,10 +1842,10 @@
 <div id="galeria" style="background:var(--cream); padding:6rem 2rem;">
   <div style="max-width:1100px; margin:0 auto;">
     <p class="section-label">08 — Galería de Looks</p>
-    <h2>Inspírate con <em>nuestros estilos</em></h2>
-    <p class="lead">Explora los looks más solicitados por nuestras clientas. Cada uno fue creado por nuestras especialistas con técnicas profesionales y productos de alta calidad.</p>
+    <h2>Dos ideas para <em>inspirarte</em></h2>
+    <p class="lead">Una pequeña muestra de estilos que pueden servir como punto de partida. Cada look se adapta a tus gustos y a la ocasión.</p>
 
-    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:1.5rem; margin-top:3rem;">
+    <div class="gallery-grid is-contained" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:1.5rem; margin-top:3rem;">
 
       <div class="galeria-card" onclick="abrirLook('Smoky Eye Clásico','💋','Profundidad y drama con sombras oscuras difuminadas. Perfecto para eventos nocturnos y ocasiones especiales.','Maquillaje de Noche','#3C291F','#B88963')">
         <div class="galeria-preview" style="background:linear-gradient(135deg,#3C291F,#704A35);">
@@ -1810,13 +1914,14 @@
       </div>
 
     </div>
+    <button class="progressive-action" id="galleryToggle" type="button" aria-expanded="false">Ver todos los looks</button>
   </div>
 </div>
 
 <!-- MODAL GALERÍA -->
-<div id="lookModal" style="display:none; position:fixed; inset:0; background:rgba(30,10,20,0.92); z-index:9000; align-items:center; justify-content:center; padding:2rem;">
+<div id="lookModal" role="dialog" aria-modal="true" aria-labelledby="lookTitulo" aria-describedby="lookDesc" aria-hidden="true" style="display:none; position:fixed; inset:0; background:rgba(30,10,20,0.92); z-index:9000; align-items:center; justify-content:center; padding:2rem;">
   <div id="lookModalContent" style="background:var(--plum); border:1px solid #684735; max-width:480px; width:100%; padding:3rem; position:relative; animation:fadeUp 0.4s ease;">
-    <button onclick="cerrarLook()" style="position:absolute;top:1rem;right:1rem;background:transparent;border:none;color:#9B8877;font-size:1.5rem;cursor:pointer;">✕</button>
+    <button id="lookModalClose" type="button" aria-label="Cerrar detalle del look" onclick="cerrarLook()" style="position:absolute;top:1rem;right:1rem;background:transparent;border:none;color:#9B8877;font-size:1.5rem;cursor:pointer;">✕</button>
     <div id="lookEmoji" style="font-size:4rem; margin-bottom:1rem;"></div>
     <p class="section-label" id="lookServicio"></p>
     <h2 id="lookTitulo" style="font-size:2rem; margin-bottom:1rem;"></h2>
@@ -1829,9 +1934,7 @@
 <footer>
   <div class="logo-footer">Arte & Belleza</div>
   <div class="divider"></div>
-  <p>Proyecto presentado al Servicio Nacional de Aprendizaje<br/>Programa de Cosmetología y Estética Integral</p>
-  <br/>
-  <p class="gold">SENA · Colombia · 2026</p>
+  <p>Maquillaje con atención cercana y reserva previa.</p>
 </footer>
 
 <script>
@@ -1879,8 +1982,92 @@ learningSections.forEach(([id, title, label]) => {
   setLearningSection(section, false);
 });
 
-const requestedSection = document.getElementById(location.hash.slice(1));
-if (requestedSection?.classList.contains('learning-collapsible')) setLearningSection(requestedSection, true);
+const learningHubContent = document.getElementById('learningHubContent');
+const presentationSection = document.getElementById('presentacion');
+const historySection = document.getElementById('historia');
+if (presentationSection && learningHubContent) learningHubContent.appendChild(presentationSection);
+if (historySection && learningHubContent) learningHubContent.appendChild(historySection);
+learningSections.forEach(([id]) => {
+  const section = document.getElementById(id);
+  if (section && learningHubContent) learningHubContent.appendChild(section);
+});
+const gallerySection = document.getElementById('galeria');
+if (gallerySection && learningHubContent) learningHubContent.appendChild(gallerySection);
+
+function configureProgressiveToggle(buttonId, target, collapsedClass, closedLabel, openLabel) {
+  const button = document.getElementById(buttonId);
+  if (!button || !target) return;
+  button.addEventListener('click', () => {
+    const willExpand = button.getAttribute('aria-expanded') !== 'true';
+    button.setAttribute('aria-expanded', String(willExpand));
+    target.classList.toggle(collapsedClass, !willExpand);
+    button.textContent = willExpand ? openLabel : closedLabel;
+  });
+}
+
+configureProgressiveToggle(
+  'catalogoToggle',
+  document.getElementById('catalogo'),
+  'is-contained',
+  'Ver catálogo completo',
+  'Mostrar menos servicios'
+);
+configureProgressiveToggle(
+  'galleryToggle',
+  document.querySelector('.gallery-grid'),
+  'is-contained',
+  'Ver todos los looks',
+  'Mostrar menos looks'
+);
+
+document.querySelectorAll('.hero-choice').forEach(choice => {
+  choice.addEventListener('click', () => {
+    const cards = [...document.querySelectorAll('#catalogoInicioServicios .public-service-card')];
+    const card = cards[Number(choice.dataset.serviceIndex)];
+    document.getElementById('catalogo')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (!card) return;
+    cards.forEach(item => item.classList.remove('hero-highlight'));
+    card.classList.add('hero-highlight');
+    card.querySelector('button')?.focus({ preventScroll: true });
+    setTimeout(() => card.classList.remove('hero-highlight'), 2200);
+  });
+});
+
+const learningHubToggle = document.getElementById('learningHubToggle');
+function setLearningHub(expanded) {
+  if (!learningHubToggle || !learningHubContent) return;
+  learningHubToggle.setAttribute('aria-expanded', String(expanded));
+  learningHubContent.hidden = !expanded;
+  learningHubToggle.textContent = expanded ? 'Mostrar menos' : 'Ver más';
+}
+learningHubToggle?.addEventListener('click', () => setLearningHub(learningHubToggle.getAttribute('aria-expanded') !== 'true'));
+if (document.body.classList.contains('learn-view')) setLearningHub(true);
+
+function revealHashTarget({ scroll = false } = {}) {
+  const targetId = location.hash.slice(1);
+  const requestedSection = document.getElementById(targetId);
+  if (!requestedSection) return;
+
+  const isInsideHub = learningHubContent?.contains(requestedSection);
+  if (document.body.classList.contains('learn-view') || targetId === 'aprende' || isInsideHub) setLearningHub(true);
+  if (requestedSection.classList.contains('learning-collapsible')) setLearningSection(requestedSection, true);
+
+  if (scroll) requestAnimationFrame(() => requestedSection.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+}
+
+revealHashTarget();
+window.addEventListener('hashchange', () => revealHashTarget({ scroll: true }));
+
+document.querySelectorAll('.galeria-card').forEach(card => {
+  card.setAttribute('role', 'button');
+  card.setAttribute('tabindex', '0');
+  card.setAttribute('aria-label', `Ver detalles de ${card.querySelector('h4')?.textContent || 'este look'}`);
+  card.addEventListener('keydown', event => {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    card.click();
+  });
+});
 
 // ── SCROLL ANIMATIONS ──
 const observer = new IntersectionObserver((entries) => {
@@ -2825,7 +3012,7 @@ function exportarPDF() {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
     doc.setTextColor(232, 196, 184);
-    doc.text('Comprobante de citas · Proyecto SENA', 16, primeraPagina ? 29 : 19);
+    doc.text('Comprobante de citas · Arte & Belleza', 16, primeraPagina ? 29 : 19);
     if (primeraPagina) {
       doc.setFontSize(8);
       doc.text('Generado: ' + generado, 194, 20, { align: 'right' });
@@ -2906,7 +3093,7 @@ function exportarPDF() {
     doc.setPage(p);
     doc.setDrawColor(232, 196, 184); doc.setLineWidth(.3); doc.line(16, 286, 194, 286);
     doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(115, 90, 95);
-    doc.text('Arte & Belleza SENA · Cosmetología y Estética Integral', 16, 292);
+    doc.text('Arte & Belleza · Maquillaje y atención personalizada', 16, 292);
     doc.text(`Página ${p} de ${total}`, 194, 292, { align: 'right' });
   }
 
@@ -2917,6 +3104,7 @@ function exportarPDF() {
 
 // ── GALERÍA DE LOOKS ──
 let lookServicioActual = '';
+let lookTriggerActual = null;
 
 function abrirLook(titulo, emoji, desc, servicio) {
   document.getElementById('lookTitulo').textContent   = titulo;
@@ -2924,15 +3112,21 @@ function abrirLook(titulo, emoji, desc, servicio) {
   document.getElementById('lookDesc').textContent     = desc;
   document.getElementById('lookServicio').textContent = servicio;
   lookServicioActual = servicio;
+  lookTriggerActual = document.activeElement;
 
   const modal = document.getElementById('lookModal');
   modal.style.display = 'flex';
+  modal.setAttribute('aria-hidden', 'false');
   document.body.style.overflow = 'hidden';
+  document.getElementById('lookModalClose').focus();
 }
 
 function cerrarLook() {
-  document.getElementById('lookModal').style.display = 'none';
+  const modal = document.getElementById('lookModal');
+  modal.style.display = 'none';
+  modal.setAttribute('aria-hidden', 'true');
   document.body.style.overflow = '';
+  if (lookTriggerActual instanceof HTMLElement) lookTriggerActual.focus();
 }
 
 function reservarDesdeGaleria() {
@@ -2946,6 +3140,9 @@ function reservarDesdeGaleria() {
 // Cerrar modal al hacer click afuera
 document.getElementById('lookModal').addEventListener('click', function(e) {
   if (e.target === this) cerrarLook();
+});
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && document.getElementById('lookModal').style.display === 'flex') cerrarLook();
 });
 
 // ── INICIALIZACIÓN ──
