@@ -49,6 +49,7 @@ test('frontend conserva rutas locales y admite publicación bajo /maquillaje', (
   assert.match(html, /const API = new URL\('\.\/api', location\.href\)/);
   assert.match(html, /href="\.\/manifest\.webmanifest"/);
   assert.match(html, /href="\.\/citas"/);
+  assert.match(html, /href="\.\/aprende"/);
   assert.match(html, /new URL\('\.\/sw\.js', location\.href\)/);
   assert.doesNotMatch(html, /const API = '\/api'/);
 });
@@ -70,7 +71,7 @@ test('catálogo se muestra en inicio y conserva el servicio al abrir citas', () 
   assert.match(html, /endsWith\('\/citas'\)/);
 });
 
-test('portada contiene el contenido avanzado y permite expandirlo progresivamente', () => {
+test('contenido educativo vive en una vista separada y mantiene expansión progresiva', () => {
   assert.match(html, /class="home-catalog is-contained"/);
   assert.match(html, /id="catalogoToggle"[^>]*aria-expanded="false"/);
   assert.match(html, /id="learningHubContent" hidden/);
@@ -81,7 +82,14 @@ test('portada contiene el contenido avanzado y permite expandirlo progresivament
   assert.match(html, /setLearningHub/);
   assert.match(html, /revealHashTarget/);
   assert.match(html, /window\.addEventListener\('hashchange'/);
-  assert.match(html, /nav a\[href="#aprende"\]/);
+  assert.match(html, /activePath\.endsWith\('\/aprende'\)/);
+  assert.match(html, /body:not\(\.learn-view\) #aprende \{ display: none; \}/);
+  assert.match(html, /document\.body\.classList\.contains\('learn-view'\).*setLearningHub\(true\)/);
+});
+
+test('marca pública no presenta referencias académicas', () => {
+  assert.doesNotMatch(html, /Proyecto SENA|Arte & Belleza SENA|>SENA\b/i);
+  assert.match(html, /Maquillaje con atención cercana y reserva previa/);
 });
 
 test('galería ofrece interacción accesible por teclado', () => {

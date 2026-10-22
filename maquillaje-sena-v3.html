@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>El Arte del Maquillaje | Proyecto SENA</title>
+  <title>Arte &amp; Belleza | Maquillaje y citas</title>
   <meta name="description" content="Servicios de maquillaje con atención personalizada y reserva de citas en Arte &amp; Belleza."/>
   <meta property="og:title" content="Arte &amp; Belleza | Maquillaje y citas"/>
   <meta property="og:description" content="Conoce los servicios disponibles y reserva tu cita de maquillaje."/>
@@ -53,7 +53,7 @@
     button { min-height: 42px; }
     .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
 
-    .citas-topbar { display: none; }
+    .citas-topbar, .learn-topbar { display: none; }
     body:not(.citas-view) #citas-wrapper { display: none; }
     body.citas-view > header,
     body.citas-view > nav,
@@ -75,34 +75,52 @@
     .citas-back { color: var(--gold); text-decoration: none; font-size: .67rem; letter-spacing: 2px; text-transform: uppercase; }
     body.citas-view #citas-wrapper { min-height: calc(100vh - 72px); padding-top: 4.5rem; }
     body.citas-view footer { border-top: 1px solid #684735; }
+    body:not(.learn-view) #aprende { display: none; }
+    body.learn-view > header,
+    body.learn-view > nav,
+    body.learn-view > #catalogo,
+    body.learn-view > #citas,
+    body.learn-view > #citas-wrapper,
+    body.learn-view > footer,
+    body.learn-view > .skip-link { display: none !important; }
+    body.learn-view { background: var(--cream); }
+    body.learn-view .learn-topbar {
+      display: flex; position: sticky; top: 0; z-index: 200;
+      align-items: center; justify-content: space-between; gap: 1rem;
+      padding: .85rem max(1.25rem, calc((100vw - 1100px) / 2));
+      background: rgba(251,245,233,.96); border-bottom: 1px solid #DFC6A760;
+      backdrop-filter: blur(12px);
+    }
+    .learn-brand { color: var(--plum); text-decoration: none; font: 400 1.35rem 'Cormorant Garamond',serif; }
+    .learn-brand em { color: var(--rose); font-style: italic; }
+    .learn-back { color: var(--deep); text-decoration: none; font-size: .67rem; letter-spacing: 2px; text-transform: uppercase; }
 
     .skip-link {
-      position: fixed; top: 1rem; left: 1rem; z-index: 10001;
+      position: fixed; top: -100px; left: 1rem; z-index: 10001;
       padding: .75rem 1rem; background: var(--cream); color: var(--plum);
-      text-decoration: none; transform: translateY(-180%); transition: transform .2s;
+      text-decoration: none; transition: top .2s;
     }
-    .skip-link:focus { transform: translateY(0); }
+    .skip-link:focus { top: 1rem; }
 
     /* ── HEADER ── */
     header {
       position: relative;
-      min-height: 64svh;
+      min-height: 48svh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       text-align: center;
       overflow: hidden;
-      background: var(--plum);
+      background: var(--cream);
     }
 
     .header-bg {
       position: absolute; inset: 0;
       background:
-        radial-gradient(ellipse 80% 60% at 50% 110%, #B8896355 0%, transparent 65%),
-        radial-gradient(ellipse 50% 50% at 80% 20%, #DFC6A740 0%, transparent 60%),
-        radial-gradient(ellipse 40% 40% at 10% 80%, #B99A6230 0%, transparent 55%),
-        linear-gradient(160deg, #3C291F 0%, #684735 50%, #3C291F 100%);
+        radial-gradient(ellipse 70% 65% at 85% 15%, #DFC6A755 0%, transparent 62%),
+        radial-gradient(ellipse 55% 55% at 8% 90%, #B8896325 0%, transparent 60%),
+        linear-gradient(150deg, #FFF9F0 0%, #FBF5E9 60%, #F4E8D8 100%);
     }
 
     .petal {
@@ -128,14 +146,14 @@
     }
 
     .hero-kicker {
-      max-width: 650px; margin: 1.5rem auto 0; color: #EADBC8;
-      font-family: 'Cormorant Garamond', serif; font-size: clamp(1.1rem, 2vw, 1.45rem);
+      max-width: 560px; margin: 1rem auto 0; color: var(--muted);
+      font-family: 'Cormorant Garamond', serif; font-size: clamp(1rem, 1.8vw, 1.25rem);
       font-weight: 300; line-height: 1.55;
     }
 
     .hero-actions {
       display: flex; justify-content: center; flex-wrap: wrap; gap: .8rem;
-      margin-top: 2rem;
+      margin-top: 1.35rem;
     }
     .hero-btn {
       display: inline-flex; align-items: center; justify-content: center; min-width: 170px;
@@ -144,18 +162,24 @@
       font-size: .68rem; font-weight: 500; letter-spacing: 2px;
       transition: transform .25s, background .25s, color .25s, box-shadow .25s;
     }
-    .hero-btn.secondary { background: transparent; color: var(--cream); border-color: #DFC6A780; }
+    .hero-btn.secondary { background: transparent; color: var(--deep); border-color: #B8896380; }
     .hero-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 30px #160A1240; }
-    .hero-btn.secondary:hover { background: #FBF5E912; border-color: var(--cream); }
+    .hero-btn.secondary:hover { background: #DFC6A730; border-color: var(--deep); }
 
     .hero-proof {
-      display: flex; justify-content: center; gap: 0; margin: 2.4rem auto 0;
-      color: #D9C3AA;
+      display: flex; justify-content: center; gap: 0; margin: 1.1rem auto 0;
+      color: var(--muted);
     }
-    .hero-proof span { padding: 0 1rem; font-size: .64rem; letter-spacing: 1.5px; text-transform: uppercase; }
-    .hero-proof span + span { border-left: 1px solid #B99A6255; }
+    .hero-choice {
+      min-height: 34px; padding: .35rem .9rem; border: 0; border-bottom: 1px solid #B99A6266;
+      background: transparent; color: var(--muted); cursor: pointer; font-size: .62rem;
+      letter-spacing: 1.4px; text-transform: uppercase; transition: color .2s, border-color .2s;
+    }
+    .hero-choice + .hero-choice { border-left: 1px solid #B99A6255; }
+    .hero-choice:hover, .hero-choice:focus-visible { color: var(--deep); border-bottom-color: var(--deep); }
+    .public-service-card.hero-highlight { border-color: var(--deep); box-shadow: 0 0 0 3px #B99A6240, 0 18px 45px rgba(60,41,31,.13); }
 
-    .sena-badge {
+    .brand-kicker {
       display: inline-block;
       color: var(--gold);
       background: rgba(185,154,98,.08);
@@ -167,15 +191,15 @@
       letter-spacing: 4px;
       text-transform: uppercase;
       padding: 6px 20px;
-      margin-bottom: 2rem;
+      margin-bottom: 1rem;
       animation: fadeUp 1s 0.2s both;
     }
 
     header h1 {
       font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(3.5rem, 9vw, 8rem);
+      font-size: clamp(2.8rem, 7vw, 5.5rem);
       font-weight: 300;
-      color: var(--cream);
+      color: var(--plum);
       line-height: 1;
       letter-spacing: -1px;
     }
@@ -183,13 +207,13 @@
     header h1 em {
       display: block;
       font-style: italic;
-      color: var(--blush);
+      color: var(--rose);
       font-size: 0.65em;
     }
 
     header p.subtitle {
-      margin-top: 1.5rem;
-      color: #D9C3AA;
+      margin-top: .9rem;
+      color: var(--deep);
       font-weight: 200;
       font-size: 1rem;
       letter-spacing: 2px;
@@ -197,18 +221,7 @@
       animation: fadeUp 1s 0.5s both;
     }
 
-    .scroll-cue {
-      position: absolute; bottom: 2.5rem; left: 50%; transform: translateX(-50%);
-      color: var(--blush); font-size: 0.65rem; letter-spacing: 3px;
-      text-transform: uppercase; display: flex; flex-direction: column; align-items: center; gap: 8px;
-      animation: fadeUp 1s 1s both;
-    }
-    .scroll-cue::after {
-      content: '';
-      width: 1px; height: 50px;
-      background: linear-gradient(to bottom, var(--blush), transparent);
-      animation: pulse 2s ease-in-out infinite;
-    }
+    .scroll-cue { display: none; }
     @keyframes pulse { 0%,100%{ opacity:.4; } 50%{ opacity:1; } }
 
     @keyframes fadeUp {
@@ -576,17 +589,17 @@
       background: var(--plum);
       color: #9B8877;
       text-align: center;
-      padding: 4rem 2rem;
+      padding: 1.5rem 2rem;
     }
     footer .logo-footer {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 2rem;
+      font-size: 1.45rem;
       color: var(--blush);
       font-style: italic;
-      margin-bottom: 1rem;
+      margin-bottom: .45rem;
     }
-    footer p { font-size: 0.8rem; line-height: 1.8; }
-    footer .divider { width: 60px; height: 1px; background: var(--rose); margin: 1.5rem auto; }
+    footer p { font-size: 0.72rem; line-height: 1.5; }
+    footer .divider { width: 40px; height: 1px; background: var(--rose); margin: .65rem auto; }
     footer .gold { color: var(--gold); font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; }
 
     /* ── CITAS / AUTH ── */
@@ -672,6 +685,13 @@
     .learning-hub-content { margin-top: 2rem; }
     .learning-hub-content[hidden] { display: none !important; }
     .learning-hub-content .learning-collapsible { margin-top: 1px; }
+    body.learn-view #aprende { display: block; padding: 3.5rem 1.25rem; background: var(--cream); }
+    body.learn-view .learning-hub-heading { max-width: 720px; margin: 0 auto 2.5rem; }
+    body.learn-view .learning-hub-heading h2 { color: var(--plum); }
+    body.learn-view .learning-hub-heading .lead { color: var(--muted); }
+    body.learn-view .learning-hub-heading .progressive-action { display: none; }
+    body.learn-view .learning-hub-content { margin-top: 0; }
+    body.learn-view .learning-hub-content > .micro-intro { display: none; }
 
     .gallery-grid.is-contained .galeria-card:nth-child(n+3) { display: none; }
 
@@ -946,7 +966,7 @@
       #historia { grid-template-columns: 1fr; }
       .historia-visual { height: 300px; order: -1; }
       .cuidado-split { grid-template-columns: 1fr; }
-      header { min-height: 68svh; }
+      header { min-height: 52svh; }
       header .content { padding: 1.5rem; }
       .hero-proof { flex-wrap: wrap; row-gap: .7rem; }
       .hero-proof span { padding: 0 .65rem; }
@@ -971,7 +991,7 @@
     }
 
     @media (max-width: 480px) {
-      .sena-badge { letter-spacing: 2.5px; margin-bottom: 1.4rem; }
+      .brand-kicker { letter-spacing: 2.5px; margin-bottom: .8rem; }
       .hero-kicker { font-size: 1.05rem; }
       .hero-btn { width: 100%; }
       .hero-proof span { font-size: .57rem; }
@@ -1207,17 +1227,26 @@
 </head>
 <body>
 <script>
-  if (window.location.pathname.replace(/\/$/, '').endsWith('/citas')) {
+  const activePath = window.location.pathname.replace(/\/$/, '');
+  if (activePath.endsWith('/citas')) {
     document.body.classList.add('citas-view');
-    document.title = 'Agenda y administración | Arte & Belleza SENA';
+    document.title = 'Agenda y administración | Arte & Belleza';
+  } else if (activePath.endsWith('/aprende')) {
+    document.body.classList.add('learn-view');
+    document.title = 'Aprende sobre maquillaje | Arte & Belleza';
   }
 </script>
 
-<a class="skip-link" href="#historia">Saltar al contenido</a>
+<a class="skip-link" href="#catalogo">Saltar al contenido</a>
 
 <div class="citas-topbar">
   <a class="citas-brand" href="./">Arte & <em>Belleza</em></a>
   <a class="citas-back" href="./">← Volver a la página principal</a>
+</div>
+
+<div class="learn-topbar">
+  <a class="learn-brand" href="./">Arte & <em>Belleza</em></a>
+  <a class="learn-back" href="./">← Volver a servicios</a>
 </div>
 
 <!-- HEADER -->
@@ -1228,7 +1257,7 @@
   <div class="petal"></div>
   <div class="petal"></div>
   <div class="content">
-    <div class="sena-badge">Proyecto SENA · Arte y Belleza</div>
+    <div class="brand-kicker">Arte &amp; Belleza</div>
     <h1>El Arte del<em>Maquillaje</em></h1>
     <p class="subtitle">Maquillaje para momentos especiales</p>
     <p class="hero-kicker">Un espacio sencillo y cercano para encontrar tu look y reservar una cita.</p>
@@ -1236,9 +1265,9 @@
       <a class="hero-btn" href="#catalogo">Ver servicios</a>
       <a class="hero-btn secondary" href="./citas">Reservar una cita</a>
     </div>
-    <div class="hero-proof" aria-label="Características del servicio">
-      <span>Atención personalizada</span>
-      <span>Citas con reserva</span>
+    <div class="hero-proof" aria-label="Explorar servicios destacados">
+      <button class="hero-choice" type="button" data-service-index="0">Evento social</button>
+      <button class="hero-choice" type="button" data-service-index="1">Día especial</button>
     </div>
   </div>
   <div class="scroll-cue">Explorar</div>
@@ -1247,7 +1276,7 @@
 <!-- NAV -->
 <nav aria-label="Navegación principal">
   <a href="#catalogo">Servicios</a>
-  <a href="#aprende">Ver más</a>
+  <a href="./aprende">Aprende</a>
   <a href="./citas" style="color:var(--rose); font-weight:500;">📅 Citas</a>
 </nav>
 
@@ -1301,10 +1330,10 @@
 <section class="learning-hub" id="aprende" aria-labelledby="aprendeTitulo">
   <div class="learning-hub-inner">
     <div class="learning-hub-heading">
-      <p class="section-label">Contenido opcional</p>
-      <h2 id="aprendeTitulo">Solo si quieres <em>ver más</em></h2>
-      <p class="lead">Aquí puedes abrir la historia, las ideas de looks y las guías.</p>
-      <button class="progressive-action" id="learningHubToggle" type="button" aria-expanded="false" aria-controls="learningHubContent">Ver más</button>
+      <p class="section-label">Guía de maquillaje</p>
+      <h2 id="aprendeTitulo">Aprende a tu <em>ritmo</em></h2>
+      <p class="lead">Historia, estilos, productos, técnicas y cuidados reunidos en un espacio separado de los servicios.</p>
+      <button class="progressive-action" id="learningHubToggle" type="button" aria-expanded="false" aria-controls="learningHubContent">Abrir contenido</button>
     </div>
     <div class="learning-hub-content" id="learningHubContent" hidden></div>
   </div>
@@ -1905,9 +1934,7 @@
 <footer>
   <div class="logo-footer">Arte & Belleza</div>
   <div class="divider"></div>
-  <p>Proyecto presentado al Servicio Nacional de Aprendizaje<br/>Programa de Cosmetología y Estética Integral</p>
-  <br/>
-  <p class="gold">SENA · Colombia · 2026</p>
+  <p>Maquillaje con atención cercana y reserva previa.</p>
 </footer>
 
 <script>
@@ -1993,6 +2020,19 @@ configureProgressiveToggle(
   'Mostrar menos looks'
 );
 
+document.querySelectorAll('.hero-choice').forEach(choice => {
+  choice.addEventListener('click', () => {
+    const cards = [...document.querySelectorAll('#catalogoInicioServicios .public-service-card')];
+    const card = cards[Number(choice.dataset.serviceIndex)];
+    document.getElementById('catalogo')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (!card) return;
+    cards.forEach(item => item.classList.remove('hero-highlight'));
+    card.classList.add('hero-highlight');
+    card.querySelector('button')?.focus({ preventScroll: true });
+    setTimeout(() => card.classList.remove('hero-highlight'), 2200);
+  });
+});
+
 const learningHubToggle = document.getElementById('learningHubToggle');
 function setLearningHub(expanded) {
   if (!learningHubToggle || !learningHubContent) return;
@@ -2001,6 +2041,7 @@ function setLearningHub(expanded) {
   learningHubToggle.textContent = expanded ? 'Mostrar menos' : 'Ver más';
 }
 learningHubToggle?.addEventListener('click', () => setLearningHub(learningHubToggle.getAttribute('aria-expanded') !== 'true'));
+if (document.body.classList.contains('learn-view')) setLearningHub(true);
 
 function revealHashTarget({ scroll = false } = {}) {
   const targetId = location.hash.slice(1);
@@ -2008,7 +2049,7 @@ function revealHashTarget({ scroll = false } = {}) {
   if (!requestedSection) return;
 
   const isInsideHub = learningHubContent?.contains(requestedSection);
-  if (targetId === 'aprende' || isInsideHub) setLearningHub(true);
+  if (document.body.classList.contains('learn-view') || targetId === 'aprende' || isInsideHub) setLearningHub(true);
   if (requestedSection.classList.contains('learning-collapsible')) setLearningSection(requestedSection, true);
 
   if (scroll) requestAnimationFrame(() => requestedSection.scrollIntoView({ behavior: 'smooth', block: 'start' }));
@@ -2016,7 +2057,6 @@ function revealHashTarget({ scroll = false } = {}) {
 
 revealHashTarget();
 window.addEventListener('hashchange', () => revealHashTarget({ scroll: true }));
-document.querySelector('nav a[href="#aprende"]')?.addEventListener('click', () => setLearningHub(true));
 
 document.querySelectorAll('.galeria-card').forEach(card => {
   card.setAttribute('role', 'button');
@@ -2972,7 +3012,7 @@ function exportarPDF() {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
     doc.setTextColor(232, 196, 184);
-    doc.text('Comprobante de citas · Proyecto SENA', 16, primeraPagina ? 29 : 19);
+    doc.text('Comprobante de citas · Arte & Belleza', 16, primeraPagina ? 29 : 19);
     if (primeraPagina) {
       doc.setFontSize(8);
       doc.text('Generado: ' + generado, 194, 20, { align: 'right' });
@@ -3053,7 +3093,7 @@ function exportarPDF() {
     doc.setPage(p);
     doc.setDrawColor(232, 196, 184); doc.setLineWidth(.3); doc.line(16, 286, 194, 286);
     doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(115, 90, 95);
-    doc.text('Arte & Belleza SENA · Cosmetología y Estética Integral', 16, 292);
+    doc.text('Arte & Belleza · Maquillaje y atención personalizada', 16, 292);
     doc.text(`Página ${p} de ${total}`, 194, 292, { align: 'right' });
   }
 
