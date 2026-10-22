@@ -79,6 +79,16 @@ test('portada contiene el contenido avanzado y permite expandirlo progresivament
   assert.match(html, /id="galleryToggle"[^>]*aria-expanded="false"/);
   assert.match(html, /configureProgressiveToggle/);
   assert.match(html, /setLearningHub/);
+  assert.match(html, /revealHashTarget/);
+  assert.match(html, /window\.addEventListener\('hashchange'/);
+  assert.match(html, /nav a\[href="#aprende"\]/);
+});
+
+test('galería ofrece interacción accesible por teclado', () => {
+  assert.match(html, /role="dialog" aria-modal="true"/);
+  assert.match(html, /aria-label="Cerrar detalle del look"/);
+  assert.match(html, /card\.setAttribute\('tabindex', '0'\)/);
+  assert.match(html, /event\.key === 'Escape'/);
 });
 
 test('identidad visual no utiliza verde institucional', () => {
