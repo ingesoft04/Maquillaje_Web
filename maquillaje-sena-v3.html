@@ -156,10 +156,6 @@
       font-weight: 300; line-height: 1.4;
     }
 
-    .hero-actions {
-      display: flex; justify-content: flex-start; flex-wrap: wrap; gap: .8rem;
-      margin-top: .85rem;
-    }
     .hero-btn {
       display: inline-flex; align-items: center; justify-content: center; min-width: 150px;
       padding: .7rem 1.1rem; border: 1px solid var(--gold); color: var(--plum);
@@ -170,19 +166,6 @@
     .hero-btn.secondary { background: transparent; color: var(--deep); border-color: #B8896380; }
     .hero-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 30px #160A1240; }
     .hero-btn.secondary:hover { background: #DFC6A730; border-color: var(--deep); }
-
-    .hero-proof {
-      display: flex; justify-content: flex-start; gap: 0; margin: .65rem 0 0;
-      color: var(--muted);
-    }
-    .hero-choice {
-      min-height: 30px; padding: .25rem .75rem; border: 0; border-bottom: 1px solid #B99A6266;
-      background: transparent; color: var(--muted); cursor: pointer; font-size: .62rem;
-      letter-spacing: 1.4px; text-transform: uppercase; transition: color .2s, border-color .2s;
-    }
-    .hero-choice + .hero-choice { border-left: 1px solid #B99A6255; }
-    .hero-choice:hover, .hero-choice:focus-visible { color: var(--deep); border-bottom-color: var(--deep); }
-    .public-service-card.hero-highlight { border-color: var(--deep); box-shadow: 0 0 0 3px #B99A6240, 0 18px 45px rgba(60,41,31,.13); }
 
     .brand-kicker {
       display: inline-block;
@@ -1001,10 +984,7 @@
       header .content { display:block; width:min(620px,calc(100% - 2rem)); padding:1.35rem 0; }
       .hero-copy { margin:0 auto; }
       .hero-kicker { margin-left:auto; margin-right:auto; }
-      .hero-actions, .hero-proof { justify-content:center; }
       .hero-visual { display:none; }
-      .hero-proof { flex-wrap: wrap; row-gap: .7rem; }
-      .hero-proof span { padding: 0 .65rem; }
       .scroll-cue { display: none; }
       nav { justify-content: flex-start; overflow-x: auto; scrollbar-width: none; }
       nav::-webkit-scrollbar { display: none; }
@@ -1032,7 +1012,6 @@
       header h1 { font-size:clamp(2.7rem,14vw,3.6rem); letter-spacing:-1px; }
       header h1 em { margin-left:0; }
       .hero-btn { width: 100%; }
-      .hero-proof span { font-size: .57rem; }
       section { padding: 4rem 1.15rem; }
       #historia { gap: 2rem; }
       .historia-visual { height: 240px; }
@@ -1300,14 +1279,6 @@
       <h1>El arte del<em>maquillaje</em></h1>
       <p class="subtitle">Maquillaje para momentos especiales</p>
       <p class="hero-kicker">Encuentra un look que se sienta como tú y reserva tu cita de forma sencilla.</p>
-      <div class="hero-actions">
-        <a class="hero-btn" href="#catalogo">Ver servicios</a>
-        <a class="hero-btn secondary" href="./citas">Reservar una cita</a>
-      </div>
-      <div class="hero-proof" aria-label="Explorar servicios destacados">
-        <button class="hero-choice" type="button" data-service-index="0">Evento social</button>
-        <button class="hero-choice" type="button" data-service-index="1">Día especial</button>
-      </div>
     </div>
     <div class="hero-visual" aria-hidden="true">
       <div class="hero-visual-content">
@@ -2071,19 +2042,6 @@ configureProgressiveToggle(
   'Ver todos los looks',
   'Mostrar menos looks'
 );
-
-document.querySelectorAll('.hero-choice').forEach(choice => {
-  choice.addEventListener('click', () => {
-    const cards = [...document.querySelectorAll('#catalogoInicioServicios .public-service-card')];
-    const card = cards[Number(choice.dataset.serviceIndex)];
-    document.getElementById('catalogo')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    if (!card) return;
-    cards.forEach(item => item.classList.remove('hero-highlight'));
-    card.classList.add('hero-highlight');
-    card.querySelector('button')?.focus({ preventScroll: true });
-    setTimeout(() => card.classList.remove('hero-highlight'), 2200);
-  });
-});
 
 const learningHubToggle = document.getElementById('learningHubToggle');
 function setLearningHub(expanded) {
