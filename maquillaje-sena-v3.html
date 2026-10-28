@@ -79,6 +79,7 @@
     body.learn-view > header,
     body.learn-view > nav,
     body.learn-view > #catalogo,
+    body.learn-view > #redes,
     body.learn-view > #citas,
     body.learn-view > #citas-wrapper,
     body.learn-view > footer,
@@ -571,6 +572,30 @@
     }
     .tendencia p { font-size: 0.8rem; color: var(--muted); line-height: 1.6; }
 
+    /* ── REDES ── */
+    .social-section {
+      max-width: none;
+      padding: 3.5rem 2rem;
+      text-align: center;
+      background: #F4E8D8;
+      border-top: 1px solid #DFC6A780;
+    }
+    .social-inner { max-width: 760px; margin: 0 auto; }
+    .social-section h2 { margin-bottom: .65rem; font-size: clamp(2rem, 4vw, 3rem); }
+    .social-section .lead { max-width: 520px; margin: 0 auto; }
+    .social-links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-top: 1.8rem; }
+    .social-card {
+      display: flex; align-items: center; gap: 1rem;
+      padding: 1.1rem 1.25rem;
+      border: 1px solid #B8896370;
+      background: rgba(251,245,233,.72);
+      color: var(--deep);
+      text-align: left;
+    }
+    .social-icon { display: grid; place-items: center; width: 42px; aspect-ratio: 1; border-radius: 50%; background: var(--plum); color: var(--cream); font-size: 1.15rem; }
+    .social-card strong { display: block; font: 500 1rem 'Work Sans',sans-serif; }
+    .social-card small { display: block; margin-top: .15rem; color: var(--muted); font-size: .65rem; letter-spacing: 1.5px; text-transform: uppercase; }
+
     /* ── FOOTER ── */
     footer {
       background: var(--plum);
@@ -991,6 +1016,8 @@
       .cita-card { align-items:flex-start; flex-wrap:wrap; gap:.65rem; }
       .btn-cancelar { margin-left:0; }
       .admin-tab { flex:0 0 auto; }
+      .social-section { padding: 3rem 1.15rem; }
+      .social-links { grid-template-columns: 1fr; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -1915,6 +1942,25 @@
     <button class="btn-agendar" onclick="reservarDesdeGaleria()" style="width:100%;">Agendar este look ✨</button>
   </div>
 </div>
+
+<!-- REDES SOCIALES -->
+<section class="social-section" id="redes" aria-labelledby="redesTitulo">
+  <div class="social-inner">
+    <p class="section-label">Sigamos en contacto</p>
+    <h2 id="redesTitulo">Encuéntrame en <em>redes</em></h2>
+    <p class="lead">Muy pronto podrás ver nuevos looks en Instagram y escribir directamente por WhatsApp.</p>
+    <div class="social-links" aria-label="Redes sociales disponibles próximamente">
+      <div class="social-card" aria-disabled="true">
+        <span class="social-icon" aria-hidden="true">◎</span>
+        <span><strong>Instagram</strong><small>Próximamente</small></span>
+      </div>
+      <div class="social-card" aria-disabled="true">
+        <span class="social-icon" aria-hidden="true">✆</span>
+        <span><strong>WhatsApp</strong><small>Próximamente</small></span>
+      </div>
+    </div>
+  </div>
+</section>
 
 <!-- FOOTER -->
 <footer>

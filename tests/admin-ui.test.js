@@ -101,6 +101,13 @@ test('marca pública no presenta referencias académicas', () => {
   assert.match(html, /Maquillaje con atención cercana y reserva previa/);
 });
 
+test('portada reserva una sección accesible para Instagram y WhatsApp', () => {
+  assert.match(html, /id="redes" aria-labelledby="redesTitulo"/);
+  assert.match(html, /<strong>Instagram<\/strong>/);
+  assert.match(html, /<strong>WhatsApp<\/strong>/);
+  assert.match(html, /class="social-card" aria-disabled="true"/);
+});
+
 test('galería ofrece interacción accesible por teclado', () => {
   assert.match(html, /role="dialog" aria-modal="true"/);
   assert.match(html, /aria-label="Cerrar detalle del look"/);
