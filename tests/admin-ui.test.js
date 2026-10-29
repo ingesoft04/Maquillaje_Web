@@ -54,7 +54,7 @@ test('catálogo de reservas es público y muestra precio y duración antes del a
   assert.match(html, /\.public-service-card[^}]+aspect-ratio:1[^}]+border-radius:50%/);
 });
 
-test('frontend conserva rutas locales y admite publicación bajo /maquillaje', () => {
+test('frontend conserva rutas relativas para el subdominio y entornos locales', () => {
   assert.match(html, /const API = new URL\('\.\/api', location\.href\)/);
   assert.match(html, /href="\.\/manifest\.webmanifest"/);
   assert.match(html, /href="\.\/citas"/);
@@ -65,7 +65,7 @@ test('frontend conserva rutas locales y admite publicación bajo /maquillaje', (
 
 test('archivo abierto directamente redirige al dominio productivo y conserva la sección', () => {
   assert.match(html, /window\.location\.protocol === 'file:'/);
-  assert.match(html, /https:\/\/dev-fmv\.duckdns\.org\/maquillaje\/\$\{window\.location\.hash\}/);
+  assert.match(html, /https:\/\/maquillaje\.dev-fmv\.duckdns\.org\/\$\{window\.location\.hash\}/);
   assert.ok(html.indexOf("window.location.protocol === 'file:'") < html.indexOf('<link rel="manifest"'));
 });
 

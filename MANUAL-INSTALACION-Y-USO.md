@@ -159,17 +159,17 @@ CORS_ORIGINS=https://citas.sudominio.com
 TRUST_PROXY=1
 ```
 
-La instalación productiva vigente utiliza la dirección `https://dev-fmv.duckdns.org/maquillaje/`. En el contenedor de la API, el origen autorizado corresponde al dominio externo completo configurado por el servidor.
+La instalación productiva vigente utiliza la dirección `https://maquillaje.dev-fmv.duckdns.org/`. En el contenedor de la API, el origen autorizado corresponde al dominio externo completo configurado por el servidor.
 
 No use el archivo HTML con una dirección `file://` para operar el sistema: necesita la API, PostgreSQL y Redis. Si alguien abre `maquillaje-sena-v3.html` directamente, la página lo redirige automáticamente al dominio productivo y conserva la sección solicitada, por ejemplo `#catalogo`.
 
 ```env
-FRONTEND_URL=https://dev-fmv.duckdns.org/maquillaje
-CORS_ORIGINS=https://dev-fmv.duckdns.org
+FRONTEND_URL=https://maquillaje.dev-fmv.duckdns.org
+CORS_ORIGINS=https://maquillaje.dev-fmv.duckdns.org,https://dev-fmv.duckdns.org
 TRUST_PROXY=1
 ```
 
-El frontend resuelve automáticamente `/maquillaje/api`, manifiesto, icono, navegación y service worker cuando se publica bajo ese prefijo. En una instalación local continúa utilizando `/api` desde la raíz.
+El frontend resuelve automáticamente `/api`, manifiesto, icono, navegación y service worker desde el subdominio. En una instalación local mantiene las mismas rutas relativas desde la raíz.
 
 ## 7. Configuración de SMTP
 
@@ -348,12 +348,12 @@ HTTP mediante IP pública debe limitarse a demostraciones sin datos reales.
 
 ## 13. Dominio y HTTPS
 
-La dirección productiva validada es `https://dev-fmv.duckdns.org/maquillaje/`. Compruebe después de cada despliegue:
+La dirección productiva validada es `https://maquillaje.dev-fmv.duckdns.org/`. Compruebe después de cada despliegue:
 
 ```bash
-curl -fsS https://dev-fmv.duckdns.org/maquillaje/health
-curl -fsS https://dev-fmv.duckdns.org/maquillaje/api/tipos
-curl -fsS https://dev-fmv.duckdns.org/maquillaje/api/especialistas
+curl -fsS https://maquillaje.dev-fmv.duckdns.org/health
+curl -fsS https://maquillaje.dev-fmv.duckdns.org/api/tipos
+curl -fsS https://maquillaje.dev-fmv.duckdns.org/api/especialistas
 ```
 
 Al comprar el dominio, cree en el proveedor DNS:
