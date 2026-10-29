@@ -6,6 +6,8 @@
 
 **Producción:** [https://maquillaje.dev-fmv.duckdns.org/](https://maquillaje.dev-fmv.duckdns.org/). La dirección anterior bajo `/maquillaje` redirige al subdominio y conserva las rutas de navegación.
 
+**Pruebas:** [https://test-maquillaje.dev-fmv.duckdns.org/](https://test-maquillaje.dev-fmv.duckdns.org/). Este entorno usa la rama `test`, el puerto interno 8089 y almacenamiento independiente para PostgreSQL y Redis. Los cambios se validan allí antes de solicitar autorización para fusionarlos a `main` y desplegarlos en producción.
+
 Backend completo para el proyecto **Arte & Belleza SENA**, construido con:
 
 - **Node.js 22 + Express** — API REST
