@@ -356,6 +356,8 @@ curl -fsS https://maquillaje.dev-fmv.duckdns.org/api/tipos
 curl -fsS https://maquillaje.dev-fmv.duckdns.org/api/especialistas
 ```
 
+El entorno previo a producción es `https://test-maquillaje.dev-fmv.duckdns.org/`. Utiliza el puerto local 8089, la rama `test` y bases PostgreSQL/Redis independientes. Todo cambio debe revisarse allí y requiere confirmación expresa antes de fusionarse a `main`. El procedimiento completo está en `docs/ENTORNOS-DESPLIEGUE-Y-PROMOCION.md`.
+
 Al comprar el dominio, cree en el proveedor DNS:
 
 ```text
@@ -426,6 +428,8 @@ La restauración reemplaza datos. Haga otra copia y detenga el uso antes de rest
 Mantenga una copia externa en otro disco, NAS o almacenamiento cifrado.
 
 ## 15. Actualización
+
+No actualice producción directamente. Primero publique y valide en el entorno de pruebas, muestre el resultado y espere aprobación. Antes de cualquier fusión ejecute `git fetch --prune origin` y compruebe que no existan cambios remotos pendientes.
 
 Antes:
 
@@ -513,6 +517,7 @@ Con CGNAT necesita solicitar IP pública o usar un túnel seguro.
 ## 19. Documentación relacionada
 
 - `MANUAL-PROYECTO-SENA.md`
+- `docs/ENTORNOS-DESPLIEGUE-Y-PROMOCION.md`
 - `docs/REQUISITOS-Y-DISENO-SENA.md`
 - `docs/ARQUITECTURA-SOLID.md`
 - API ejecutándose: `/api/docs`

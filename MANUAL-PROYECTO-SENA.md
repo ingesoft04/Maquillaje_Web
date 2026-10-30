@@ -831,3 +831,22 @@ El flujo de una petición es: ruta, controlador HTTP, servicio de aplicación, r
 El módulo de fotografías es la implementación de referencia: el controlador no contiene SQL; `ComparacionService` aplica consentimiento, publicación y archivo; `ComparacionRepository` concentra persistencia; `Database` y `Cache` son adaptadores intercambiables; `container.js` ensambla las dependencias.
 
 La adopción se valida mediante pruebas unitarias que sustituyen base de datos y caché por objetos en memoria, además de las pruebas integrales existentes.
+
+## 43. Entornos de pruebas y producción
+
+La operación pública vigente separa dos entornos:
+
+- Producción: `https://maquillaje.dev-fmv.duckdns.org/`, rama `main`, puerto local 8088.
+- Pruebas: `https://test-maquillaje.dev-fmv.duckdns.org/`, rama `test`, puerto local 8089.
+
+Pruebas cuenta con PostgreSQL y Redis propios; sus registros, citas y cambios administrativos no afectan producción. El sitio se identifica con el aviso **“Entorno de prueba · Los cambios aquí aún no están en producción”**, desactiva caché pública y solicita a los buscadores no indexarlo.
+
+El procedimiento de GitHub, despliegue Ubuntu, Caddy, pruebas, aprobación, promoción y reversión se mantiene en `docs/ENTORNOS-DESPLIEGUE-Y-PROMOCION.md`. La regla central es que toda mejora debe comprobarse primero en pruebas y solo puede fusionarse a `main` después de mostrar el resultado y recibir autorización expresa.
+
+Durante la puesta en marcha se corrigieron tres condiciones relevantes para instalaciones nuevas:
+
+1. PostgreSQL de pruebas utiliza `postgres:16-bookworm` para evitar una falla de collator al inicializar un volumen vacío con Alpine.
+2. Los archivos copiados al servidor deben ser legibles por el usuario no privilegiado del contenedor; los archivos de aplicación se normalizan a `0644` y los directorios a `0755`, manteniendo `.env` en `0600`.
+3. Nginx enruta `/metrics` hacia la API. Las pruebas integrales se ejecutan directamente contra el API para no disparar artificialmente el limitador de solicitudes del proxy.
+
+La validación inicial del entorno terminó con 25 de 25 pruebas integrales aprobadas, además de verificaciones públicas independientes para HTTPS, catálogo, rutas, CORS, cabeceras, métricas y salud de producción.

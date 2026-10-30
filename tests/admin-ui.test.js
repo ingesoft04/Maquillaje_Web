@@ -69,6 +69,13 @@ test('archivo abierto directamente redirige al dominio productivo y conserva la 
   assert.ok(html.indexOf("window.location.protocol === 'file:'") < html.indexOf('<link rel="manifest"'));
 });
 
+test('entorno de prueba se identifica sin mostrar el aviso en producción', () => {
+  assert.match(html, /window\.location\.hostname === 'test-maquillaje\.dev-fmv\.duckdns\.org'/);
+  assert.match(html, /Entorno de prueba · Los cambios aquí aún no están en producción/);
+  assert.match(html, /\.test-environment-banner \{ display: none; \}/);
+  assert.match(html, /html\.test-environment \.test-environment-banner/);
+});
+
 test('catálogo se muestra en inicio y conserva el servicio al abrir citas', () => {
   const catalogoInicio = html.indexOf('id="catalogoInicioServicios"');
   const historia = html.indexOf('id="historia"');

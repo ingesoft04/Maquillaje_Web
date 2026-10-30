@@ -13,6 +13,9 @@
     if (window.location.protocol === 'file:') {
       window.location.replace(`https://maquillaje.dev-fmv.duckdns.org/${window.location.hash}`);
     }
+    if (window.location.hostname === 'test-maquillaje.dev-fmv.duckdns.org') {
+      document.documentElement.classList.add('test-environment');
+    }
   </script>
   <meta name="theme-color" content="#3C291F"/>
   <link rel="manifest" href="./manifest.webmanifest"/>
@@ -43,6 +46,21 @@
       color: var(--text);
       overflow-x: hidden;
       line-height: 1.5;
+    }
+
+    .test-environment-banner { display: none; }
+    html.test-environment .test-environment-banner {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 38px;
+      padding: .55rem 1rem;
+      background: #3C291F;
+      border-bottom: 1px solid #B99A62;
+      color: #FFF9F0;
+      font-size: .78rem;
+      letter-spacing: .02em;
+      text-align: center;
     }
 
     :focus-visible {
@@ -1240,6 +1258,9 @@
   </style>
 </head>
 <body>
+<div class="test-environment-banner" role="status">
+  <strong>Entorno de prueba · Los cambios aquí aún no están en producción</strong>
+</div>
 <script>
   const activePath = window.location.pathname.replace(/\/$/, '');
   if (activePath.endsWith('/citas')) {
