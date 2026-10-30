@@ -729,12 +729,14 @@
     }
     body.learn-view .learning-hub-content > .micro-intro { display: none; }
     body.learn-view .learning-hub-content > .learning-collapsible {
+      display: block;
       margin: 0;
       padding: 0 !important;
       background: transparent;
     }
     body.learn-view .learning-hub-content > .learning-collapsible:not(.is-collapsed) {
       grid-column: 1 / -1;
+      order: -1;
     }
     body.learn-view .learning-toggle {
       min-height: 104px;
