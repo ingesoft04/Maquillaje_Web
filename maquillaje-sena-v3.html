@@ -720,8 +720,45 @@
     body.learn-view .learning-hub-heading h2 { color: var(--plum); }
     body.learn-view .learning-hub-heading .lead { color: var(--muted); }
     body.learn-view .learning-hub-heading .progressive-action { display: none; }
-    body.learn-view .learning-hub-content { margin-top: 0; }
+    body.learn-view .learning-hub-content {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: .85rem;
+      margin-top: 0;
+      align-items: start;
+    }
     body.learn-view .learning-hub-content > .micro-intro { display: none; }
+    body.learn-view .learning-hub-content > .learning-collapsible {
+      margin: 0;
+      padding: 0 !important;
+      background: transparent;
+    }
+    body.learn-view .learning-hub-content > .learning-collapsible:not(.is-collapsed) {
+      grid-column: 1 / -1;
+    }
+    body.learn-view .learning-toggle {
+      min-height: 104px;
+      border-radius: 14px;
+      box-shadow: 0 8px 24px rgba(60,41,31,.06);
+    }
+    body.learn-view .learning-collapsible.is-collapsed .learning-toggle {
+      height: 100%;
+    }
+    body.learn-view .learning-collapsible:not(.is-collapsed) .learning-toggle {
+      border-radius: 14px 14px 0 0;
+      box-shadow: none;
+    }
+    body.learn-view .learning-collapsible:not(.is-collapsed) .learning-content {
+      margin-top: 0;
+      overflow: hidden;
+      border: 1px solid #DFC6A790;
+      border-top: 0;
+      border-radius: 0 0 14px 14px;
+      background: var(--ivory);
+    }
+    body.learn-view .learning-content > section,
+    body.learn-view .learning-content > div { max-width: 100%; }
+    body.learn-view .learning-hub-heading .lead { max-width: 590px; }
 
     .gallery-grid.is-contained .galeria-card:nth-child(n+3) { display: none; }
 
@@ -1029,6 +1066,10 @@
       #historia { gap: 2rem; }
       .historia-visual { height: 240px; }
       .learning-hub { padding: 3rem 1.15rem; }
+      body.learn-view .learning-hub-content { grid-template-columns: 1fr; }
+      body.learn-view .learning-hub-content > .learning-collapsible:not(.is-collapsed) { grid-column: auto; }
+      body.learn-view .learning-toggle { min-height: 88px; padding: 1rem; }
+      body.learn-view .learning-toggle-action { font-size: .6rem; }
       .agendar-grid, .admin-form-grid, .admin-stats { grid-template-columns: 1fr; }
       .stats-row { display:grid; grid-template-columns:1fr 1fr; }
       .cita-card { align-items:flex-start; flex-wrap:wrap; gap:.65rem; }
@@ -1361,7 +1402,7 @@
     <div class="learning-hub-heading">
       <p class="section-label">Guía de maquillaje</p>
       <h2 id="aprendeTitulo">Aprende a tu <em>ritmo</em></h2>
-      <p class="lead">Historia, estilos, productos, técnicas y cuidados reunidos en un espacio separado de los servicios.</p>
+      <p class="lead">Elige un tema y consulta solo lo que necesitas. Puedes cerrar una guía y continuar con otra cuando quieras.</p>
       <button class="progressive-action" id="learningHubToggle" type="button" aria-expanded="false" aria-controls="learningHubContent">Abrir contenido</button>
     </div>
     <div class="learning-hub-content" id="learningHubContent" hidden></div>
@@ -1997,11 +2038,13 @@
 
 // ── GUÍAS FORMATIVAS DESPLEGABLES ──
 const learningSections = [
+  ['historia', 'Historia del maquillaje', 'Origen y evolución'],
   ['tipos', 'Tipos de maquillaje', 'Estilos y ocasiones'],
   ['productos', 'Productos esenciales', 'Herramientas y funciones'],
   ['tecnicas', 'Técnicas fundamentales', 'Proceso paso a paso'],
   ['cuidado', 'Cuidado de la piel', 'Rutinas y recomendaciones'],
-  ['tendencias', 'Tendencias', 'Inspiración actual']
+  ['tendencias', 'Tendencias', 'Inspiración actual'],
+  ['galeria', 'Galería de looks', 'Ideas para inspirarte']
 ];
 
 function setLearningSection(section, expanded) {
@@ -2028,7 +2071,16 @@ learningSections.forEach(([id, title, label]) => {
   button.className = 'learning-toggle';
   button.setAttribute('aria-controls', content.id);
   button.innerHTML = `<span><span class="learning-toggle-label">${label}</span><span class="learning-toggle-title">${title}</span></span><span class="learning-toggle-action">Ver guía</span>`;
-  button.addEventListener('click', () => setLearningSection(section, button.getAttribute('aria-expanded') !== 'true'));
+  button.addEventListener('click', () => {
+    const willExpand = button.getAttribute('aria-expanded') !== 'true';
+    if (willExpand) {
+      learningSections.forEach(([otherId]) => {
+        const otherSection = document.getElementById(otherId);
+        if (otherSection && otherSection !== section) setLearningSection(otherSection, false);
+      });
+    }
+    setLearningSection(section, willExpand);
+  });
 
   section.classList.add('learning-collapsible');
   section.append(button, content);
@@ -2037,15 +2089,11 @@ learningSections.forEach(([id, title, label]) => {
 
 const learningHubContent = document.getElementById('learningHubContent');
 const presentationSection = document.getElementById('presentacion');
-const historySection = document.getElementById('historia');
 if (presentationSection && learningHubContent) learningHubContent.appendChild(presentationSection);
-if (historySection && learningHubContent) learningHubContent.appendChild(historySection);
 learningSections.forEach(([id]) => {
   const section = document.getElementById(id);
   if (section && learningHubContent) learningHubContent.appendChild(section);
 });
-const gallerySection = document.getElementById('galeria');
-if (gallerySection && learningHubContent) learningHubContent.appendChild(gallerySection);
 
 function configureProgressiveToggle(buttonId, target, collapsedClass, closedLabel, openLabel) {
   const button = document.getElementById(buttonId);

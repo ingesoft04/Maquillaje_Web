@@ -101,6 +101,10 @@ test('contenido educativo vive en una vista separada y mantiene expansión progr
   assert.match(html, /activePath\.endsWith\('\/aprende'\)/);
   assert.match(html, /body:not\(\.learn-view\) #aprende \{ display: none; \}/);
   assert.match(html, /document\.body\.classList\.contains\('learn-view'\).*setLearningHub\(true\)/);
+  assert.match(html, /\['historia', 'Historia del maquillaje', 'Origen y evolución'\]/);
+  assert.match(html, /\['galeria', 'Galería de looks', 'Ideas para inspirarte'\]/);
+  assert.match(html, /otherSection && otherSection !== section/);
+  assert.match(html, /body\.learn-view \.learning-hub-content \{[\s\S]*grid-template-columns: repeat\(2/);
 });
 
 test('marca pública no presenta referencias académicas', () => {
