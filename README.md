@@ -4,9 +4,13 @@
 
 > Documentación académica: consulta el [Manual técnico del proyecto](MANUAL-PROYECTO-SENA.md) para entender la arquitectura, Docker, base de datos, seguridad, endpoints y el guion de sustentación.
 
+> Operación vigente: consulta [Entornos, despliegue y promoción](docs/ENTORNOS-DESPLIEGUE-Y-PROMOCION.md) antes de publicar cambios. Allí se documentan pruebas aisladas, Caddy, validación, aprobación y reversión.
+
 **Producción:** [https://maquillaje.dev-fmv.duckdns.org/](https://maquillaje.dev-fmv.duckdns.org/). La dirección anterior bajo `/maquillaje` redirige al subdominio y conserva las rutas de navegación.
 
 **Pruebas:** [https://test-maquillaje.dev-fmv.duckdns.org/](https://test-maquillaje.dev-fmv.duckdns.org/). Este entorno usa la rama `test`, el puerto interno 8089 y almacenamiento independiente para PostgreSQL y Redis. Los cambios se validan allí antes de solicitar autorización para fusionarlos a `main` y desplegarlos en producción.
+
+**Regla de publicación:** ningún cambio funcional pasa a producción sin revisión previa en la URL de pruebas y confirmación expresa. La creación del entorno de pruebas permanece fuera de `main` hasta recibir esa aprobación.
 
 Backend completo para el proyecto **Arte & Belleza SENA**, construido con:
 
